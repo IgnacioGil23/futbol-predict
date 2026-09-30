@@ -1,44 +1,55 @@
-.tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-.tabs .btn { flex-direction: column; align-items: flex-start; gap: 0; line-height: 1.2; }
+.tabs button { display: inline-flex; align-items: baseline; gap: 8px; padding: 8px 16px; }
+.tab-date { font-size: 0.75rem; opacity: 0.7; font-weight: 500; }
 
 .highlight {
-  display: flex; flex-direction: column; gap: 4px; text-align: left; cursor: pointer;
-  font: inherit; color: inherit; transition: border-color 0.15s;
+  display: flex; flex-direction: column; gap: 8px; text-align: left; cursor: pointer;
+  font: inherit; color: inherit;
 }
-.highlight:hover { border-color: var(--accent); }
+.highlight strong { font-family: var(--display); font-size: 1.35rem; text-transform: uppercase; line-height: 1.05; font-weight: 700; }
+.highlight-badges { display: flex; gap: 4px; margin-top: 4px; }
+.highlight-badges > *:last-child { margin-left: -10px; }
 
 .upcoming-list { list-style: none; margin: 0; padding: 0; }
 .upcoming-list > li { border-bottom: 1px solid var(--line); scroll-margin-top: 72px; }
 .upcoming-list > li:last-child { border-bottom: 0; }
-.upcoming-list > li.open { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+.upcoming-list > li { transition: background 0.2s; }
+.upcoming-list > li.open { background: linear-gradient(180deg, var(--accent-soft), transparent 240px); box-shadow: inset 3px 0 0 var(--accent); }
 
 .upcoming-row {
   all: unset; box-sizing: border-box; cursor: pointer; width: 100%;
-  display: grid; gap: 6px 16px; align-items: center; padding: 14px 18px;
+  display: grid; gap: 8px 18px; align-items: center; padding: 16px 20px;
   grid-template-columns: 1fr auto;
   grid-template-areas: "when chev" "teams teams" "bar bar" "meta meta";
 }
-.upcoming-row:hover { background: var(--surface-2); }
+.upcoming-row:hover { background: color-mix(in srgb, var(--surface-2) 70%, transparent); }
 .upcoming-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .u-when { grid-area: when; }
-.u-teams { grid-area: teams; font-size: 1.02rem; min-width: 0; }
+.u-teams { grid-area: teams; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; min-width: 0; }
+.u-team { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.u-team strong { font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.u-vs { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-weight: 700; }
+.u-when::first-letter { text-transform: uppercase; }
 .upcoming-row .mini-bar { grid-area: bar; }
 .u-meta { grid-area: meta; display: flex; gap: 12px; flex-wrap: wrap; }
 .u-market { color: var(--ink-2); }
 .u-chevron {
-  grid-area: chev; justify-self: end; width: 28px; height: 28px; border-radius: 50%;
-  display: grid; place-items: center; border: 1px solid var(--line); font-weight: 700;
+  grid-area: chev; justify-self: end; width: 30px; height: 30px; border-radius: 50%;
+  display: grid; place-items: center; border: 1px solid var(--line-strong); font-weight: 700;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.upcoming-row:hover .u-chevron { border-color: var(--accent-line); color: var(--accent); }
+.open .u-chevron { background: var(--accent); color: var(--accent-ink); border-color: var(--accent);
 }
 @media (min-width: 900px) {
   .upcoming-row {
-    grid-template-columns: 120px minmax(0, 1.3fr) minmax(180px, 1fr) minmax(0, 1fr) 28px;
+    grid-template-columns: 120px minmax(0, 1.4fr) minmax(180px, 1fr) minmax(0, 1fr) 30px;
     grid-template-areas: "when teams bar meta chev";
   }
   .u-meta { flex-direction: column; gap: 2px; }
 }
 
 .mini-bar-track { display: grid; gap: 2px; height: 8px; }
-.mini-bar-track span { border-radius: 2px; min-width: 3px; }
+.mini-bar-track span { border-radius: 3px; min-width: 3px; }
 .mini-bar-labels { display: flex; justify-content: space-between; font-size: 0.78rem; margin-top: 3px; font-weight: 600; }
 
 .upcoming-detail { padding: 0 4px 12px; }

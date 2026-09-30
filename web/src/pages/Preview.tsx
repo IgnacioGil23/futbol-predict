@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { Icon } from '../components/Icon'
 import { MatchAnalysis, type MatchView } from '../components/MatchAnalysis'
+import { TeamBadge } from '../components/TeamBadge'
 import { API_URL, fetchPrediction, formatDate, loadData, twoSeasonsBefore, useData } from '../lib/data'
 import { forecast } from '../lib/model'
 import type { H2H, MetaFile, ModelFile, StateFile, TeamFile, TeamIndexItem, UpcomingFile } from '../lib/types'
@@ -29,6 +31,10 @@ export function Preview() {
   const names = useMemo(() => new Map((index.data ?? []).map((t) => [t.team, t.name])), [index.data])
   const nameOf = (t: string) => names.get(t) ?? t
   const slugOf = (t: string) => index.data?.find((x) => x.team === t)?.slug
+  const badgeOf = (t: string) => {
+    const x = index.data?.find((y) => y.team === t)
+    return x ? { badge: x.badge, short: x.short } : null
+  }
   const options = isToday
     ? current.map((t) => ({ team: t.team, name: t.name }))
     : (index.data ?? []).map((t) => ({ team: t.team, name: t.name }))
@@ -101,8 +107,15 @@ export function Preview() {
     <div className="container section">
       <div className="section-head">
         <span className="eyebrow">Previa de partido</span>
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)' }}>
-          {homeName || '…'} <span className="muted" style={{ fontWeight: 600 }}>vs</span> {awayName || '…'}
+        <h1 className="faceoff">
+          {[{ t: home, n: homeName }, null, { t: away, n: awayName }].map((x, i) => x === null
+            ? <span key="vs" className="faceoff-vs">vs</span>
+            : (
+              <span key={i} className="faceoff-team">
+                {badgeOf(x.t) && <TeamBadge {...badgeOf(x.t)!} name={x.n} size={64} decorative eager />}
+                <span>{x.n || '…'}</span>
+              </span>
+            ))}
         </h1>
         <p className="lede">
           Elegí dos equipos y una fecha. El modelo convierte la diferencia de Elo en goles esperados y, de ahí, en la
@@ -110,7 +123,7 @@ export function Preview() {
         </p>
       </div>
 
-      <div className="card" style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', alignItems: 'end' }}>
+      <div className="card preview-controls">
         <div className="field">
           <label htmlFor="home">Local</label>
           <select id="home" value={home} onChange={(e) => update({ home: e.target.value })}>
@@ -129,7 +142,7 @@ export function Preview() {
                  onChange={(e) => update({ date: e.target.value || today })} />
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button className="btn" onClick={() => update({ home: away, away: home })} title="Invertir localía">⇄ Invertir</button>
+          <button className="btn" onClick={() => update({ home: away, away: home })} title="Invertir localía"><Icon name="swap" size={16} /> Invertir</button>
           {!isToday && <button className="btn" onClick={() => update({ date: today })}>Hoy</button>}
         </div>
       </div>

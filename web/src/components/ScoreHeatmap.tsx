@@ -8,12 +8,13 @@ interface Props {
   awayName: string
   actual?: [number, number] // resultado real (modo revisión)
   size?: number
+  compact?: boolean         // sin la nota de lectura (portada)
 }
 
 const SEQ = ['var(--seq-1)', 'var(--seq-2)', 'var(--seq-3)', 'var(--seq-4)', 'var(--seq-5)']
 
 /** Grilla de probabilidades de marcador exacto con marginales de goles por equipo. */
-export function ScoreHeatmap({ grid, homeName, awayName, actual, size = 6 }: Props) {
+export function ScoreHeatmap({ grid, homeName, awayName, actual, size = 6, compact = false }: Props) {
   const [ref, width] = useWidth<HTMLDivElement>(520)
   const [hover, setHover] = useState<[number, number] | null>(null)
 
@@ -43,9 +44,9 @@ export function ScoreHeatmap({ grid, homeName, awayName, actual, size = 6 }: Pro
 
   return (
     <div ref={ref} className="chart-wrap">
-      <p className="small muted" style={{ marginBottom: 8 }} aria-live="polite">
-        <strong style={{ color: 'var(--ink)' }}>{homeName} {focus[0]} – {focus[1]} {awayName}</strong>
-        {': '}{pct1(focusP)}
+      <p className="heatmap-focus small muted" aria-live="polite">
+        <strong>{homeName} <span className="heatmap-score tabular">{focus[0]}–{focus[1]}</span> {awayName}</strong>
+        {' '}<span className="heatmap-p tabular">{pct1(focusP)}</span>
         {!hover && ' · el marcador más probable'}
         {actual && ` · resultado real ${actual[0]}-${actual[1]} (${pct1(grid[actual[0]]?.[actual[1]] ?? 0)})`}
       </p>
@@ -78,9 +79,10 @@ export function ScoreHeatmap({ grid, homeName, awayName, actual, size = 6 }: Pro
                onFocus={() => setHover([x, y])} onBlur={() => setHover(null)}
                tabIndex={0} role="button" aria-label={`${homeName} ${x}, ${awayName} ${y}: ${pct1(p)}`}
                style={{ cursor: 'default', outline: 'none' }}>
-              <rect x={1} y={1} width={cell - 2} height={cell - 2} rx={5} fill={color(p)}
-                    stroke={isHover ? 'var(--ink)' : x === y ? 'var(--axis)' : 'none'}
-                    strokeWidth={isHover ? 2 : 1} strokeDasharray={x === y && !isHover ? '3 3' : undefined} />
+              <rect x={1.5} y={1.5} width={cell - 3} height={cell - 3} rx={7} fill={color(p)}
+                    stroke={isHover ? 'var(--ink)' : isBest ? 'var(--accent)' : x === y ? 'var(--axis)' : 'none'}
+                    strokeWidth={isHover || isBest ? 2 : 1} strokeDasharray={x === y && !isHover && !isBest ? '3 3' : undefined}
+                    style={{ transition: 'stroke 0.15s' }} />
               {cell >= 40 && (
                 <text x={cell / 2} y={cell / 2 + 4} textAnchor="middle"
                       style={{ fill: textOn(p), fontSize: 11, fontWeight: isBest ? 700 : 500 }}>
@@ -114,11 +116,11 @@ export function ScoreHeatmap({ grid, homeName, awayName, actual, size = 6 }: Pro
           )
         })}
       </svg>
-      <p className="small muted" style={{ marginTop: 6 }}>
+      {!compact && <p className="small muted" style={{ marginTop: 6 }}>
         Números en %: probabilidad de cada marcador (· = menos de 0,05%). Diagonal punteada: empates. Barras: probabilidad de que cada
         equipo marque exactamente esa cantidad de goles. La grilla muestra el {pct1(visibleMass)} de la probabilidad
         (el resto son marcadores con 6 goles o más de algún equipo).
-      </p>
+      </p>}
     </div>
   )
 }

@@ -1,9 +1,9 @@
-import { Link } from 'react-router-dom'
-import { formatDate, num, pct, pct1, useData } from '../lib/data'
-import type { SeasonEvaluation, SeasonFile, SeasonTeam } from '../lib/types'
+import { TeamName } from '../components/TeamName'
+import { formatDate, num, pct, pct1, REPO, useData } from '../lib/data'
+import { useTeamIndex } from '../lib/teams'
+import type { SeasonEvaluation, SeasonFile, SeasonTeam, TeamIndexItem } from '../lib/types'
 import './season.css'
 
-const REPO = 'https://github.com/IgnacioGil23/futbol-predict'
 
 /** Probabilidad como porcentaje legible: "<0,1%" en lugar de 0% cuando pasó en alguna simulación. */
 function prob(p: number) {
@@ -22,7 +22,7 @@ function ProbCell({ p, tone }: { p: number; tone: 'up' | 'down' }) {
   )
 }
 
-function PositionGrid({ teams }: { teams: SeasonTeam[] }) {
+function PositionGrid({ teams, index }: { teams: SeasonTeam[]; index: Map<string, TeamIndexItem> }) {
   const n = teams.length
   return (
     <div className="table-wrap">
@@ -34,7 +34,7 @@ function PositionGrid({ teams }: { teams: SeasonTeam[] }) {
         ))}
         {teams.map((t) => (
           <div key={t.slug} className="pos-row" role="row">
-            <div className="pos-team" role="rowheader"><Link to={`/equipos/${t.slug}`}>{t.name}</Link></div>
+            <div className="pos-team" role="rowheader"><TeamName team={index.get(t.team)} name={t.name} size={18} to={`/equipos/${t.slug}`} /></div>
             {t.positions.map((p, i) => (
               <div key={i} className="pos-cell" role="cell" title={`${t.name}: ${prob(p)} de terminar ${i + 1}º`}
                    style={{ '--p': Math.min(1, p / 0.5) } as React.CSSProperties}>
@@ -176,6 +176,7 @@ function Evaluation({ ev }: { ev: SeasonEvaluation }) {
 
 export function Season() {
   const { data: s, error, loading } = useData<SeasonFile>('season.json')
+  const { byTeam } = useTeamIndex()
   if (loading) return <div className="container section"><div className="skeleton" style={{ minHeight: 400 }} /></div>
   if (error || !s) {
     return <div className="container section"><p className="callout">Todavía no hay una simulación publicada.</p></div>
@@ -184,7 +185,7 @@ export function Season() {
     <div className="container section">
       <div className="section-head">
         <span className="eyebrow">Temporada {s.season} · actualizada el {formatDate(s.as_of)}</span>
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)' }}>¿Cómo puede terminar la temporada?</h1>
+        <h1>¿Cómo puede terminar la temporada?</h1>
         <p className="lede" style={{ maxWidth: 820 }}>
           Jugamos los {s.remaining_matches} partidos que faltan {num(s.n_sims, 0)} veces con el modelo. En cada
           simulación, el Elo de los equipos se actualiza con los resultados simulados, así una racha cambia las chances de
@@ -203,7 +204,7 @@ export function Season() {
             <tbody>
               {s.teams.map((t) => (
                 <tr key={t.slug}>
-                  <td><Link to={`/equipos/${t.slug}`}>{t.name}</Link></td>
+                  <td><TeamName team={byTeam.get(t.team)} name={t.name} to={`/equipos/${t.slug}`} /></td>
                   <td className="num tabular">{t.points} <span className="muted">({t.played})</span></td>
                   <td className="num tabular">{num(t.elo, 0)}</td>
                   <td className="num tabular">{num(t.expected_points, 1)}</td>
@@ -230,7 +231,7 @@ export function Season() {
       </div>
 
       <h2 style={{ margin: '32px 0 12px' }}>Todas las posiciones posibles</h2>
-      <div className="card"><PositionGrid teams={s.teams} /></div>
+      <div className="card"><PositionGrid teams={s.teams} index={byTeam} /></div>
 
       {s.evaluation && <Evaluation ev={s.evaluation} />}
     </div>

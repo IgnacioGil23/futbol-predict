@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { ApiPrediction } from './types'
 
+export const REPO = 'https://github.com/IgnacioGil23/futbol-predict'
+
 const cache = new Map<string, Promise<unknown>>()
 
 /** Carga (y cachea) un JSON de /data. */

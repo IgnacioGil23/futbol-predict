@@ -37,14 +37,25 @@ export interface H2H {
   last: { date: string; home_team: string; away_team: string; score: string; division: string }[]
 }
 
-export interface TeamIndexItem { team: string; name: string; slug: string; badge: string | null; short: string; premier_seasons: number; last_premier_season: string }
+/** Estadio y foto (Wikimedia Commons, licencia CC) de los clubes de la temporada en curso. */
+export interface Stadium {
+  name: string; image: string; wikipedia: string
+  credit: { author: string; license: string; license_url: string; source: string }
+}
+export interface TeamIndexItem {
+  team: string; name: string; slug: string; badge: string | null; short: string; stadium: Stadium | null
+  premier_seasons: number; last_premier_season: string
+}
 export interface TeamSeason {
   season: string; played: number; points: number; position: number
   goals_for_per_game: number; goals_against_per_game: number; league_goals_per_team_game: number
   attack_vs_league_pct: number; defence_vs_league_pct: number
 }
 export interface EloPoint { date: string; elo: number; division: string; opponent: string; home: boolean; score: string }
-export interface TeamFile { team: string; name: string; slug: string; badge: string | null; short: string; seasons: TeamSeason[]; elo: EloPoint[] }
+export interface TeamFile {
+  team: string; name: string; slug: string; badge: string | null; short: string; stadium: Stadium | null
+  seasons: TeamSeason[]; elo: EloPoint[]
+}
 
 export interface XgTeamRow {
   team: string; name: string; slug: string; played: number
@@ -110,15 +121,6 @@ export interface ReviewSeasonFile { season: string; matches: ReviewMatch[] }
 
 export interface CalibrationBin { outcome: Outcome; bin: number; n: number; mean_predicted: number; observed: number; ci_low: number; ci_high: number }
 export interface CalibrationFile { seasons: string; matches: number; model: CalibrationBin[]; market: CalibrationBin[] }
-
-export interface HABlock {
-  matches: number; home_win: number; draw: number; away_win: number; goal_diff: number; goal_diff_ci: [number, number]
-}
-export interface HomeAdvantageFile {
-  eras: (HABlock & { era: string; from: string; to: string })[]
-  seasons: (HABlock & { season: string })[]
-  overall_home_win: number
-}
 
 export interface MetaFile {
   generated_at: string; as_of: string; last_match_in_data: string; upcoming_matches: number; model_version: string

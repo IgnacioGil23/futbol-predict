@@ -51,7 +51,7 @@ export function Review() {
     <div className="container section">
       <div className="section-head">
         <span className="eyebrow">Revisión histórica</span>
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)' }}>¿Qué había predicho el modelo?</h1>
+        <h1>¿Qué había predicho el modelo?</h1>
         <p className="lede">
           Cada predicción se hizo como si fuera antes del partido: el modelo se reentrena al comienzo de cada temporada
           solo con las anteriores, y el Elo usa solo partidos previos. Sin maquillaje: acá están también los errores.

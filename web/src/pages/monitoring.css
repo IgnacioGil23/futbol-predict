@@ -1,4 +1,5 @@
 .status-card { border-left-width: 4px; }
+.status-card .status-pill { margin-bottom: 2px; }
 .status-ok { border-left-color: var(--good); }
 .status-atencion { border-left-color: #c98500; }
 .status-alerta { border-left-color: var(--bad); }
@@ -9,13 +10,12 @@
   letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
 }
 .pill-ok { background: color-mix(in srgb, var(--good) 18%, transparent); color: var(--good); }
-.pill-atencion { background: color-mix(in srgb, #eda100 22%, transparent); color: #8a5a00; }
+.pill-atencion { background: color-mix(in srgb, #eda100 22%, transparent); color: var(--warn); }
 .pill-alerta { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); }
 .pill-insuficiente { background: var(--surface-2); color: var(--ink-2); }
-:root[data-theme='dark'] .pill-atencion { color: #fab219; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .pill-atencion { color: #fab219; } }
 
-.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat { display: flex; flex-direction: column; gap: 4px; }
+.stat .big-num { font-size: 2.6rem; font-weight: 800; }
 
 .range-bar { margin-top: 10px; }
 .range-labels { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }

@@ -31,7 +31,7 @@ datos, la experimentación, una API y una web interactiva.
 | Features | Elo propio partido a partido (ajustado solo con entrenamiento), forma, tabla, descanso, head-to-head; tests de "invariancia al futuro" contra la fuga | `src/features/`, `notebooks/02_features.ipynb` |
 | Modelos | Frecuencias, logit sobre Elo, Dixon-Coles (MLE con gradiente analítico), Poisson GLM, XGBoost Poisson; split temporal, bootstrap pareado vs mercado, MLflow | `src/models/`, `notebooks/03_modelo.ipynb` |
 | Servicio | Modelo exportado como JSON (sin pickle), consultas "a una fecha" sin fuga, FastAPI + Docker multi-etapa, deploy en Cloud Run | `src/serving/`, `src/api/`, `Dockerfile`, `docs/deploy_cloud_run.md` |
-| Web | React + TypeScript + D3: próximas jornadas y previa con grilla de marcadores, fichas de equipo, revisión histórica fuera de muestra, ventaja de local, metodología | `web/` |
+| Web | React + TypeScript + D3: próximas jornadas y previa con grilla de marcadores, simulación de la temporada, fichas de equipo (con la foto de su estadio, de Wikimedia Commons), revisión histórica fuera de muestra, monitoreo y metodología | `web/` |
 | Automatización | CI, publicación de la web, deploy de la API, monitoreo diario y reentrenamiento por PR | `.github/workflows/` |
 
 ## Decisiones que vale la pena mirar

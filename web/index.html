@@ -1,12 +1,21 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Probabilidad de cada marcador en la Premier League: un modelo de Poisson sobre Elo, evaluado contra el mercado de apuestas." />
-    <meta name="theme-color" content="#0f6b3f" />
+    <meta name="theme-color" content="#05080a" />
+    <meta property="og:title" content="Marcador Probable · Premier League" />
+    <meta property="og:description" content="La probabilidad de cada marcador exacto de la Premier League, con un modelo evaluado con honestidad contra el mercado." />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://resources.premierleague.com" crossorigin />
+    <link rel="preconnect" href="https://upload.wikimedia.org" crossorigin />
     <title>Marcador Probable · Premier League</title>
+    <script>
+      // Tema guardado antes del primer pintado (oscuro por defecto), para que no parpadee.
+      try { if (localStorage.getItem('theme') === 'light') document.documentElement.dataset.theme = 'light' } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

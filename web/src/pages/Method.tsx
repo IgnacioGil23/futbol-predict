@@ -1,5 +1,6 @@
 import { CalibrationChart } from '../components/CalibrationChart'
 import { formatDate, num, pct, useData } from '../lib/data'
+import { useTeamIndex } from '../lib/teams'
 import type { CalibrationFile, MetaFile, ReviewSeasonSummary } from '../lib/types'
 
 const REPO_NOTE = 'Código, notebooks y tests en el repositorio del proyecto.'
@@ -8,6 +9,8 @@ export function Method() {
   const meta = useData<MetaFile>('meta.json')
   const calib = useData<CalibrationFile>('calibration.json')
   const review = useData<ReviewSeasonSummary[]>('review/index.json')
+  const { list } = useTeamIndex()
+  const photos = list.filter((t) => t.stadium)
   const m = meta.data?.model
   const t = m?.test_metrics
 
@@ -15,7 +18,7 @@ export function Method() {
     <div className="container section" style={{ maxWidth: 980 }}>
       <div className="section-head">
         <span className="eyebrow">Ficha del modelo</span>
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)' }}>Cómo funciona</h1>
+        <h1>Cómo funciona</h1>
         <p className="lede">Qué hace el modelo, con qué datos, cómo se evaluó y, sobre todo, qué no puede hacer.</p>
       </div>
 
@@ -114,7 +117,7 @@ export function Method() {
           <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-2)' }}>
             <li>No conoce lesiones, suspensiones, alineaciones, fichajes ni cambios de entrenador.</li>
             <li>Solo ve partidos de liga (Premier y Championship): no FA Cup, League Cup ni competiciones europeas. El descanso y la congestión que muestra la web son solo de liga.</li>
-            <li>La ventaja de local cambió con el tiempo (ver "Ventaja de local"); el modelo la estima con los datos hasta cada temporada.</li>
+            <li>La ventaja de local cambió con el tiempo (se achicó con los estadios vacíos de 2020-21); el modelo la estima con los datos hasta cada temporada.</li>
             <li>Los datos se actualizan una vez por semana; los partidos de la fecha se publican pocos días antes.</li>
             <li>Es un proyecto educativo de portfolio: <strong>no es una recomendación de apuestas</strong>.</li>
           </ul>
@@ -129,6 +132,27 @@ export function Method() {
             <p className="small muted" style={{ marginTop: 8 }}>
               Último partido en los datos: {formatDate(meta.data.last_match_in_data)} · generado el {formatDate(meta.data.generated_at)}.
             </p>
+          </div>
+        )}
+
+        {photos.length > 0 && (
+          <div className="card" id="creditos">
+            <h3>Créditos de las fotos de estadios</h3>
+            <p className="card-sub">
+              Imagen principal del artículo de cada estadio en Wikipedia, alojada en Wikimedia Commons con licencia
+              Creative Commons. Estadio según la ficha de cada club en Wikipedia (verificado el 30/09/2026).
+            </p>
+            <ul className="credits">
+              {photos.map((t) => (
+                <li key={t.slug}>
+                  <strong>{t.stadium!.name}</strong> <span className="muted">({t.name})</span>
+                  <span className="small muted">
+                    {' '}· <a href={t.stadium!.credit.source} target="_blank" rel="noreferrer">{t.stadium!.credit.author}</a>,{' '}
+                    <a href={t.stadium!.credit.license_url} target="_blank" rel="noreferrer">{t.stadium!.credit.license}</a>
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </div>

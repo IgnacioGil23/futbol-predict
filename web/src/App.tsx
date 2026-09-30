@@ -1,7 +1,7 @@
 import { HashRouter, Link, Route, Routes } from 'react-router-dom'
+import { Icon } from './components/Icon'
 import { Layout } from './components/Layout'
 import { Home } from './pages/Home'
-import { HomeAdvantagePage } from './pages/HomeAdvantage'
 import { Method } from './pages/Method'
 import { Monitoring } from './pages/Monitoring'
 import { Preview } from './pages/Preview'
@@ -12,10 +12,12 @@ import { Upcoming } from './pages/Upcoming'
 
 function NotFound() {
   return (
-    <div className="container section">
+    <div className="container section not-found">
+      <div className="not-found-code" aria-hidden="true">404</div>
+      <span className="eyebrow">Bandera levantada</span>
       <h1>Fuera de juego</h1>
-      <p className="lede" style={{ margin: '12px 0 20px' }}>Esta página no existe.</p>
-      <Link className="btn btn-primary" to="/">Volver al inicio</Link>
+      <p className="lede">Esta página no existe (o se adelantó a la última línea).</p>
+      <Link className="btn btn-primary" to="/">Volver al inicio <span className="arrow"><Icon name="arrow" size={16} /></span></Link>
     </div>
   )
 }
@@ -33,7 +35,6 @@ export default function App() {
           <Route path="equipos" element={<Teams />} />
           <Route path="equipos/:slug" element={<TeamDetail />} />
           <Route path="revision" element={<Review />} />
-          <Route path="ventaja-local" element={<HomeAdvantagePage />} />
           <Route path="metodologia" element={<Method />} />
           <Route path="monitoreo" element={<Monitoring />} />
           <Route path="*" element={<NotFound />} />

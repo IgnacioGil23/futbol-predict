@@ -2,12 +2,11 @@ import { scaleLinear } from 'd3-scale'
 import { line } from 'd3-shape'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { formatDate, num, pct, useData } from '../lib/data'
+import { formatDate, num, pct, REPO, useData } from '../lib/data'
 import type { MonitoringIndicator, MonitoringReport, MonitoringStatus } from '../lib/types'
 import { useWidth } from '../lib/useWidth'
 import './monitoring.css'
 
-const REPO = 'https://github.com/IgnacioGil23/futbol-predict'
 
 const STATUS_TEXT: Record<MonitoringStatus, string> = {
   ok: 'Todos los indicadores están dentro de lo normal según 10 temporadas de historia.',
@@ -107,7 +106,7 @@ export function Monitoring() {
   if (error || !r) {
     return (
       <div className="container section">
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)' }}>Monitoreo del modelo</h1>
+        <h1>Monitoreo del modelo</h1>
         <p className="callout" style={{ marginTop: 16 }}>Todavía no hay un reporte de monitoreo publicado.</p>
       </div>
     )
@@ -118,7 +117,7 @@ export function Monitoring() {
     <div className="container section">
       <div className="section-head">
         <span className="eyebrow">Transparencia · actualizado el {formatDate(r.generated_at)}</span>
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)' }}>Monitoreo del modelo</h1>
+        <h1>Monitoreo del modelo</h1>
         <p className="lede">
           Antes de cada partido se guarda la predicción en un <a href={`${REPO}/blob/monitoring/ledger/predictions.csv`} target="_blank" rel="noreferrer">registro público e inmutable</a>{' '}
           (<a href={`${REPO}/commits/monitoring`} target="_blank" rel="noreferrer">historial de cambios</a>). Después del partido se compara

@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { MatchAnalysis, type MatchView } from '../components/MatchAnalysis'
+import { TeamBadge } from '../components/TeamBadge'
 import { formatDate, loadData, num, pct, twoSeasonsBefore, useData } from '../lib/data'
-import type { MetaFile, TeamFile, UpcomingFile, UpcomingMatch } from '../lib/types'
+import { useTeamIndex } from '../lib/teams'
+import type { MetaFile, TeamFile, TeamIndexItem, UpcomingFile, UpcomingMatch } from '../lib/types'
 import './upcoming.css'
 
 const matchKey = (m: UpcomingMatch) => `${m.home_team}|${m.away_team}`
@@ -59,6 +61,9 @@ export function Upcoming() {
   const [params, setParams] = useSearchParams()
   const data = useData<UpcomingFile>('upcoming.json')
   const meta = useData<MetaFile>('meta.json')
+  const { byTeam } = useTeamIndex()
+  const badge = (t: TeamIndexItem | undefined, size: number) =>
+    t ? <TeamBadge badge={t.badge} short={t.short} name={t.name} size={size} decorative /> : null
   const matchdays = data.data?.matchdays ?? []
   const selected = Number(params.get('jornada')) || matchdays[0]?.matchday
   const md = matchdays.find((x) => x.matchday === selected) ?? matchdays[0]
@@ -93,7 +98,7 @@ export function Upcoming() {
     <div className="container section">
       <div className="section-head">
         <span className="eyebrow">Próximos partidos · {data.data?.season ?? ''}</span>
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)' }}>{md ? `Jornada ${md.matchday}` : 'Próximos partidos'}</h1>
+        <h1>{md ? `Jornada ${md.matchday}` : 'Próximos partidos'}</h1>
         {md && (
           <p className="lede">
             Del {formatDate(md.from, { weekday: 'long', day: 'numeric', month: 'long' })} al{' '}
@@ -112,13 +117,12 @@ export function Upcoming() {
       )}
 
       {matchdays.length > 1 && (
-        <div className="tabs" role="tablist" aria-label="Jornadas">
+        <div className="seg tabs" role="tablist" aria-label="Jornadas">
           {matchdays.map((x) => (
             <button key={x.matchday} role="tab" aria-selected={x.matchday === md?.matchday}
-                    className={`btn ${x.matchday === md?.matchday ? 'btn-primary' : ''}`}
                     onClick={() => setParam({ jornada: String(x.matchday), partido: null })}>
               Jornada {x.matchday}
-              <span className="small" style={{ opacity: 0.75 }}>{formatDate(x.from, { day: 'numeric', month: 'short' })}</span>
+              <span className="tab-date">{formatDate(x.from, { day: 'numeric', month: 'short' })}</span>
             </button>
           ))}
         </div>
@@ -134,8 +138,9 @@ export function Upcoming() {
               } },
             { label: 'Más goles esperados', m: highlights.goals, text: (m: UpcomingMatch) => `${num(m.expected_goals.home + m.expected_goals.away, 1)} goles en total` },
           ].map((h) => (
-            <button key={h.label} className="card highlight" onClick={() => setParam({ partido: matchKey(h.m) })}>
+            <button key={h.label} className="card card-link highlight" onClick={() => setParam({ partido: matchKey(h.m) })}>
               <span className="eyebrow">{h.label}</span>
+              <span className="highlight-badges">{badge(byTeam.get(h.m.home_team), 34)}{badge(byTeam.get(h.m.away_team), 34)}</span>
               <strong>{h.m.home_name} vs {h.m.away_name}</strong>
               <span className="small muted tabular">{h.text(h.m)}</span>
             </button>
@@ -154,7 +159,9 @@ export function Upcoming() {
                   <button className="upcoming-row" onClick={() => toggle(m)} aria-expanded={isOpen}>
                     <span className="u-when small muted tabular">{kickoff(m)}</span>
                     <span className="u-teams">
-                      <strong>{m.home_name}</strong> <span className="muted">vs</span> <strong>{m.away_name}</strong>
+                      <span className="u-team">{badge(byTeam.get(m.home_team), 26)}<strong>{m.home_name}</strong></span>
+                      <span className="u-vs">vs</span>
+                      <span className="u-team">{badge(byTeam.get(m.away_team), 26)}<strong>{m.away_name}</strong></span>
                     </span>
                     <MiniBar m={m} />
                     <span className="u-meta small tabular">

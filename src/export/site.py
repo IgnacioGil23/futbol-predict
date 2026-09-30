@@ -18,13 +18,13 @@ import numpy as np
 import pandas as pd
 import requests
 
-from src.analysis.home_advantage import home_advantage
 from src.config import PREMIER_LEAGUE, TEST_SEASONS, season_label, season_start_year
 from src.data.fixtures import FIXTURES_URL, fetch_fixtures
 from src.data.schedule import SCHEDULE_URL, check_against_results, fetch_schedule
 from src.data.teams import display_name, slug
 from src.export.badges import badge
 from src.export.season import build_season
+from src.export.stadiums import stadium
 from src.export.xg import build_xg
 from src.features.build import FEATURES_PATH
 from src.metrics import OUTCOMES, reliability_table, summarize
@@ -139,9 +139,10 @@ def export_teams(out: Path, store: MatchStore) -> None:
                     "opponent": m.opponent, "home": m.is_home, "score": f"{int(m.gf)}-{int(m.ga)}"}
                    for m in store.by_team[team] if m.played]
         write(out / "teams" / f"{slug(team)}.json",
-              {"team": team, "name": display_name(team), "slug": slug(team), **badge(team), "seasons": seasons,
+              {"team": team, "name": display_name(team), "slug": slug(team), **badge(team), **stadium(team),
+               "seasons": seasons,
                "elo": history})
-        index.append({"team": team, "name": display_name(team), "slug": slug(team), **badge(team),
+        index.append({"team": team, "name": display_name(team), "slug": slug(team), **badge(team), **stadium(team),
                       "premier_seasons": len(seasons), "last_premier_season": seasons[-1]["season"]})
     write(out / "teams.json", sorted(index, key=lambda t: t["name"]))
 
@@ -299,8 +300,6 @@ def main() -> None:
     export_teams(out, store)
     upcoming = export_upcoming(out, store, predictor, today)
     review = export_review(out, features, season_start_year(today.date()))
-    pl = store.matches[(store.matches.division == PREMIER_LEAGUE) & store.matches.home_goals.notna()]
-    write(out / "home_advantage.json", home_advantage(pl))
     write(out / "xg.json", build_xg(store, args.xg_ledger))
     season_sim = build_season(store, predictor, today)
     if season_sim is not None:
