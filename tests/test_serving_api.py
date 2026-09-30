@@ -143,3 +143,9 @@ def test_serving_csv_roundtrip_gives_same_answers(league, tmp_path):
         assert reloaded.recent_form(team, day) == store.recent_form(team, day)
         assert reloaded.rest(team, day) == store.rest(team, day)
     pd.testing.assert_frame_equal(reloaded.standings("E0", 2005, day), store.standings("E0", 2005, day))
+
+
+def test_root_redirects_to_docs(client):
+    r = client.get("/", follow_redirects=False)
+    assert r.status_code == 307 and r.headers["location"] == "/docs"
+    assert client.get("/docs").status_code == 200

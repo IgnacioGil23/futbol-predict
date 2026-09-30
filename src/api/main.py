@@ -4,6 +4,7 @@ Uso local:
     uvicorn src.api.main:app --reload
 
 Endpoints:
+    GET /                            redirige a /docs (documentación interactiva)
     GET /health                      estado, versión del modelo, último partido en los datos
     GET /teams?season=2026           equipos de la Premier en una temporada
     GET /predict?home=&away=&date=   grilla de marcadores, 1X2 y contexto pre-partido
@@ -19,6 +20,7 @@ from functools import lru_cache
 import pandas as pd
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
 from src.api.schemas import (Context, EloBlock, ExpectedGoals, Health, PredictionOut, Probabilities, ScoreProb,
                              TeamsOut)
@@ -68,6 +70,12 @@ app.add_middleware(
 def last_data_date(store: MatchStore) -> Date:
     played = store.matches[store.matches.home_goals.notna()]
     return played.date.max().date()
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    """La raíz no tiene contenido propio: lleva a la documentación interactiva."""
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/health", response_model=Health)
