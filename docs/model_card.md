@@ -101,6 +101,11 @@ Las familias no se distinguen entre sí (IC pareados de ±0,004 a ±0,009 que in
 * **Lectura:** el efecto parece real pero chico (~20% de la brecha con el mercado). Las variables de tiros quedan
   en el pipeline y se vuelven a evaluar en el reentrenamiento anual, en temporadas que no se usaron para elegir el
   candidato (2023-24 en adelante). Reporte completo: `reports/challengers/challengers_2026-09-30.json`.
+* **Confirmación en temporadas no usadas para elegirlo** (2023-24 a 2025-26, 1.140 partidos; candidato único fijado
+  antes de correr, misma regla): −0,0052 de log loss, IC 95% [−0,0111; +0,0006]. Mejora en las 3 temporadas
+  (−0,0023, −0,0084, −0,0050), pero el IC incluye el 0: **no confirma**. Sumando ambas evaluaciones, el candidato
+  mejoró en 11 de 11 temporadas; la decisión queda para cuando haya más partidos no vistos. Reporte:
+  `reports/challengers/confirmacion_tiros_2026-09-30.json`; script: `src/models/confirm_shots.py`.
 
 ### Poisson bivariado, solo y con tiros al arco (30/09/2026) · **no se promovió**
 

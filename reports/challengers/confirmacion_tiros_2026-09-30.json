@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-30",
+  "seasons": [
+    "2023-24",
+    "2024-25",
+    "2025-26"
+  ],
+  "candidate": {
+    "name": "elo+tiros+tiros_al_arco_hl4",
+    "features": [
+      "elo_diff",
+      "sot_f_hl4_home",
+      "sot_a_hl4_home",
+      "sh_f_hl4_home",
+      "sh_a_hl4_home",
+      "sot_f_hl4_away",
+      "sot_a_hl4_away",
+      "sh_f_hl4_away",
+      "sh_a_hl4_away"
+    ]
+  },
+  "rule": {
+    "min_improvement": 0.005,
+    "ci": "95% bootstrap pareado, debe quedar por debajo de 0"
+  },
+  "champion_log_loss": 0.9879455486173382,
+  "candidate_log_loss": 0.9827240116203679,
+  "n": 1140,
+  "diff": -0.00522153699697005,
+  "ci_low": -0.011061205255432248,
+  "ci_high": 0.0005778403673278736,
+  "promote": false,
+  "by_season": {
+    "2023-24": -0.002268179587888764,
+    "2024-25": -0.008400913545849409,
+    "2025-26": -0.004995517857171978
+  },
+  "seasons_improved": 3
+}
