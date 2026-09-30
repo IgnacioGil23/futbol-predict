@@ -57,9 +57,31 @@ jobs:
           print("Integridad verificada: el registro anterior quedó intacto.")
           EOF
 
+      # Modelo en evaluación (docs/preregistro_tiros.md). Si falla, se descarta lo que haya escrito y el
+      # monitoreo del modelo de producción sigue: esos partidos quedan fuera de la comparación.
+      - name: Registrar predicciones del modelo en evaluación (tiros)
+        run: |
+          SHADOW=monitoring-branch/ledger/shadow_predictions.csv
+          if [ -f "$SHADOW" ]; then cp "$SHADOW" /tmp/shadow_before.csv; else : > /tmp/shadow_before.csv; fi
+          set +e
+          python -m src.monitoring.shadow_ledger --ledger "$SHADOW" && python - <<'EOF'
+          from pathlib import Path
+          from src.monitoring.ledger import verify_append_only
+          verify_append_only(Path("/tmp/shadow_before.csv").read_text(encoding="utf-8"),
+                             Path("monitoring-branch/ledger/shadow_predictions.csv").read_text(encoding="utf-8"))
+          print("Integridad verificada (modelo en evaluación).")
+          EOF
+          STATUS=$?
+          set -e
+          if [ $STATUS -ne 0 ]; then
+            if [ -s /tmp/shadow_before.csv ]; then cp /tmp/shadow_before.csv "$SHADOW"; else rm -f "$SHADOW"; fi
+            echo "::warning::Falló el registro del modelo en evaluación; se descartaron sus cambios de hoy."
+          fi
+
       - name: Evaluar contra los resultados
         run: |
           python -m src.monitoring.evaluate --ledger monitoring-branch/ledger/predictions.csv \
+            --shadow-ledger monitoring-branch/ledger/shadow_predictions.csv \
             --out monitoring-branch/reports --issue-body /tmp/issue.md
 
       - name: Guardar en la rama monitoring
@@ -69,7 +91,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           NEW=$(git diff --numstat ledger/predictions.csv | cut -f1)
-          git add ledger/predictions.csv reports/
+          git add ledger/ reports/
           if git diff --cached --quiet; then echo "Sin cambios."; echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; fi
           STATUS=$(python -c "import json;print(json.load(open('reports/latest.json'))['status'])")
           git commit -m "Monitoreo $(date -u +%F): ${NEW:-0} predicciones nuevas · estado ${STATUS}"

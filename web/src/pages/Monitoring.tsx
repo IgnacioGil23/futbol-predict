@@ -154,6 +154,21 @@ export function Monitoring() {
         </div>
       </div>
 
+      {r.shadow && (
+        <div className="card" style={{ marginTop: 16 }}>
+          <span className="eyebrow">Modelo en evaluación</span>
+          <h3 style={{ margin: '4px 0 6px', fontSize: '1.05rem' }}>{r.shadow.candidate}</h3>
+          <p className="small" style={{ margin: 0 }}>
+            <strong className="tabular">{r.shadow.logged}</strong> predicciones registradas en paralelo
+            ({r.shadow.logged_live} en vivo · {r.shadow.logged_reconstructed} reconstruidas), en un{' '}
+            <a href={`${REPO}/blob/monitoring/ledger/shadow_predictions.csv`} target="_blank" rel="noreferrer">registro aparte</a>.
+            No reemplaza al modelo publicado ni se muestran resultados parciales: se evalúa una sola vez,{' '}
+            {r.shadow.evaluation}, con una regla fijada de antemano en el{' '}
+            <a href={`${REPO}/blob/main/docs/preregistro_tiros.md`} target="_blank" rel="noreferrer">preregistro</a>.
+          </p>
+        </div>
+      )}
+
       <h2 style={{ margin: '32px 0 12px' }}>Indicadores</h2>
       <p className="small muted" style={{ marginBottom: 12 }}>
         Sobre los últimos {r.window} partidos evaluados. Los rangos no son arbitrarios: salen de un backtest del mismo modelo en{' '}

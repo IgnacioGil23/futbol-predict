@@ -10,8 +10,13 @@ Protocolo (fijado antes de correr, 30/09/2026):
 * Regla: la misma de src/models/challenger.py (mejora >= MIN_IMPROVEMENT y IC 95% pareado
   completamente por debajo de 0).
 
+Evaluación final (julio de 2027, ver docs/preregistro_tiros.md): suma a estas temporadas los partidos
+de 2026-27 registrados por ambos modelos (registro de producción y registro en paralelo).
+
 Uso:
     python -m src.models.confirm_shots --out reports/challengers
+    python -m src.models.confirm_shots --final --ledger monitoring-branch/ledger/predictions.csv \\
+        --shadow-ledger monitoring-branch/ledger/shadow_predictions.csv
 """
 
 import argparse
@@ -20,10 +25,12 @@ import logging
 from datetime import date
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from src.config import season_label
 from src.features.build import FEATURES_PATH
+from src.metrics import OUTCOMES
 from src.models.challenger import (CHAMPION_FEATURES, MIN_IMPROVEMENT, compare, per_match_log_loss, shot_features,
                                    walk_forward)
 from src.models.experiments import prepare
@@ -55,12 +62,81 @@ def run(features: pd.DataFrame, seasons: list[int]) -> dict:
     return report
 
 
+def ledger_log_loss(ledger: pd.DataFrame, store) -> pd.DataFrame:
+    """Log loss por partido de un registro, contra el resultado real (probabilidades renormalizadas:
+    en disco están redondeadas a 6 decimales). Índice: 'temporada|local|visitante'."""
+    from src.monitoring.evaluate import join_results
+
+    d = join_results(ledger, store)
+    p = d[["p_home", "p_draw", "p_away"]].astype(float)
+    p = p.div(p.sum(axis=1), axis=0).to_numpy()
+    k = d["result"].map({o: i for i, o in enumerate(OUTCOMES)}).to_numpy()
+    return pd.DataFrame({"ll": -np.log(p[np.arange(len(d)), k]), "source": d["source"].to_numpy(),
+                         "season": d["season"].to_numpy()}, index=d["match_id"].to_numpy())
+
+
+def final(features: pd.DataFrame, main_ledger: pd.DataFrame, shadow_ledger: pd.DataFrame, store,
+          season: int) -> dict:
+    """Evaluación preregistrada (docs/preregistro_tiros.md): 2023-24..2025-26 + la temporada del registro."""
+    champ = per_match_log_loss(walk_forward(features, CHAMPION_FEATURES, CONFIRM_SEASONS), features)
+    cand = per_match_log_loss(walk_forward(features, CANDIDATE, CONFIRM_SEASONS), features)
+    main_ll = ledger_log_loss(main_ledger[main_ledger.season_start.astype(int) == season], store)
+    shadow_ll = ledger_log_loss(shadow_ledger[shadow_ledger.season_start.astype(int) == season], store)
+    both = main_ll.index.intersection(shadow_ll.index)
+    live = both[(main_ll.loc[both, "source"] == "vivo").to_numpy() & (shadow_ll.loc[both, "source"] == "vivo").to_numpy()]
+
+    pooled_champ = pd.concat([champ, main_ll.loc[both, "ll"]])
+    pooled_cand = pd.concat([cand[champ.index], shadow_ll.loc[both, "ll"]])
+    season_of = np.concatenate([features.set_index("match_id").loc[champ.index, "season"].to_numpy(),
+                                main_ll.loc[both, "season"].to_numpy()])
+    report = {
+        "date": date.today().isoformat(), "preregistration": "docs/preregistro_tiros.md",
+        "candidate": {"name": "elo+tiros+tiros_al_arco_hl4", "features": CANDIDATE},
+        "rule": {"min_improvement": MIN_IMPROVEMENT, "ci": "95% bootstrap pareado, debe quedar por debajo de 0"},
+        "seasons": [season_label(s) for s in CONFIRM_SEASONS] + [season_label(season)],
+        "decision": compare(pooled_champ, pooled_cand),
+        "secondary": {
+            "solo_" + season_label(season): compare(main_ll.loc[both, "ll"], shadow_ll.loc[both, "ll"]),
+            "solo_en_vivo": compare(main_ll.loc[live, "ll"], shadow_ll.loc[live, "ll"]) if len(live) else None,
+            "por_temporada": {s: float(v) for s, v in
+                              (pooled_cand - pooled_champ).groupby(season_of).mean().items()},
+        },
+        "coverage": {"main_evaluated": int(len(main_ll)), "shadow_evaluated": int(len(shadow_ll)),
+                     "paired": int(len(both)), "paired_live": int(len(live)),
+                     "main_without_shadow": int(len(main_ll.index.difference(shadow_ll.index)))},
+    }
+    d = report["decision"]
+    logger.info("Evaluación final: diff %+.4f IC95%% [%+.4f, %+.4f] (n = %d) -> %s", d["diff"], d["ci_low"],
+                d["ci_high"], d["n"], "PROMUEVE" if d["promote"] else "no promueve")
+    return report
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=Path("reports/challengers"))
+    parser.add_argument("--final", action="store_true", help="Evaluación preregistrada con el registro en paralelo")
+    parser.add_argument("--ledger", type=Path, default=Path("monitoring/ledger/predictions.csv"))
+    parser.add_argument("--shadow-ledger", type=Path, default=Path("monitoring/ledger/shadow_predictions.csv"))
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     features = prepare(pd.read_parquet(FEATURES_PATH))
+    if args.final:
+        from src.monitoring.ledger import read_ledger
+        from src.monitoring.shadow_ledger import SHADOW_COLUMNS
+        from src.serving.store import MatchStore
+
+        shadow = read_ledger(args.shadow_ledger, SHADOW_COLUMNS)
+        season = int(shadow.season_start.astype(int).max())
+        played = int(features[features.season_start == season].played.sum())
+        if played < 380:
+            raise SystemExit(f"La temporada {season_label(season)} no terminó ({played}/380): el preregistro "
+                             "fija la evaluación al final de la temporada")
+        report = final(features, read_ledger(args.ledger), shadow, MatchStore.load(), season)
+        args.out.mkdir(parents=True, exist_ok=True)
+        path = args.out / f"evaluacion_final_tiros_{report['date']}.json"
+        path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+        logger.info("Reporte -> %s", path)
+        return
     complete = features[features.season_start.isin(CONFIRM_SEASONS)].groupby("season_start").played.sum()
     if not (complete == 380).all():
         raise SystemExit(f"Temporadas incompletas: {complete.to_dict()}")

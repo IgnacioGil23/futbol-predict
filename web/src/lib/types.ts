@@ -120,6 +120,10 @@ export interface MonitoringReport {
   counts: { logged: number; logged_live: number; logged_reconstructed: number; evaluated: number; evaluated_live: number; pending: number }
   model_versions: string[]
   thresholds: { computed_on: string; backtest: { seasons: string; matches?: number } }
+  shadow?: null | {
+    candidate: string; model_versions: string[]; logged: number; logged_live: number; logged_reconstructed: number
+    evaluation: string
+  }
   indicators: Record<string, MonitoringIndicator>
   season: null | {
     season: string; matches: number; with_market: number; live: number

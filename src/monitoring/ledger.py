@@ -55,15 +55,15 @@ class LedgerIntegrityError(RuntimeError):
     """El registro existente fue modificado (no es un agregado al final)."""
 
 
-def read_ledger(path: Path) -> pd.DataFrame:
+def read_ledger(path: Path, columns: list[str] = COLUMNS) -> pd.DataFrame:
     if not path.exists() or path.stat().st_size == 0:
-        return pd.DataFrame(columns=COLUMNS)
+        return pd.DataFrame(columns=columns)
     df = pd.read_csv(path, dtype={"home_team": str, "away_team": str, "season": str, "source": str,
                                   "model_version": str, "code_commit": str, "kickoff_time": str})
-    missing = set(COLUMNS) - set(df.columns)
+    missing = set(columns) - set(df.columns)
     if missing:
         raise LedgerIntegrityError(f"Faltan columnas en el registro: {sorted(missing)}")
-    return df[COLUMNS]
+    return df[columns]
 
 
 def _top_scores(matrix: np.ndarray, k: int = 5) -> str:
@@ -130,9 +130,9 @@ def new_live_entries(fixtures: pd.DataFrame, store: MatchStore, predictor: EloPo
     return pd.DataFrame(rows, columns=COLUMNS)
 
 
-def serialize_rows(rows: pd.DataFrame, header: bool) -> str:
+def serialize_rows(rows: pd.DataFrame, header: bool, columns: list[str] = COLUMNS) -> str:
     buf = io.StringIO()
-    rows[COLUMNS].to_csv(buf, index=False, header=header, float_format=FLOAT_FORMAT, lineterminator="\n")
+    rows[columns].to_csv(buf, index=False, header=header, float_format=FLOAT_FORMAT, lineterminator="\n")
     return buf.getvalue()
 
 
@@ -141,18 +141,23 @@ def verify_append_only(old_text: str, new_text: str) -> None:
         raise LedgerIntegrityError("El registro existente cambió: solo se permite agregar filas al final.")
 
 
-def append_entries(path: Path, entries: pd.DataFrame) -> int:
-    """Agrega filas al final del archivo (sin reescribir lo existente) y verifica la integridad."""
+def append_entries(path: Path, entries: pd.DataFrame, columns: list[str] = COLUMNS) -> int:
+    """Agrega filas al final del archivo (sin reescribir lo existente) y verifica la integridad.
+
+    Con `entries` vacío y el archivo inexistente, lo crea solo con el encabezado."""
     old_text = path.read_text(encoding="utf-8") if path.exists() else ""
     if entries.empty:
+        if not old_text:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(serialize_rows(entries, header=True, columns=columns), encoding="utf-8", newline="\n")
         return 0
-    existing = read_ledger(path)
+    existing = read_ledger(path, columns)
     keys = set(map(tuple, existing[KEY].astype(str).to_numpy())) if len(existing) else set()
     dupes = [k for k in map(tuple, entries[KEY].astype(str).to_numpy()) if k in keys]
     if dupes or entries.duplicated(KEY).any():
         raise LedgerIntegrityError(f"Partidos ya registrados o repetidos: {dupes[:3]}")
     entries = entries.sort_values(["match_date", "home_team"])
-    new_text = old_text + serialize_rows(entries, header=not old_text)
+    new_text = old_text + serialize_rows(entries, header=not old_text, columns=columns)
     verify_append_only(old_text, new_text)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(new_text, encoding="utf-8", newline="\n")

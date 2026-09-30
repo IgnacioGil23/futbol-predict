@@ -106,6 +106,11 @@ Las familias no se distinguen entre sí (IC pareados de ±0,004 a ±0,009 que in
   (−0,0023, −0,0084, −0,0050), pero el IC incluye el 0: **no confirma**. Sumando ambas evaluaciones, el candidato
   mejoró en 11 de 11 temporadas; la decisión queda para cuando haya más partidos no vistos. Reporte:
   `reports/challengers/confirmacion_tiros_2026-09-30.json`; script: `src/models/confirm_shots.py`.
+* **Registro en paralelo durante 2026-27** ([preregistro](preregistro_tiros.md)): el candidato quedó congelado
+  (`models/shadow/model.json`, versión `ec5a7a4752bc`, entrenado con 2002-03 a 2025-26) y el monitoreo diario guarda
+  su predicción antes de cada partido en `ledger/shadow_predictions.csv` (rama `monitoring`). Sus variables se calculan
+  con la misma función que en el entrenamiento; en los 50 partidos ya jugados de 2026-27 coinciden con la tabla de
+  features salvo el redondeo a 6 decimales del CSV. La decisión se toma una sola vez, en julio de 2027.
 
 ### Poisson bivariado, solo y con tiros al arco (30/09/2026) · **no se promovió**
 
