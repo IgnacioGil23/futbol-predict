@@ -1,0 +1,13 @@
+.git
+venv
+.venv
+data
+notebooks
+reports
+tests
+mlflow.db
+mlruns
+mlartifacts
+**/__pycache__
+**/.ipynb_checkpoints
+web

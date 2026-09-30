@@ -1,4 +1,6 @@
 -r requirements.txt
 pytest
+httpx
 jupyter
 ipykernel
+nbconvert

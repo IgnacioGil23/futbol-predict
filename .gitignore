@@ -26,3 +26,6 @@ Thumbs.db
 
 # MLflow (tracking local)
 mlflow.db
+
+# Datos generados para la web
+web/public/data/

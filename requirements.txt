@@ -8,3 +8,5 @@ xgboost
 matplotlib
 seaborn
 mlflow
+fastapi
+uvicorn

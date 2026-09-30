@@ -1,0 +1,4 @@
+# Etapa de build de la imagen: descargar y procesar datos (sin scikit-learn/XGBoost/MLflow).
+-r requirements-api.txt
+requests==2.34.2
+urllib3==2.7.0

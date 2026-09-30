@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests-python:
+    name: Tests de Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - run: pytest
+
+  web:
+    name: Datos + web (tests y build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements.txt
+      - name: Pipeline de datos y export del sitio
+        run: |
+          python -m src.data.download
+          python -m src.data.load
+          python -m src.features.build
+          python -m src.serving.build_state
+          python -m src.export.site --out web/public/data
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+      - run: npx vitest run
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+
+  docker:
+    name: Imagen de la API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          push: false
+          tags: premier-api:ci
+      - name: Smoke test del contenedor
+        run: |
+          docker run -d --name api -p 8000:8000 premier-api:ci
+          for i in $(seq 1 30); do curl -fsS localhost:8000/health && break; sleep 2; done
+          curl -fsS "localhost:8000/predict?home=Arsenal&away=Chelsea&date=2024-01-20" | head -c 300
+          docker logs api | tail -5

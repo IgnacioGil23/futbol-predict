@@ -1,0 +1,27 @@
+.hero {
+  padding: 36px 0 24px;
+  background:
+    radial-gradient(1200px 400px at 85% -10%, var(--accent-soft), transparent 60%),
+    linear-gradient(180deg, transparent, var(--page));
+  border-bottom: 1px solid var(--line);
+}
+.hero-grid { display: grid; gap: 28px; align-items: center; }
+@media (min-width: 980px) { .hero-grid { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); padding-top: 12px; } }
+.hero-copy h1 { margin: 10px 0 14px; }
+.hero-accent { color: var(--accent); }
+.hero-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-top: 28px; }
+.hero-stats div { border-top: 2px solid var(--line); padding-top: 10px; display: flex; flex-direction: column; }
+.hero-stats strong { font-family: var(--display); font-size: 2rem; line-height: 1; }
+.hero-stats span { font-size: 0.8rem; color: var(--muted); }
+.hero-card { padding: 22px; }
+
+.fixture-list { list-style: none; margin: 0; padding: 0; }
+.fixture-list a {
+  display: grid; grid-template-columns: 90px minmax(0, 1fr) auto; gap: 10px; align-items: center;
+  padding: 10px 6px; border-bottom: 1px solid var(--line); text-decoration: none; border-radius: 6px;
+}
+.fixture-list a:hover { background: var(--surface-2); }
+.fx-teams { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 520px) {
+  .fixture-list a { grid-template-columns: 1fr; gap: 2px; }
+}

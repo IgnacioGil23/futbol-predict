@@ -1,0 +1,74 @@
+name: Actualizar datos y publicar
+
+on:
+  schedule:
+    - cron: "0 6 * * 1,4"   # lunes y jueves, 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements.txt
+      - name: Descargar datos, recalcular features y exportar JSON
+        run: |
+          python -m src.data.download
+          python -m src.data.load
+          python -m src.features.build
+          python -m src.serving.build_state
+          python -m src.export.site --out web/public/data
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+      - run: npx vitest run
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+        env:
+          # URL pública de la API en Render (Settings > Secrets and variables > Actions > Variables).
+          VITE_API_URL: ${{ vars.API_URL }}
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
+
+  refresh-api:
+    # La imagen de la API descarga los datos al construirse: redeploy para que use los partidos nuevos.
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disparar deploy en Render (si está configurado)
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "RENDER_DEPLOY_HOOK no configurado: se omite"; exit 0; fi
+          curl -fsS -X POST "$HOOK" > /dev/null && echo "Deploy de la API solicitado"

@@ -1,0 +1,60 @@
+{
+  "params": {
+    "home_goals": {
+      "intercept": 0.3868468408041948,
+      "coef": 0.29514766199531345,
+      "feature_mean": -0.4607881986646318,
+      "feature_scale": 180.25720200429183
+    },
+    "away_goals": {
+      "intercept": 0.1272234713925053,
+      "coef": -0.3056532114060523,
+      "feature_mean": -0.4607881986646318,
+      "feature_scale": 180.25720200429183
+    }
+  },
+  "meta": {
+    "model": "Poisson (goles del local y del visitante) sobre la diferencia de Elo",
+    "features": [
+      "elo_diff"
+    ],
+    "alpha": 0.0001,
+    "trained_on": {
+      "seasons": "2002-03 a 2025-26",
+      "matches": 9120
+    },
+    "trained_at": "2026-09-29T22:59:38",
+    "elo_params": {
+      "k0": 7.5,
+      "lam": 1.0,
+      "home_advantage": 59.4,
+      "season_regression": 0.05,
+      "initial_gap": 250,
+      "newcomer_offset": -50
+    },
+    "test_metrics": {
+      "seasons": "2023-24 a 2025-26",
+      "model": {
+        "log_loss": 0.9879455486173382,
+        "rps": 0.2030210740945716,
+        "brier": 0.5896379556770238,
+        "accuracy": 0.5157894736842106,
+        "ece": 0.0215140231916926,
+        "n": 1140
+      },
+      "bet365_pre_closing": {
+        "log_loss": 0.9657268449295372,
+        "rps": 0.1955521725302659,
+        "brier": 0.5744303349230286,
+        "accuracy": 0.5421052631578948
+      },
+      "pinnacle_closing": {
+        "log_loss": 0.944269708079502,
+        "rps": 0.1905698314684709,
+        "brier": 0.559079634314363,
+        "accuracy": 0.5618556701030928,
+        "n": 970
+      }
+    }
+  }
+}
