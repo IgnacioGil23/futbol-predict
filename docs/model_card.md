@@ -339,6 +339,31 @@ fijados antes de mirar (`src/analysis/error_analysis.py`, `reports/analysis/anal
   es propio de cada liga), pero sí sirve para validar que una señal no es una casualidad de una liga.
 * Reporte: `reports/replication/replicacion_2026-09-30.json`; código: `src/data/leagues.py`, `src/models/replication.py`.
 
+### Simulación de la temporada (30/09/2026)
+
+* **Producto** (sección "Temporada" de la web; [preregistro](preregistro_temporada.md) commiteado antes del código):
+  10.000 simulaciones de los partidos que faltan desde la tabla y el Elo actuales, con marcadores sorteados del modelo de
+  producción y el Elo actualizado dentro de cada simulación; probabilidad de campeón, top 4, top 6 y descenso, y
+  distribución de posiciones finales (`src/models/season_sim.py`, `src/export/season.py`).
+* **Evaluación histórica** (2015-16 a 2025-26, modelo entrenado con las temporadas anteriores, cortes antes de la fecha 1
+  y tras 100, 200 y 300 partidos). Habilidad = 1 − Brier / Brier del mismo simulador con todos los equipos iguales
+  (que solo conoce la tabla); IC 95% remuestreando temporadas:
+
+| Momento | Campeón | Top 4 | Descenso |
+|---|---|---|---|
+| Antes de la fecha 1 | 29% [6%; 52%] | 45% [29%; 60%] | 18% [6%; 28%] |
+| Tras 100 partidos | 28% [−2%; 58%] | 19% [−2%; 40%] | 15% [1%; 29%] |
+| Tras 200 partidos | 23% [−11%; 53%] | 13% [−11%; 32%] | 8% [−5%; 23%] |
+| Tras 300 partidos | 37% [5%; 55%] | 15% [−4%; 25%] | −1% [−16%; 19%] |
+
+* **Lectura:** la fuerza de los equipos aporta mucho al principio de la temporada y menos a medida que la tabla lo dice
+  casi todo (en el descenso, tras 300 partidos, ya no agrega nada). Está bien calibrada: en top 4, cuando dijo 50%-80%
+  pasó el 67% de las veces (57 casos); cuando dijo 20%-50%, el 38% (87 casos). Actualizar el Elo dentro de la simulación
+  casi no cambia el Brier, pero mejora el log loss del campeón (1,72 contra 1,82 antes de la fecha 1) porque evita
+  probabilidades demasiado extremas. Límite honesto: antes de la fecha 1 de 2015-16 le daba 0% al Leicester, el campeón.
+  Salvedades: el Elo se ajustó con temporadas que incluyen parte de las evaluadas, y 11 campeones son pocos.
+  Reporte: `reports/season/evaluacion_2026-09-30.json`.
+
 ## 6. Limitaciones
 
 * No conoce lesiones, suspensiones, alineaciones, fichajes ni cambios de entrenador: el mercado sí, y por eso predice mejor.

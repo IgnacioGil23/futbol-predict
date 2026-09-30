@@ -60,6 +60,22 @@ export interface XgMatch {
 }
 export interface XgFile { source: string; seasons: XgSeason[]; series: Record<string, XgMatch[]> }
 
+export interface SeasonTeam {
+  team: string; name: string; slug: string; elo: number; points: number; played: number; expected_points: number
+  p_champion: number; p_top4: number; p_top6: number; p_relegation: number; positions: number[]
+}
+export interface SeasonVariantScore { brier: number; skill: number; skill_ci: [number, number] }
+export interface SeasonEvaluation {
+  seasons: string[]; n_sims: number; report: string
+  table: { event: 'campeon' | 'top4' | 'descenso'; cutoff: number; producto: SeasonVariantScore; elo_fijo: SeasonVariantScore; base_iguales: SeasonVariantScore }[]
+  calibration: Record<'top4' | 'descenso', { bin: string; n: number; predicted: number; observed: number }[]>
+  champion_probability: { season: string; cutoff: number; p_real_champion: number }[]
+}
+export interface SeasonFile {
+  as_of: string; season: string; n_sims: number; remaining_matches: number; model_version: string
+  teams: SeasonTeam[]; evaluation: SeasonEvaluation | null
+}
+
 export interface Probabilities { home: number; draw: number; away: number }
 
 export interface UpcomingMatch {

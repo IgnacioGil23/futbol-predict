@@ -1,0 +1,20 @@
+.prob-cell { position: relative; min-width: 84px; }
+.prob-bar {
+  position: absolute; right: 8px; top: 50%; height: 60%; transform: translateY(-50%); max-width: calc(100% - 16px);
+  border-radius: 3px; opacity: 0.22; background: var(--home);
+}
+.prob-bar[data-tone='down'] { background: var(--away); }
+.prob-text { position: relative; }
+
+.pos-grid { display: grid; gap: 2px; min-width: 640px; font-size: 0.78rem; }
+.pos-row { display: contents; }
+.pos-head { font-weight: 650; color: var(--muted); text-align: center; padding: 4px 0; }
+.pos-head:first-child { text-align: left; }
+.pos-head.zone-top { color: var(--home); }
+.pos-head.zone-rel { color: var(--away); }
+.pos-team { padding: 4px 6px 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pos-cell {
+  display: flex; align-items: center; justify-content: center; min-height: 26px; border-radius: 3px;
+  background: color-mix(in srgb, var(--home) calc(var(--p) * 100%), var(--surface-2));
+  color: var(--ink);
+}

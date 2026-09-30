@@ -7,6 +7,7 @@ import './layout.css'
 const LINKS = [
   { to: '/proximos', label: 'Próximos' },
   { to: '/previa', label: 'Previa' },
+  { to: '/temporada', label: 'Temporada' },
   { to: '/equipos', label: 'Equipos' },
   { to: '/revision', label: 'Revisión' },
   { to: '/ventaja-local', label: 'Ventaja de local' },

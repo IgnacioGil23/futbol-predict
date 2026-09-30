@@ -82,7 +82,7 @@ Full tables, confidence intervals and reasoning: [model card](docs/model_card.md
 ## Tech stack
 
 Python 3.11 · pandas · scikit-learn · XGBoost · MLflow · FastAPI · Docker · Google Cloud Run · GitHub Actions ·
-React · TypeScript · Vite · D3 · pytest (169 tests)
+React · TypeScript · Vite · D3 · pytest (175 tests)
 
 ## Reproduce
 

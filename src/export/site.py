@@ -23,6 +23,7 @@ from src.config import PREMIER_LEAGUE, TEST_SEASONS, season_label, season_start_
 from src.data.fixtures import FIXTURES_URL, fetch_fixtures
 from src.data.schedule import SCHEDULE_URL, check_against_results, fetch_schedule
 from src.data.teams import display_name, slug
+from src.export.season import build_season
 from src.export.xg import build_xg
 from src.features.build import FEATURES_PATH
 from src.metrics import OUTCOMES, reliability_table, summarize
@@ -299,6 +300,9 @@ def main() -> None:
     pl = store.matches[(store.matches.division == PREMIER_LEAGUE) & store.matches.home_goals.notna()]
     write(out / "home_advantage.json", home_advantage(pl))
     write(out / "xg.json", build_xg(store, args.xg_ledger))
+    season_sim = build_season(store, predictor, today)
+    if season_sim is not None:
+        write(out / "season.json", season_sim)
     export_meta(out, store, predictor, today, upcoming["matches"])
     logger.info("Exportado en %s: %d equipos actuales, %d próximos partidos en %d jornadas, %d temporadas de revisión",
                 out, len(teams), upcoming["matches"], upcoming["matchdays"], review["seasons"])

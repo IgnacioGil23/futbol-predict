@@ -6,6 +6,7 @@ import { Method } from './pages/Method'
 import { Monitoring } from './pages/Monitoring'
 import { Preview } from './pages/Preview'
 import { Review } from './pages/Review'
+import { Season } from './pages/Season'
 import { TeamDetail, Teams } from './pages/Teams'
 import { Upcoming } from './pages/Upcoming'
 
@@ -28,6 +29,7 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="proximos" element={<Upcoming />} />
           <Route path="previa" element={<Preview />} />
+          <Route path="temporada" element={<Season />} />
           <Route path="equipos" element={<Teams />} />
           <Route path="equipos/:slug" element={<TeamDetail />} />
           <Route path="revision" element={<Review />} />
