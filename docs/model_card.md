@@ -85,6 +85,34 @@ Las familias no se distinguen entre sí (IC pareados de ±0,004 a ±0,009 que in
 +0,022 frente a Bet365 pre-cierre (IC 95% 0,013 a 0,031) y +0,028 frente a Pinnacle cierre (IC 95% 0,017 a 0,038).
 **El modelo no supera al mercado**; la brecha es estable temporada a temporada. Está bien calibrado (ECE 0,022).
 
+### Comparación con un resultado publicado
+
+Ley, Van de Wiele y Van Eetvelde (2019) compararon 10 modelos en la Premier League 2008-09 a 2017-18, fechas 6 a
+38 (3.300 partidos), con el RPS (misma fórmula que la nuestra). En esos partidos, cada temporada predicha con el modelo
+entrenado con las anteriores:
+
+| Modelo | RPS | IC 95% |
+|---|---|---|
+| Ley et al.: Poisson bivariado, 1 parámetro por equipo (el mejor de su estudio) | 0,1953 | no publicado |
+| Ley et al.: Poisson independiente, 1 parámetro por equipo | 0,1954 | no publicado |
+| **Nuestro modelo (Poisson + diferencia de Elo)** | **0,1942** | 0,1896 a 0,1987 |
+| Mercado: Bet365 pre-cierre | 0,1917 | 0,1869 a 0,1965 |
+| Mercado: Pinnacle cierre (desde 2012-13, n = 1.980) | 0,1899 | 0,1836 a 0,1961 |
+
+* **Lectura:** nuestro modelo queda **al nivel** del mejor modelo del estudio (0,0011 menos de RPS), pero su valor cae
+  dentro de nuestro intervalo: no se puede afirmar que sea mejor. Sin sus predicciones por partido no hay prueba pareada.
+  Ninguno de los dos alcanza al mercado.
+* **Diferencias de protocolo:**
+  * Ellos reajustan el modelo en cada fecha con los dos años previos; nosotros, una vez por temporada con toda la
+    historia (y el Elo, partido a partido).
+  * Sin número de fecha en nuestros datos, "fechas 6 a 38" se aproxima quitando los primeros 50 partidos de cada
+    temporada. Quitando en cambio los partidos en que algún equipo jugaba su quinto partido o uno anterior, el resultado
+    es el mismo (0,1945, n = 3.294).
+* **Ambos resultados son algo optimistas:** los parámetros de nuestro Elo se ajustaron con las temporadas de
+  entrenamiento (2002-03 a 2020-21), que incluyen estas. La vida media de cada modelo de Ley et al. también se eligió
+  como la de menor RPS en estos mismos partidos.
+* Script: `src/analysis/literature_benchmark.py`; reporte: `reports/benchmarks/ley2019.json`.
+
 ## 5 bis. Experimentos posteriores al modelo de producción
 
 ### Tiros y tiros al arco (30/09/2026) · **no se promovió**
@@ -161,6 +189,7 @@ Las familias no se distinguen entre sí (IC pareados de ±0,004 a ±0,009 que in
 
 * Maher, M. J. (1982). Modelling association football scores. *Statistica Neerlandica*, 36(3).
 * Dixon, M. J., y Coles, S. G. (1997). Modelling association football scores and inefficiencies in the football betting market. *JRSS C*, 46(2).
+* Ley, C., Van de Wiele, T., y Van Eetvelde, H. (2019). Ranking soccer teams on the basis of their current strength: A comparison of maximum likelihood approaches. *Statistical Modelling*, 19(1).
 * Karlis, D., y Ntzoufras, I. (2003). Analysis of sports data by using bivariate Poisson models. *The Statistician*, 52(3).
 * Hvattum, L. M., y Arntzen, H. (2010). Using ELO ratings for match result prediction in association football. *International Journal of Forecasting*, 26(3).
 * Štrumbelj, E. (2014). On determining probability forecasts from betting odds. *International Journal of Forecasting*, 30(4).

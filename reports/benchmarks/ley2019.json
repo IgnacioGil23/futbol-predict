@@ -1,0 +1,96 @@
+{
+  "published": {
+    "source": "Ley, Van de Wiele y Van Eetvelde (2019), Statistical Modelling 19(1):55-77, tabla 1",
+    "matches": 3300,
+    "rps": {
+      "Poisson bivariado, 1 parámetro por equipo (vida media 390 días)": 0.1953,
+      "Poisson independiente, 1 parámetro por equipo (vida media 360 días)": 0.1954,
+      "Poisson independiente, ataque y defensa (vida media 390 días)": 0.1961
+    }
+  },
+  "seasons": [
+    "2008-09",
+    "2009-10",
+    "2010-11",
+    "2011-12",
+    "2012-13",
+    "2013-14",
+    "2014-15",
+    "2015-16",
+    "2016-17",
+    "2017-18"
+  ],
+  "model": "Poisson sobre ['elo_diff'] (producción), ventana expansiva desde 2002-03",
+  "selections": {
+    "primeros_50_por_fecha": [
+      {
+        "name": "Nuestro modelo",
+        "n": 3300,
+        "rps": 0.19416686857615825,
+        "rps_ci": [
+          0.18962401527252906,
+          0.19869464353320487
+        ],
+        "log_loss": 0.9676193994076149,
+        "accuracy": 0.5442424242424242
+      },
+      {
+        "name": "Mercado: Bet365 pre-cierre",
+        "n": 3300,
+        "rps": 0.19165968970541553,
+        "rps_ci": [
+          0.18687637199588764,
+          0.19648802565482398
+        ],
+        "log_loss": 0.9589330322908212,
+        "accuracy": 0.546060606060606
+      },
+      {
+        "name": "Mercado: Pinnacle cierre",
+        "n": 1980,
+        "rps": 0.18985938849656017,
+        "rps_ci": [
+          0.18360655017613878,
+          0.1961263928972449
+        ],
+        "log_loss": 0.9483283174992838,
+        "accuracy": 0.5555555555555556
+      }
+    ],
+    "ambos_equipos_con_5_partidos": [
+      {
+        "name": "Nuestro modelo",
+        "n": 3294,
+        "rps": 0.19452205828854205,
+        "rps_ci": [
+          0.1899192428236284,
+          0.19917871726255557
+        ],
+        "log_loss": 0.9689189182169662,
+        "accuracy": 0.5437158469945356
+      },
+      {
+        "name": "Mercado: Bet365 pre-cierre",
+        "n": 3294,
+        "rps": 0.19204415458146734,
+        "rps_ci": [
+          0.1873090174707148,
+          0.19687468751604525
+        ],
+        "log_loss": 0.9603411346018775,
+        "accuracy": 0.5449301760777171
+      },
+      {
+        "name": "Mercado: Pinnacle cierre",
+        "n": 1979,
+        "rps": 0.18997916029039547,
+        "rps_ci": [
+          0.18399435053304192,
+          0.19604771242414726
+        ],
+        "log_loss": 0.948425508935538,
+        "accuracy": 0.5553309752400202
+      }
+    ]
+  }
+}
