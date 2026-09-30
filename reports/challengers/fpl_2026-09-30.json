@@ -1,0 +1,322 @@
+{
+  "date": "2026-09-30",
+  "preregistration": "docs/preregistro_fpl.md",
+  "seasons": [
+    "2023-24",
+    "2024-25",
+    "2025-26"
+  ],
+  "rule": {
+    "min_improvement": 0.005,
+    "ci": "95% bootstrap pareado, debe quedar por debajo de 0"
+  },
+  "candidates": [
+    {
+      "candidate": "A_xg",
+      "columns": [
+        "xg_f_hl4_home",
+        "xg_a_hl4_home",
+        "xg_f_hl4_away",
+        "xg_a_hl4_away"
+      ],
+      "horizon": "días antes",
+      "decision": {
+        "n": 1140,
+        "diff": -0.005897834534712514,
+        "ci_low": -0.011478527478550882,
+        "ci_high": -0.00022636193359111428,
+        "promote": true
+      },
+      "by_season": {
+        "2023-24": 0.006434285444381166,
+        "2024-25": -0.019149019489527193,
+        "2025-26": -0.004978769558991516
+      },
+      "seasons_improved": 2,
+      "production": {
+        "n": 1140,
+        "log_loss": 0.9879455486173382,
+        "brier": 0.5896379556770237,
+        "rps": 0.20302107409457168,
+        "accuracy": 0.5157894736842106,
+        "ece": 0.021514023191692655
+      },
+      "candidate_metrics": {
+        "n": 1140,
+        "log_loss": 0.9820477140826258,
+        "brier": 0.5856277355376268,
+        "rps": 0.2010391147699502,
+        "accuracy": 0.5289473684210526,
+        "ece": 0.022563156358832933
+      },
+      "rps": {
+        "production": 0.2030210740945717,
+        "candidate": 0.20103911476995023
+      },
+      "vs_market": {
+        "market": "Bet365 pre-cierre",
+        "n": 1140,
+        "candidate_minus_market": {
+          "n": 1140,
+          "diff": 0.01632086915308845,
+          "ci_low": 0.006747396594184062,
+          "ci_high": 0.02610295805559244,
+          "promote": false
+        },
+        "production_minus_market": {
+          "n": 1140,
+          "diff": 0.022218703687800965,
+          "ci_low": 0.013226784990419124,
+          "ci_high": 0.03125129689434015,
+          "promote": false
+        }
+      },
+      "params": {
+        "2023-24": {
+          "train_matches": 234,
+          "imputed_target_rows": 3,
+          "beta_home": {
+            "xg_f_hl4_home": 0.05968432028684436,
+            "xg_a_hl4_home": 0.019021724927997904,
+            "xg_f_hl4_away": 0.06569101251897161,
+            "xg_a_hl4_away": 0.006029088674920898
+          },
+          "beta_away": {
+            "xg_f_hl4_home": 0.04469058799293117,
+            "xg_a_hl4_home": 0.10411130918898637,
+            "xg_f_hl4_away": 0.05843613014631024,
+            "xg_a_hl4_away": 0.12040241237658351
+          }
+        },
+        "2024-25": {
+          "train_matches": 611,
+          "imputed_target_rows": 1,
+          "beta_home": {
+            "xg_f_hl4_home": 0.07319844131174162,
+            "xg_a_hl4_home": 0.04093921325573988,
+            "xg_f_hl4_away": 0.08868702079450963,
+            "xg_a_hl4_away": 0.10206316961512368
+          },
+          "beta_away": {
+            "xg_f_hl4_home": -0.0014525655147104824,
+            "xg_a_hl4_home": 0.11746927135513584,
+            "xg_f_hl4_away": 0.04671937178213326,
+            "xg_a_hl4_away": 0.027783281699169528
+          }
+        },
+        "2025-26": {
+          "train_matches": 990,
+          "imputed_target_rows": 1,
+          "beta_home": {
+            "xg_f_hl4_home": 0.05405254239358164,
+            "xg_a_hl4_home": 0.019065419875234715,
+            "xg_f_hl4_away": 0.09527657172631547,
+            "xg_a_hl4_away": 0.08872369940395555
+          },
+          "beta_away": {
+            "xg_f_hl4_home": 0.01792574688585928,
+            "xg_a_hl4_home": 0.131538637363907,
+            "xg_f_hl4_away": 0.02586324926687816,
+            "xg_a_hl4_away": 0.007073517739181955
+          }
+        }
+      }
+    },
+    {
+      "candidate": "B_alineacion",
+      "columns": [
+        "xi_dev_home",
+        "xi_dev_away"
+      ],
+      "horizon": "una hora antes",
+      "decision": {
+        "n": 1140,
+        "diff": 0.0006000920231487328,
+        "ci_low": -0.002311257715141387,
+        "ci_high": 0.003641435701010729,
+        "promote": false
+      },
+      "by_season": {
+        "2023-24": 0.00205732383364727,
+        "2024-25": -0.0022388242425187446,
+        "2025-26": 0.001981776478317673
+      },
+      "seasons_improved": 1,
+      "production": {
+        "n": 1140,
+        "log_loss": 0.9879455486173382,
+        "brier": 0.5896379556770237,
+        "rps": 0.20302107409457168,
+        "accuracy": 0.5157894736842106,
+        "ece": 0.021514023191692655
+      },
+      "candidate_metrics": {
+        "n": 1140,
+        "log_loss": 0.9885456406404868,
+        "brier": 0.5900287834318404,
+        "rps": 0.20320613569458087,
+        "accuracy": 0.5140350877192983,
+        "ece": 0.022557102841766305
+      },
+      "rps": {
+        "production": 0.2030210740945717,
+        "candidate": 0.20320613569458087
+      },
+      "vs_market": {
+        "market": "Pinnacle cierre",
+        "n": 970,
+        "candidate_minus_market": {
+          "n": 970,
+          "diff": 0.027935799517955336,
+          "ci_low": 0.017018124156866623,
+          "ci_high": 0.03896180517469904,
+          "promote": false
+        },
+        "production_minus_market": {
+          "n": 970,
+          "diff": 0.02790585590111989,
+          "ci_low": 0.0171460616748362,
+          "ci_high": 0.03849442941539731,
+          "promote": false
+        }
+      },
+      "params": {
+        "2023-24": {
+          "train_matches": 244,
+          "imputed_target_rows": 0,
+          "beta_home": {
+            "xi_dev_home": 0.03321160966326914,
+            "xi_dev_away": -0.006752278933182597
+          },
+          "beta_away": {
+            "xi_dev_home": 0.1098460712017994,
+            "xi_dev_away": 0.015586304591666553
+          }
+        },
+        "2024-25": {
+          "train_matches": 624,
+          "imputed_target_rows": 0,
+          "beta_home": {
+            "xi_dev_home": 0.029253349935038742,
+            "xi_dev_away": -0.01523443964289632
+          },
+          "beta_away": {
+            "xi_dev_home": 0.05537772047104602,
+            "xi_dev_away": 0.022297611729355692
+          }
+        },
+        "2025-26": {
+          "train_matches": 1004,
+          "imputed_target_rows": 0,
+          "beta_home": {
+            "xi_dev_home": 0.0258394130926674,
+            "xi_dev_away": -0.0484506274943107
+          },
+          "beta_away": {
+            "xi_dev_home": 0.03392998262797659,
+            "xi_dev_away": 0.042499967411956434
+          }
+        }
+      }
+    }
+  ],
+  "controls": [
+    {
+      "candidate": "B_control_alineacion_anterior",
+      "columns": [
+        "xi_dev_prev_home",
+        "xi_dev_prev_away"
+      ],
+      "horizon": "días antes",
+      "decision": {
+        "n": 1140,
+        "diff": -0.00012658121324868213,
+        "ci_low": -0.005194702156130726,
+        "ci_high": 0.004921671163385196,
+        "promote": false
+      },
+      "by_season": {
+        "2023-24": -0.0007603630906784614,
+        "2024-25": -0.00010873578689106993,
+        "2025-26": 0.0004893552378234843
+      },
+      "seasons_improved": 2,
+      "production": {
+        "n": 1140,
+        "log_loss": 0.9879455486173382,
+        "brier": 0.5896379556770237,
+        "rps": 0.20302107409457168,
+        "accuracy": 0.5157894736842106,
+        "ece": 0.021514023191692655
+      },
+      "candidate_metrics": {
+        "n": 1140,
+        "log_loss": 0.9878189674040896,
+        "brier": 0.5897772152718401,
+        "rps": 0.20302007280917325,
+        "accuracy": 0.519298245614035,
+        "ece": 0.019676018883133483
+      },
+      "rps": {
+        "production": 0.2030210740945717,
+        "candidate": 0.20302007280917325
+      },
+      "vs_market": {
+        "market": "Bet365 pre-cierre",
+        "n": 1140,
+        "candidate_minus_market": {
+          "n": 1140,
+          "diff": 0.02209212247455228,
+          "ci_low": 0.011707280540291774,
+          "ci_high": 0.032355889063508225,
+          "promote": false
+        },
+        "production_minus_market": {
+          "n": 1140,
+          "diff": 0.022218703687800965,
+          "ci_low": 0.013226784990419124,
+          "ci_high": 0.03125129689434015,
+          "promote": false
+        }
+      },
+      "params": {
+        "2023-24": {
+          "train_matches": 244,
+          "imputed_target_rows": 0,
+          "beta_home": {
+            "xi_dev_prev_home": 0.013536950990609782,
+            "xi_dev_prev_away": -0.07360059416904634
+          },
+          "beta_away": {
+            "xi_dev_prev_home": 0.15920729444327475,
+            "xi_dev_prev_away": 0.03229129067207652
+          }
+        },
+        "2024-25": {
+          "train_matches": 624,
+          "imputed_target_rows": 0,
+          "beta_home": {
+            "xi_dev_prev_home": -0.02947371288969925,
+            "xi_dev_prev_away": -0.04921553898191329
+          },
+          "beta_away": {
+            "xi_dev_prev_home": 0.06080655794429857,
+            "xi_dev_prev_away": 0.023718302400024264
+          }
+        },
+        "2025-26": {
+          "train_matches": 1004,
+          "imputed_target_rows": 0,
+          "beta_home": {
+            "xi_dev_prev_home": -0.016345836988515144,
+            "xi_dev_prev_away": -0.030592856104439646
+          },
+          "beta_away": {
+            "xi_dev_prev_home": 0.04168581956633348,
+            "xi_dev_prev_away": 0.03243780795487039
+          }
+        }
+      }
+    }
+  ]
+}

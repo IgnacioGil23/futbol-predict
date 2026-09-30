@@ -174,6 +174,34 @@ entrenado con las anteriores:
 * **Lectura:** la correlación entre los goles existió pero no es estable; un modelo que la fije con la historia
   empeora. Reporte completo: `reports/bivariate/evaluacion_2026-09-30.json`.
 
+### xG y fuerza de la alineación con datos de Fantasy Premier League (30/09/2026) · **A en observación, B descartado**
+
+* **Datos:** archivo histórico de Fantasy (`vaastav/Fantasy-Premier-League`, commit fijado), 2022-23 a 2025-26:
+  380/380 partidos por temporada vinculados a Football-Data con el mismo marcador; precio de cada jugador en cada fecha
+  del torneo, verificado contra el precio inicial (100%) y contra la API oficial (30/30). Controles y correcciones en
+  `src/data/fpl_archive.py` y `reports/fpl/calidad_archivo.json`.
+* **Preregistro** ([docs/preregistro_fpl.md](preregistro_fpl.md)), commiteado antes de construir las variables:
+  * **A:** xG a favor y en contra, media exponencial con vida media 4, información de días antes.
+  * **B:** precio de los 11 titulares respecto de los 5 partidos anteriores, información de una hora antes. B es además una
+    cota del valor de conocer las lesiones.
+  * Ambos como corrección sin intercepto sobre el modelo de producción; 2023-24 a 2025-26; la regla de siempre.
+
+| Candidato (diferencia contra producción) | Log loss | IC 95% | Por temporada |
+|---|---|---|---|
+| **A: xG móvil** | **−0,0059** | [−0,0115; −0,0002] | +0,0064 · −0,0191 · −0,0050 |
+| B: fuerza de la alineación | +0,0006 | [−0,0023; +0,0036] | +0,0021 · −0,0022 · +0,0020 |
+| Control: alineación del partido anterior | −0,0001 | [−0,0052; +0,0049] | — |
+
+* **B: no mejora.** Conocer los 11 titulares no aporta sobre el Elo; por el preregistro, **se descarta la recolección de
+  lesiones** (la alineación confirmada contiene más información que la lista de lesionados).
+* **A: cumple la regla, con fragilidad.** El IC queda apenas por debajo de 0 y, corrigiendo por los 2 candidatos
+  (IC 97,5%), incluye el 0 ([−0,0123; +0,0007]). Empeora en 2023-24, la temporada con menos datos para estimar la
+  corrección (234 partidos). La mejora no depende de pocos partidos: los 20 de mayor diferencia van, en conjunto, en
+  contra de A. Reduce la brecha con Bet365 de +0,022 a +0,016.
+* **Decisión, como fija el preregistro:** A no pasa directo a producción. Se registra en paralelo durante 2026-27 y se
+  decide en julio de 2027 junto con el candidato de tiros; como probablemente miden la misma señal, se elegirá uno.
+* Reporte: `reports/challengers/fpl_2026-09-30.json`; código: `src/features/fpl_features.py`, `src/models/fpl_eval.py`.
+
 ## 6. Limitaciones
 
 * No conoce lesiones, suspensiones, alineaciones, fichajes ni cambios de entrenador: el mercado sí, y por eso predice mejor.
