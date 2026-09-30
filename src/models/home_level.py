@@ -25,7 +25,8 @@ from src.data.leagues import LEAGUES
 from src.models.feature_models import Forecast, PoissonGLMModel
 from src.models.replication import EVAL_SEASONS, TRAIN_START, log_loss_per_match, stratified_ci
 from src.models.scoreline import outcome_probabilities, score_matrix
-from src.serving.production import ALPHA, FEATURES as ELO
+from src.serving.production import ALPHA
+from src.serving.production import FEATURES as ELO
 
 logger = logging.getLogger(__name__)
 
@@ -87,8 +88,8 @@ def league_result(pred: pd.DataFrame) -> tuple[dict, np.ndarray]:
 
 
 def load_frames() -> dict[str, pd.DataFrame]:
-    from src.models.replication import league_features
     from src.data.leagues import LEAGUES_DIR
+    from src.models.replication import league_features
     frames = {"ENG": league_features("ENG")}
     for code in LEAGUES:
         cached = LEAGUES_DIR / f"{code}_features.parquet"      # variables de la liga (data/, no versionado)

@@ -36,7 +36,8 @@ from src.models.experiments import FIRST_TRAIN_SEASON, prepare
 from src.models.feature_models import PoissonGLMModel
 from src.models.scoreline import outcome_probabilities, score_matrix
 from src.odds import shin_probabilities
-from src.serving.production import ALPHA, FEATURES as ELO
+from src.serving.production import ALPHA
+from src.serving.production import FEATURES as ELO
 
 logger = logging.getLogger(__name__)
 
@@ -112,8 +113,8 @@ def season_predictions(df: pd.DataFrame, season: int, spec: dict) -> tuple[pd.Da
     lam_c, mu_c = np.exp(home.log_rate(x, np.log(lam))), np.exp(away.log_rate(x, np.log(mu)))
     out = pd.DataFrame({"match_id": target["match_id"].to_numpy(), "season": target["season"].to_numpy(),
                         "result": target["result"].to_numpy()})
-    for name, (l, m) in {"prod": (lam, mu), "cand": (lam_c, mu_c)}.items():
-        p = outcome_probabilities(score_matrix(l, m))
+    for name, (home_rate, away_rate) in {"prod": (lam, mu), "cand": (lam_c, mu_c)}.items():
+        p = outcome_probabilities(score_matrix(home_rate, away_rate))
         out[[f"{name}_h", f"{name}_d", f"{name}_a"]] = p
     params = {"train_matches": int(len(train)), "imputed_target_rows": int(target[spec["columns"]].isna().any(axis=1).sum()),
               "beta_home": dict(zip(spec["columns"], map(float, home.coef_))),

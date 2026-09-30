@@ -175,7 +175,8 @@ export function TeamPreviewPopover({ s, anchor, modal, onClose, onPointerEnter, 
     ? { left: pos.left, top: pos.top, width: WIDTH, transformOrigin: pos.side === 'right' ? 'left center' : 'right center' }
     : { left: -9999, top: 0, width: WIDTH, visibility: 'hidden' }
   return createPortal(
-    <div ref={ref} className={`tp-pop ${pos ? 'shown' : ''}`} style={style} role="tooltip" id={`tp-${s.team.slug}`}
+    <div ref={ref} className={`tp-pop ${pos ? 'shown' : ''}`} style={style} role="dialog" aria-label={`Resumen de ${s.team.name}`}
+         id={`tp-${s.team.slug}`}
          onPointerEnter={onPointerEnter} onPointerLeave={onPointerLeave}>
       <TeamPreviewCard s={s} />
     </div>,

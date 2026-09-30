@@ -9,6 +9,7 @@ on:
     branches: [main]
     paths:
       - "src/**"
+      - "!src/export/**"   # exportación de la web: no entra en la imagen de la API
       - "configs/**"
       - "models/**"
       - "Dockerfile"

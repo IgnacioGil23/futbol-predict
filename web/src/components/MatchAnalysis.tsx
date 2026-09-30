@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import { num } from '../lib/data'
+import { num, pct1, useData } from '../lib/data'
 import { topScores } from '../lib/model'
-import type { EloPoint, FormMatch, H2H, Probabilities, Rest } from '../lib/types'
+import type { EloPoint, FormMatch, H2H, MetaFile, Probabilities, Rest } from '../lib/types'
 import { EloChart } from './EloChart'
 import { FormStrip, H2HBlock, RestBlock } from './MatchContext'
 import { OutcomeBar } from './OutcomeBar'
@@ -33,6 +33,7 @@ interface Props {
 
 export function MatchAnalysis({ view, home, homeName, awayName, homeSlug, awaySlug }: Props) {
   const top = topScores(view.grid, 3)
+  const review = useData<MetaFile>('meta.json').data?.review
   const diff = view.elo.home - view.elo.away
   return (
     <>
@@ -56,10 +57,13 @@ export function MatchAnalysis({ view, home, homeName, awayName, homeSlug, awaySl
                 </li>
               ))}
             </ol>
-            <p className="small muted" style={{ marginTop: 8 }}>
-              En las 8.030 predicciones históricas del modelo (2005-2026), el marcador más probable nunca superó el
-              15%: en fútbol hay demasiados resultados posibles como para "acertar el resultado exacto".
-            </p>
+            {review && (
+              <p className="small muted" style={{ marginTop: 8 }}>
+                En las {num(review.matches, 0)} predicciones fuera de muestra del modelo ({review.first_season} a{' '}
+                {review.last_season}), el marcador más probable nunca pasó del {pct1(review.max_top_score)}: en fútbol hay
+                demasiados resultados posibles como para "acertar el resultado exacto".
+              </p>
+            )}
           </div>
           <div className="card">
             <h3>Elo</h3>

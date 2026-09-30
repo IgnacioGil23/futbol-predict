@@ -136,7 +136,7 @@ def match_squad_values(matches: pd.DataFrame, mapping: dict, events: pd.DataFram
 
 
 def main() -> None:
-    from src.data.leagues import LEAGUES, matches_path
+    from src.data.leagues import matches_path
     from src.data.load import load_matches
 
     parser = argparse.ArgumentParser()

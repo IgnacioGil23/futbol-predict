@@ -1,10 +1,12 @@
 """Registro en paralelo del modelo con tiros (docs/preregistro_tiros.md)."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
 import pytest
+from test_features import PARAMS, full_frame, make_league
+from test_serving_api import store_from
 
 from src.features.build import POST_MATCH_COLUMNS, build_features
 from src.models import confirm_shots
@@ -12,11 +14,9 @@ from src.models.feature_models import PoissonGLMModel
 from src.monitoring.ledger import COLUMNS, LedgerIntegrityError, append_entries, read_ledger
 from src.monitoring.shadow_ledger import SHADOW_COLUMNS, new_live_entries, reconstructed_entries, shots_model
 from src.serving.shadow import FEATURES, SHOT_COLUMNS, ShadowPredictor, candidate_features, export_glm, shot_features_for
-from test_features import PARAMS, full_frame, make_league
-from test_serving_api import store_from
 
 # La liga sintética juega los jueves: la temporada 2006 va del 10/08 al 14/09.
-NOW = datetime(2006, 8, 28, 6, 0, tzinfo=timezone.utc)
+NOW = datetime(2006, 8, 28, 6, 0, tzinfo=UTC)
 FUTURE_FROM = pd.Timestamp("2006-08-31")
 
 

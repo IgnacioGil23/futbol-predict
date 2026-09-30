@@ -7,7 +7,7 @@ prediction before kick-off in a tamper-evident ledger, and tests every improveme
 **[Live site](https://ignaciogil23.github.io/futbol-predict/)** (Spanish UI) · **[Model card](docs/model_card.md)** ·
 [Versión en español](README.es.md)
 
-![Home page: featured match with home / draw / away probabilities and the most likely scores](docs/img/home.png)
+![Home page: featured match with home / draw / away probabilities and the most likely scores](docs/img/home.webp)
 
 ## Results in 30 seconds
 
@@ -64,7 +64,7 @@ flowchart LR
 * **Security.** Cloud Run deploys via Workload Identity Federation (no long-lived keys); the runtime service account
   has no permissions; the API image excludes scipy and pyarrow.
 
-![Monitoring page](docs/img/monitoring.png)
+![Monitoring page](docs/img/monitoring.webp)
 
 ## Experiments log
 
@@ -83,7 +83,7 @@ Full tables, confidence intervals and reasoning: [model card](docs/model_card.md
 ## Tech stack
 
 Python 3.11 · pandas · scikit-learn · XGBoost · MLflow · FastAPI · Docker · Google Cloud Run · GitHub Actions ·
-React · TypeScript · Vite · D3 · pytest (175 tests)
+React · TypeScript · Vite · D3 · pytest · Vitest · ruff · oxlint
 
 ## Reproduce
 
@@ -95,7 +95,7 @@ python -m src.features.build
 python -m src.models.experiments --stage validation     # model selection (MLflow: mlflow.db)
 python -m src.serving.production                        # models/production/model.json
 python -m src.export.site --out web/public/data         # JSON for the website
-pytest
+pytest && ruff check .                                  # tests and lint (same as CI)
 uvicorn src.api.main:app --reload                       # API
 cd web && npm install && npm run dev                    # website
 ```
@@ -112,6 +112,13 @@ in its docstring and each pre-registration names the command.
 | ClubElo ratings (comparison only) | [Club-Football-Match-Data](https://github.com/xgabora/Club-Football-Match-Data) |
 | Player xG and line-ups | [Fantasy Premier League](https://fantasy.premierleague.com/) API and the [vaastav/Fantasy-Premier-League](https://github.com/vaastav/Fantasy-Premier-League) archive |
 | Squad market values | [dcaribou/transfermarkt-datasets](https://github.com/dcaribou/transfermarkt-datasets) |
+| Club crests (website) | Served by premierleague.com; trademarks of each club, shown only as a visual reference |
+| Stadium photos (website) | Lead image of each stadium's Wikipedia article, on [Wikimedia Commons](https://commons.wikimedia.org/) under CC BY / CC BY-SA; author and licence credited next to each photo (`src/export/stadiums.py`) |
 
 Raw data are downloaded at build time and not versioned; only aggregated reports are published.
 Educational project. **Not betting advice.**
+
+## License
+
+The code is released under the [MIT License](LICENSE). Data, crests and photos belong to their respective sources
+and keep their own terms (see the table above).

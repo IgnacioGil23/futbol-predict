@@ -18,7 +18,7 @@ Uso (lo corre el workflow diario):
 import argparse
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import numpy as np
@@ -96,7 +96,7 @@ def shadow_summary(name: str, shadow: pd.DataFrame) -> dict:
 
 def evaluate(ledger: pd.DataFrame, store: MatchStore, thresholds: dict, now: datetime | None = None,
              shadows: dict[str, pd.DataFrame] | None = None) -> dict:
-    now = now or datetime.now(timezone.utc)
+    now = now or datetime.now(UTC)
     window = thresholds["window"]
     joined = join_results(ledger, store)
     pending = len(ledger) - len(joined)

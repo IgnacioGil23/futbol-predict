@@ -4,13 +4,13 @@ import numpy as np
 import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
+from test_features import PARAMS, make_league
 
 from src.features.elo import compute_elo
 from src.models.feature_models import PoissonGLMModel
 from src.serving.predictor import EloPoissonPredictor
 from src.serving.production import export_params
 from src.serving.store import MatchStore, build_serving_matches
-from test_features import PARAMS, make_league
 
 
 def store_from(matches: pd.DataFrame) -> MatchStore:

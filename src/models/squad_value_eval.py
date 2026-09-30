@@ -24,7 +24,8 @@ from src.models.fpl_eval import OffsetPoisson
 from src.models.home_level import load_frames
 from src.models.replication import EVAL_SEASONS, TRAIN_START, log_loss_per_match, stratified_ci
 from src.models.scoreline import outcome_probabilities, score_matrix
-from src.serving.production import ALPHA, FEATURES as ELO
+from src.serving.production import ALPHA
+from src.serving.production import FEATURES as ELO
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +54,9 @@ def walk_forward(df: pd.DataFrame, train_start: int, seasons: list[int] = EVAL_S
         frame = pd.DataFrame({"match_id": target["match_id"].to_numpy(), "season": target["season"].to_numpy(),
                               "result": target["result"].to_numpy(),
                               "early": (target["games_played_home"] <= EARLY_GAMES).to_numpy()})
-        for name, (l, m) in {"base": (lam, mu), "cand": (np.exp(home.log_rate(x, np.log(lam))),
+        for name, (home_rate, away_rate) in {"base": (lam, mu), "cand": (np.exp(home.log_rate(x, np.log(lam))),
                                                           np.exp(away.log_rate(x, np.log(mu))))}.items():
-            frame[[f"{name}_h", f"{name}_d", f"{name}_a"]] = outcome_probabilities(score_matrix(l, m))
+            frame[[f"{name}_h", f"{name}_d", f"{name}_a"]] = outcome_probabilities(score_matrix(home_rate, away_rate))
         out.append(frame)
         betas[season_label(s)] = {"home": float(home.coef_[0]), "away": float(away.coef_[0]), "train": int(len(train))}
     return pd.concat(out, ignore_index=True), betas

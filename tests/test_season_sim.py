@@ -58,9 +58,10 @@ def test_same_seed_same_result_and_summary_probabilities():
 
 
 def test_current_state_uses_real_table_and_simulates_only_unplayed_fixtures():
-    from src.export.season import current_state
     from test_features import make_league
     from test_serving_api import store_from
+
+    from src.export.season import current_state
     league = make_league(seasons=(2005, 2006))
     league["season"] = league["season"].astype(str)
     e0 = league[(league.division == "E0") & (league.season_start == 2006)].sort_values("date")

@@ -24,8 +24,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 from src.metrics import OUTCOMES
-from src.models.scoreline import (MAX_GOALS, BivariateDependence, dixon_coles_tau, outcome_probabilities,
-                                  rho_bounds, score_matrix)
+from src.models.scoreline import MAX_GOALS, BivariateDependence, outcome_probabilities, rho_bounds, score_matrix
 
 
 @dataclass

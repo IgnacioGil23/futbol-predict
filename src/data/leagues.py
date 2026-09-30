@@ -23,7 +23,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.config import FIRST_SEASON_START_YEAR, FOOTBALL_DATA_URL, PROCESSED_DIR, PROJECT_ROOT, season_code, season_label, season_start_year
+from src.config import FIRST_SEASON_START_YEAR, FOOTBALL_DATA_URL, PROCESSED_DIR, PROJECT_ROOT, season_code, season_label
 from src.data.download import _fetch, _session, football_data_path
 from src.data.football_data import clean_odds, read_season, validate_rows
 

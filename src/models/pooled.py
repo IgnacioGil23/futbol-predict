@@ -14,7 +14,6 @@ import logging
 from datetime import date
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 from src.config import season_label
@@ -24,7 +23,8 @@ from src.models.experiments import GOALS, OTHER, TABLE
 from src.models.feature_models import PoissonGLMModel, XGBPoissonModel
 from src.models.home_level import load_frames
 from src.models.replication import EVAL_SEASONS, TRAIN_START, log_loss_per_match, stratified_ci
-from src.serving.production import ALPHA, FEATURES as ELO
+from src.serving.production import ALPHA
+from src.serving.production import FEATURES as ELO
 
 logger = logging.getLogger(__name__)
 

@@ -150,6 +150,7 @@ def test_challenger_rule_requires_margin_and_significance():
 
 def test_candidates_report_flags_promotion(monkeypatch):
     from datetime import date
+
     import src.models.retrain as retrain
     fake = {"seasons": ["2023-24"], "candidates": [
         {"candidate": "a", "diff": -0.009, "ci_low": -0.012, "ci_high": -0.006, "promote": True},

@@ -13,7 +13,7 @@ Uso (lo corre el workflow diario):
 
 import argparse
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -53,7 +53,7 @@ def ledger_rows(team: pd.DataFrame, now: datetime) -> pd.DataFrame:
         "match_date": [d.isoformat() for d in dates], "home_team": team["home_team"], "away_team": team["away_team"],
         "team": team["team"], "is_home": team["is_home"], "xg_f": team["xg_for"].round(6),
         "xg_a": team["xg_against"].round(6), "players": team["players"], "fpl_fixture": team["fixture"],
-        "captured_at_utc": now.astimezone(timezone.utc).isoformat(timespec="seconds"),
+        "captured_at_utc": now.astimezone(UTC).isoformat(timespec="seconds"),
     })[XG_COLUMNS]
 
 
@@ -82,7 +82,7 @@ def main() -> None:
     parser.add_argument("--ledger", type=Path, default=DEFAULT_XG_LEDGER)
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     existing = read_ledger(args.ledger, XG_COLUMNS)
     rows, dropped = capture(FplApi(), existing, now)
     added = append_entries(args.ledger, rows, columns=XG_COLUMNS, key=XG_KEY, order=["match_date", "home_team", "team"])

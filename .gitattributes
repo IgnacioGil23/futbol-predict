@@ -1,0 +1,9 @@
+# Fin de línea LF en el repositorio para todos los archivos de texto (evita los avisos LF/CRLF en Windows).
+* text=auto eol=lf
+
+# Binarios
+*.png binary
+*.jpg binary
+*.webp binary
+*.gz binary
+*.parquet binary

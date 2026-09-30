@@ -74,7 +74,7 @@ python -m src.models.experiments --stage validation   # selección (registra en 
 python -m src.models.experiments --stage test         # evaluación final (una sola vez)
 python -m src.serving.production           # modelo de producción -> models/production/model.json
 python -m src.export.site --out web/public/data       # JSON para la web
-pytest
+pytest && ruff check .                     # tests y lint (igual que en CI)
 ```
 
 API local:
@@ -106,5 +106,14 @@ cd web && npm install && npm run dev
 | Resultados, estadísticas y cuotas | [Football-Data.co.uk](https://www.football-data.co.uk/) ([notes.txt](https://www.football-data.co.uk/notes.txt)) |
 | Elo de comparación (ClubElo) | [Club Football Match Data](https://github.com/xgabora/Club-Football-Match-Data) (A. Gábor), `EloRatings.csv` |
 | Calendario de las próximas jornadas | [openfootball/england](https://github.com/openfootball/england) (dominio público) |
+| xG de jugadores y alineaciones | API de [Fantasy Premier League](https://fantasy.premierleague.com/) y el archivo [vaastav/Fantasy-Premier-League](https://github.com/vaastav/Fantasy-Premier-League) |
+| Valor de mercado de los planteles | [dcaribou/transfermarkt-datasets](https://github.com/dcaribou/transfermarkt-datasets) |
+| Escudos (web) | Servidos por premierleague.com; marcas registradas de cada club, mostradas solo como referencia visual |
+| Fotos de estadios (web) | Imagen principal del artículo de cada estadio en Wikipedia, en [Wikimedia Commons](https://commons.wikimedia.org/) con licencia CC BY / CC BY-SA; autor y licencia junto a cada foto (`src/export/stadiums.py`) |
 
 Proyecto educativo. **No es una recomendación de apuestas.**
+
+## Licencia
+
+El código se publica con [licencia MIT](LICENSE). Los datos, escudos y fotos pertenecen a sus fuentes y conservan
+sus propios términos (ver la tabla de arriba).

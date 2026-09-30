@@ -91,7 +91,7 @@ def compute_elo(matches: pd.DataFrame, params: EloParams = EloParams(),
                 for team in teams:
                     ratings[team] = start
             return
-        for division, teams in teams_by_div.items():
+        for teams in teams_by_div.values():
             carried = [t for t in teams if last_season_played.get(t) == season - 1]
             new = [t for t in teams if t not in carried]
             if carried:

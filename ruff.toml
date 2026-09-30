@@ -1,0 +1,15 @@
+# Linter de Python (se corre en CI: `ruff check .`).
+line-length = 150
+target-version = "py311"
+extend-exclude = ["notebooks"]
+
+[lint]
+# pycodestyle, pyflakes, imports ordenados, bugbear y sintaxis moderna.
+select = ["E", "W", "F", "I", "B", "UP"]
+# zip() sin strict= es intencional en el código de análisis (columnas del mismo DataFrame).
+ignore = ["B905"]
+
+[lint.flake8-bugbear]
+# FastAPI declara los parámetros con Query(...) como valor por defecto.
+# EloParams es un dataclass congelado (inmutable): es seguro como valor por defecto.
+extend-immutable-calls = ["fastapi.Query", "fastapi.Depends", "src.features.elo.EloParams"]

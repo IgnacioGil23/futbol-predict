@@ -124,6 +124,8 @@ export interface CalibrationFile { seasons: string; matches: number; model: Cali
 
 export interface MetaFile {
   generated_at: string; as_of: string; last_match_in_data: string; upcoming_matches: number; model_version: string
+  /** Resumen de las predicciones fuera de muestra (sección Revisión). */
+  review?: { matches: number; first_season: string; last_season: string; max_top_score: number }
   model: ModelMeta
   sources: { name: string; url: string; use: string }[]
 }

@@ -1,18 +1,25 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
 import pytest
-
-from src.models.feature_models import PoissonGLMModel
-from src.monitoring.ledger import (COLUMNS, LedgerIntegrityError, append_entries, new_live_entries, read_ledger,
-                                   reconstructed_entries, verify_append_only)
-from src.serving.predictor import EloPoissonPredictor
-from src.serving.production import export_params
 from test_features import make_league
 from test_serving_api import store_from
 
-NOW = datetime(2006, 10, 1, 6, 0, tzinfo=timezone.utc)
+from src.models.feature_models import PoissonGLMModel
+from src.monitoring.ledger import (
+    COLUMNS,
+    LedgerIntegrityError,
+    append_entries,
+    new_live_entries,
+    read_ledger,
+    reconstructed_entries,
+    verify_append_only,
+)
+from src.serving.predictor import EloPoissonPredictor
+from src.serving.production import export_params
+
+NOW = datetime(2006, 10, 1, 6, 0, tzinfo=UTC)
 
 
 @pytest.fixture(scope="module")
@@ -56,7 +63,7 @@ def test_first_prediction_is_final_and_file_is_append_only(tmp_path, store, pred
     assert append_entries(path, first) == 1
     before = path.read_text(encoding="utf-8")
     # Otra corrida: el mismo partido (aunque cambien las cuotas) no se vuelve a registrar; uno nuevo sí.
-    later = datetime(2006, 10, 3, 6, 0, tzinfo=timezone.utc)
+    later = datetime(2006, 10, 3, 6, 0, tzinfo=UTC)
     fx = fixtures(("2006-10-05", "A", "B"), ("2006-10-06", "C", "D"))
     fx.loc[0, "B365H"] = 1.5
     second = new_live_entries(fx, store, predictor, read_ledger(path), later, "c2")

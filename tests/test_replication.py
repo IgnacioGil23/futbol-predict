@@ -3,12 +3,12 @@
 import numpy as np
 import pandas as pd
 import pytest
+from test_features import make_league
 
 from src.data.football_data import clean_odds
 from src.data.leagues import first_full_shots_season, round_robin_check
 from src.features.elo import BASE_RATING, EloParams, compute_elo
 from src.models.replication import stratified_ci
-from test_features import make_league
 
 
 def double_round_robin(teams):
@@ -47,8 +47,9 @@ def test_elo_top_division_is_configurable():
 
 
 def test_features_of_another_league_do_not_use_the_future():
-    from src.features.build import POST_MATCH_COLUMNS, build_features
     from test_features import PARAMS, blank_from, full_frame
+
+    from src.features.build import POST_MATCH_COLUMNS, build_features
     matches = full_frame(make_league()).replace({"division": {"E0": "SP1", "E1": "SP2"}})
     dates = np.sort(matches.loc[matches.division == "SP1", "date"].unique())
     cutoff = pd.Timestamp(dates[10])

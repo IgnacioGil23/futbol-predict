@@ -22,7 +22,6 @@ import itertools
 import json
 import logging
 import time
-from dataclasses import asdict
 
 import mlflow
 import numpy as np
@@ -33,7 +32,7 @@ from src.data.load import load_matches
 from src.features.build import FEATURES_PATH
 from src.metrics import OUTCOMES, summarize
 from src.models.dixon_coles import DixonColesParams, walk_forward
-from src.models.feature_models import (EloLogitModel, FrequencyModel, PoissonGLMModel, XGBPoissonModel)
+from src.models.feature_models import EloLogitModel, FrequencyModel, PoissonGLMModel, XGBPoissonModel
 from src.models.scoreline import exact_score_log_loss, score_matrix
 from src.odds import shin_probabilities
 

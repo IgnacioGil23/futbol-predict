@@ -1,5 +1,6 @@
 -r requirements.txt
 pytest
+ruff==0.16.9  # fijado: las reglas cambian entre versiones
 httpx
 jupyter
 ipykernel

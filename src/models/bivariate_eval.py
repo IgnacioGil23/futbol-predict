@@ -35,7 +35,8 @@ from src.models.challenger import MIN_IMPROVEMENT, compare, shot_features
 from src.models.experiments import FIRST_TRAIN_SEASON, prepare
 from src.models.feature_models import BivariatePoissonGLMModel, PoissonGLMModel
 from src.models.scoreline import MAX_GOALS
-from src.serving.production import ALPHA, FEATURES as ELO
+from src.serving.production import ALPHA
+from src.serving.production import FEATURES as ELO
 
 logger = logging.getLogger(__name__)
 

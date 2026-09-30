@@ -1,10 +1,11 @@
 """Candidato A en observación: captura del xG en vivo, variables y predictor congelado (docs/preregistro_xg.md)."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
 import pytest
+from test_shadow import FUTURE_FROM, NOW, fixtures_from, predictor_and_model, setup  # noqa: F401  (fixtures)
 
 from src.data.fpl_live import player_rows, team_xg
 from src.features.fpl_features import A_COLUMNS
@@ -14,7 +15,6 @@ from src.monitoring.shadow_ledger import SHADOW_XG_COLUMNS, new_live_entries, xg
 from src.monitoring.xg_capture import XG_COLUMNS, XG_KEY, history_rows, ledger_rows, pending_fixtures
 from src.serving.predictor import EloPoissonPredictor
 from src.serving.shadow_xg import ShadowXgPredictor, xg_features_for
-from test_shadow import FUTURE_FROM, NOW, fixtures_from, predictor_and_model, setup  # noqa: F401  (fixtures)
 
 KICK = pd.Timestamp("2026-08-22T14:00:00Z")
 FIXTURES = pd.DataFrame({"fixture": [1, 2], "event": [1, 1], "kickoff": [KICK, KICK + pd.Timedelta(hours=2)],
@@ -61,7 +61,7 @@ def test_player_rows_split_a_double_gameweek_by_fixture():
 
 def test_xg_ledger_two_rows_per_match_append_only_and_pending(tmp_path):
     out, _ = team_xg(FIXTURES, pd.DataFrame(players_for(1, 1.3, 0.4) + players_for(2, 0.9, 0.9)))
-    rows = ledger_rows(out, datetime(2026, 8, 23, 6, tzinfo=timezone.utc))
+    rows = ledger_rows(out, datetime(2026, 8, 23, 6, tzinfo=UTC))
     assert list(rows.columns) == XG_COLUMNS and len(rows) == 4 and set(rows.match_date) == {"2026-08-22"}
     path = tmp_path / "xg.csv"
     assert append_entries(path, rows, columns=XG_COLUMNS, key=XG_KEY) == 4

@@ -17,6 +17,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import requests
+from scipy.stats import poisson
 
 from src.config import PREMIER_LEAGUE, TEST_SEASONS, season_label, season_start_year
 from src.data.fixtures import FIXTURES_URL, fetch_fixtures
@@ -69,6 +70,15 @@ def prediction_payload(predictor: EloPoissonPredictor, elo_home: float, elo_away
         "score_grid": [[r4(v) for v in row] for row in p.matrix[:GRID, :GRID]],
         "top_scores": [{**s, "probability": r4(s["probability"])} for s in p.top_scores(6)],
     }
+
+
+def top_score_probability(lam, mu) -> np.ndarray:
+    """Probabilidad del marcador más probable con goles Poisson independientes.
+
+    La grilla es el producto de dos Poisson, así que su máximo es el producto de las dos modas (floor de cada tasa).
+    """
+    lam, mu = np.asarray(lam, dtype=float), np.asarray(mu, dtype=float)
+    return poisson.pmf(np.floor(lam), lam) * poisson.pmf(np.floor(mu), mu)
 
 
 def market_probs(odds_row) -> dict | None:
@@ -258,16 +268,22 @@ def export_review(out: Path, features: pd.DataFrame, current_season: int) -> dic
         t = reliability_table(test[cols].to_numpy(), test["result"].to_numpy(), n_bins=8)
         calib[name] = t[t.n >= 25].round(4).to_dict("records")
     write(out / "calibration.json", {"seasons": "2023-24 a 2025-26", "matches": int(len(test)), **calib})
-    return {"seasons": len(summary)}
+    top = top_score_probability(df["lam"], df["mu"])
+    return {"seasons": len(summary), "matches": int(len(df)), "first_season": seasons[0], "last_season": current_season,
+            "max_top_score": r4(top.max())}
 
 
-def export_meta(out: Path, store: MatchStore, predictor: EloPoissonPredictor, today: pd.Timestamp, n_upcoming: int) -> None:
+def export_meta(out: Path, store: MatchStore, predictor: EloPoissonPredictor, today: pd.Timestamp, n_upcoming: int,
+                review: dict) -> None:
     played = store.matches[store.matches.home_goals.notna()]
     write(out / "meta.json", {
         "generated_at": pd.Timestamp.now().isoformat(timespec="seconds"),
         "as_of": today.date(),
         "last_match_in_data": played.date.max().date(),
         "upcoming_matches": n_upcoming,
+        # Resumen de las predicciones fuera de muestra (sección Revisión), para los textos de la web.
+        "review": {"matches": review["matches"], "first_season": season_label(review["first_season"]),
+                   "last_season": season_label(review["last_season"]), "max_top_score": review["max_top_score"]},
         "model_version": predictor.version,
         "model": predictor.meta,
         "sources": [
@@ -304,7 +320,7 @@ def main() -> None:
     season_sim = build_season(store, predictor, today)
     if season_sim is not None:
         write(out / "season.json", season_sim)
-    export_meta(out, store, predictor, today, upcoming["matches"])
+    export_meta(out, store, predictor, today, upcoming["matches"], review)
     logger.info("Exportado en %s: %d equipos actuales, %d próximos partidos en %d jornadas, %d temporadas de revisión",
                 out, len(teams), upcoming["matches"], upcoming["matchdays"], review["seasons"])
 

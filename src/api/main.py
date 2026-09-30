@@ -22,8 +22,7 @@ from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from src.api.schemas import (Context, EloBlock, ExpectedGoals, Health, PredictionOut, Probabilities, ScoreProb,
-                             TeamsOut)
+from src.api.schemas import Context, EloBlock, ExpectedGoals, Health, PredictionOut, Probabilities, ScoreProb, TeamsOut
 from src.config import PREMIER_LEAGUE, season_start_year
 from src.serving.predictor import EloPoissonPredictor
 from src.serving.store import MatchStore
@@ -110,7 +109,7 @@ def _predict_cached(home: str, away: str, day: Date) -> PredictionOut:
         try:
             division = store.division_in_season(team, season)
         except KeyError:
-            raise HTTPException(404, f"Equipo desconocido: {team}")
+            raise HTTPException(404, f"Equipo desconocido: {team}") from None
         if division is None:
             raise HTTPException(422, f"{team} no jugaba en Premier League ni Championship en {season}-{(season + 1) % 100:02d}: "
                                      "no hay un Elo actualizado para esa fecha")

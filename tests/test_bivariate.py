@@ -7,8 +7,7 @@ import pandas as pd
 import pytest
 
 from src.models.feature_models import BivariatePoissonGLMModel, fit_dependence
-from src.models.scoreline import (BivariateDependence, bivariate_poisson_matrix, inflate_diagonal,
-                                  outcome_probabilities, poisson_pmf, score_matrix)
+from src.models.scoreline import BivariateDependence, bivariate_poisson_matrix, inflate_diagonal, outcome_probabilities, poisson_pmf, score_matrix
 
 
 def paper_pmf(x: int, y: int, l1: float, l2: float, l3: float) -> float:

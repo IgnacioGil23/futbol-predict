@@ -29,7 +29,8 @@ from src.features.team_state import SHOTS_HALFLIVES
 from src.metrics import OUTCOMES, summarize
 from src.models.experiments import predict_feature_model, prepare
 from src.models.feature_models import PoissonGLMModel
-from src.serving.production import ALPHA, FEATURES as CHAMPION_FEATURES
+from src.serving.production import ALPHA
+from src.serving.production import FEATURES as CHAMPION_FEATURES
 
 logger = logging.getLogger(__name__)
 

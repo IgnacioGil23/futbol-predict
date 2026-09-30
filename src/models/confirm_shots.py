@@ -31,8 +31,7 @@ import pandas as pd
 from src.config import season_label
 from src.features.build import FEATURES_PATH
 from src.metrics import OUTCOMES
-from src.models.challenger import (CHAMPION_FEATURES, MIN_IMPROVEMENT, compare, per_match_log_loss, shot_features,
-                                   walk_forward)
+from src.models.challenger import CHAMPION_FEATURES, MIN_IMPROVEMENT, compare, per_match_log_loss, shot_features, walk_forward
 from src.models.experiments import prepare
 
 logger = logging.getLogger(__name__)

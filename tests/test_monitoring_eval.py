@@ -1,16 +1,16 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
 import pytest
-
-from src.monitoring.evaluate import evaluate, history_row, indicator_status, issue_markdown
-from src.monitoring.ledger import COLUMNS, prediction_row
 from test_features import make_league
 from test_ledger import predictor  # noqa: F401  (fixture)
 from test_serving_api import store_from
 
-NOW = datetime(2007, 6, 1, tzinfo=timezone.utc)
+from src.monitoring.evaluate import evaluate, history_row, indicator_status, issue_markdown
+from src.monitoring.ledger import COLUMNS, prediction_row
+
+NOW = datetime(2007, 6, 1, tzinfo=UTC)
 
 
 def thresholds(window=10, gap_hi=(0.03, 0.04)):
@@ -92,6 +92,7 @@ def test_alert_issue_and_history_row(store, predictor):  # noqa: F811
 
 def test_report_only_rewritten_when_something_besides_timestamp_changes(tmp_path):
     import json
+
     from src.monitoring.evaluate import report_changed
     path = tmp_path / "latest.json"
     report = {"generated_at": "2026-10-01T06:00:00+00:00", "status": "ok", "counts": {"evaluated": 10}}

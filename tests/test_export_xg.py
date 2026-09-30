@@ -2,10 +2,10 @@
 
 import numpy as np
 import pandas as pd
-
-from src.export.xg import season_table, team_matches
 from test_features import make_league
 from test_serving_api import store_from
+
+from src.export.xg import season_table, team_matches
 
 
 def test_history_and_live_rows_join_results_and_do_not_duplicate():

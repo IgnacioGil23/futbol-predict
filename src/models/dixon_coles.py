@@ -37,8 +37,8 @@ class DixonColesParams:
 class DixonColesModel:
     name = "dixon_coles"
 
-    def __init__(self, params: DixonColesParams = DixonColesParams()):
-        self.params = params
+    def __init__(self, params: DixonColesParams | None = None):
+        self.params = params if params is not None else DixonColesParams()
 
     def fit(self, matches: pd.DataFrame, as_of: pd.Timestamp) -> "DixonColesModel":
         p = self.params

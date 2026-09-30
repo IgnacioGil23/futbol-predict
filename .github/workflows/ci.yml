@@ -17,6 +17,8 @@ jobs:
           cache: pip
           cache-dependency-path: requirements*.txt
       - run: pip install -r requirements-dev.txt
+      - name: Lint (ruff)
+        run: ruff check .
       - run: pytest
 
   web:
@@ -43,6 +45,8 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
       - run: npm ci
+        working-directory: web
+      - run: npm run lint
         working-directory: web
       - run: npx vitest run
         working-directory: web

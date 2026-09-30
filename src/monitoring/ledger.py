@@ -25,7 +25,7 @@ import argparse
 import io
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import numpy as np
@@ -88,7 +88,7 @@ def prediction_row(predictor: EloPoissonPredictor, *, home: str, away: str, matc
     return {
         "season": season_label(start), "season_start": start, "home_team": home, "away_team": away,
         "match_date": match_date.date().isoformat(), "kickoff_time": kickoff_time or "",
-        "logged_at_utc": logged_at.astimezone(timezone.utc).isoformat(timespec="seconds"),
+        "logged_at_utc": logged_at.astimezone(UTC).isoformat(timespec="seconds"),
         "source": source, "model_version": predictor.version, "code_commit": code_commit,
         "elo_home": elo_home, "elo_away": elo_away, "elo_data_until": elo_data_until,
         "lam": pred.lam, "mu": pred.mu,
@@ -102,7 +102,7 @@ def prediction_row(predictor: EloPoissonPredictor, *, home: str, away: str, matc
 def new_live_entries(fixtures: pd.DataFrame, store: MatchStore, predictor: EloPoissonPredictor,
                      existing: pd.DataFrame, now: datetime, code_commit: str) -> pd.DataFrame:
     """Predicciones a registrar: partidos con fecha posterior a hoy (UTC) que todavía no estén en el registro."""
-    today = now.astimezone(timezone.utc).date()
+    today = now.astimezone(UTC).date()
     logged = set(map(tuple, existing[KEY].astype(str).to_numpy())) if len(existing) else set()
     played = store.matches[store.matches.home_goals.notna()]
     data_until = played.date.max().date().isoformat() if len(played) else ""
@@ -197,7 +197,7 @@ def main() -> None:
                         help="JSON de revisión de la temporada en curso (web/public/data/review/AAAA-AA.json)")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     commit = os.getenv("GITHUB_SHA", "local")[:12]
     store, predictor = MatchStore.load(), EloPoissonPredictor.load()
     existing = read_ledger(args.ledger)

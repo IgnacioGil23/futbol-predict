@@ -4,8 +4,15 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.data.fpl_archive import (ArchiveQualityError, assert_quality, clean_player_rows, link_fixtures, map_teams,
-                                  mask_missing_lineups, player_matches, start_price_agreement)
+from src.data.fpl_archive import (
+    ArchiveQualityError,
+    assert_quality,
+    clean_player_rows,
+    link_fixtures,
+    map_teams,
+    player_matches,
+    start_price_agreement,
+)
 
 TEAMS = pd.DataFrame({"id": [1, 2, 3, 4], "code": [3, 6, 1, 43], "name": ["Arsenal", "Spurs", "Man Utd", "Man City"]})
 CANON = {1: "Arsenal", 2: "Tottenham", 3: "Man United", 4: "Man City"}

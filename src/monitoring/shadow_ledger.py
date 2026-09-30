@@ -21,10 +21,10 @@ Uso (lo corre el workflow diario):
 import argparse
 import logging
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Callable
 
 import numpy as np
 import pandas as pd
@@ -103,7 +103,7 @@ def _rows(targets: pd.DataFrame, model: ShadowModel, store: MatchStore, now: dat
         "season": [season_label(s) for s in starts], "season_start": starts,
         "home_team": rows["home_team"], "away_team": rows["away_team"],
         "match_date": rows["date"].dt.date.astype(str),
-        "logged_at_utc": now.astimezone(timezone.utc).isoformat(timespec="seconds"),
+        "logged_at_utc": now.astimezone(UTC).isoformat(timespec="seconds"),
         "source": source, "model_version": model.predictor.version, "code_commit": code_commit,
         "elo_home": rows["elo_home"], "elo_away": rows["elo_away"], **{c: rows[c] for c in model.feature_columns},
         "lam": fc.lam, "mu": fc.mu, "p_home": fc.probs[:, 0], "p_draw": fc.probs[:, 1], "p_away": fc.probs[:, 2],
@@ -120,7 +120,7 @@ def _not_logged(df: pd.DataFrame, existing: pd.DataFrame) -> pd.DataFrame:
 def new_live_entries(fixtures: pd.DataFrame, model: ShadowModel, store: MatchStore, existing: pd.DataFrame,
                      now: datetime, code_commit: str) -> pd.DataFrame:
     """Partidos con fecha posterior a hoy (UTC) que todavía no estén en el registro."""
-    today = now.astimezone(timezone.utc).date()
+    today = now.astimezone(UTC).date()
     t = pd.DataFrame({"date": pd.to_datetime(fixtures["date"]), "home_team": fixtures["HomeTeam"],
                       "away_team": fixtures["AwayTeam"]})
     t = t[t["date"].dt.date > today]
@@ -130,7 +130,7 @@ def new_live_entries(fixtures: pd.DataFrame, model: ShadowModel, store: MatchSto
 def reconstructed_entries(matches: pd.DataFrame, model: ShadowModel, store: MatchStore, now: datetime,
                           code_commit: str) -> pd.DataFrame:
     """Partidos de Premier ya jugados de la temporada en curso (una sola vez, al crear el registro)."""
-    current = season_start_year(now.astimezone(timezone.utc).date())
+    current = season_start_year(now.astimezone(UTC).date())
     played = matches[(matches.division == PREMIER_LEAGUE) & (matches.season_start == current)
                      & matches.home_goals.notna()]
     return _rows(played[["date", "home_team", "away_team"]], model, store, now, "reconstruido", code_commit)
@@ -158,7 +158,7 @@ def main() -> None:
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     ledger = args.ledger or (DEFAULT_SHADOW_LEDGER if args.model == "tiros" else DEFAULT_SHADOW_XG_LEDGER)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     commit = os.getenv("GITHUB_SHA", "local")[:12]
     matches, store = load_matches(), MatchStore.load()
     model = load_model(args.model, matches, args.xg_ledger)

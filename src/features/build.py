@@ -17,7 +17,7 @@ from pathlib import Path
 import pandas as pd
 
 from src import eras
-from src.config import FEATURES_PATH_NAME, PROCESSED_DIR, PROJECT_ROOT, PREMIER_LEAGUE
+from src.config import FEATURES_PATH_NAME, PREMIER_LEAGUE, PROCESSED_DIR, PROJECT_ROOT
 from src.data.load import load_matches
 from src.features.elo import EloParams, compute_elo
 from src.features.h2h import h2h_features
