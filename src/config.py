@@ -24,6 +24,19 @@ DIVISIONS = (PREMIER_LEAGUE, CHAMPIONSHIP)
 
 FIRST_SEASON_START_YEAR = 2000
 
+# Split temporal (año de inicio de temporada). Nunca aleatorio: se entrena con el
+# pasado y se evalúa con temporadas posteriores.
+#   2000-01 y 2001-02: "burn-in" del Elo propio (arranca sin historia), no se evalúan.
+#   2002-03 a 2020-21: entrenamiento (y ajuste de hiperparámetros del Elo).
+#   2021-22 y 2022-23: validación (selección de modelo).
+#   2023-24 a 2025-26: test (se mira una sola vez, al final).
+BURN_IN_SEASONS = range(2000, 2002)
+TRAIN_SEASONS = range(2002, 2021)
+VALIDATION_SEASONS = range(2021, 2023)
+TEST_SEASONS = range(2023, 2026)
+
+FEATURES_PATH_NAME = "features.parquet"
+
 # Tabla de ratings de ClubElo redistribuida por el dataset "Club Football Match Data"
 # (Adam Gábor). Se usa solo como Elo de comparación: la API pública de ClubElo
 # dejó de estar disponible y, desde el 15/06/2025, los snapshots de esa tabla son

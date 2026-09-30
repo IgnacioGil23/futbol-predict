@@ -7,7 +7,7 @@ evaluado contra las probabilidades implícitas del mercado de apuestas. **En con
 
 - [x] Datos: descarga, parser robusto y validación (`src/data/`)
 - [x] EDA y auditoría de fuga temporal (`notebooks/01_eda.ipynb`)
-- [ ] Feature engineering (Elo propio, tabla, head-to-head, congestión)
+- [x] Feature engineering: Elo propio ajustado, forma, tabla, head-to-head, congestión (`src/features/`, `notebooks/02_features.ipynb`)
 - [ ] Modelo + tracking con MLflow
 - [ ] API (FastAPI + Docker) y web
 - [ ] Model card
@@ -20,6 +20,8 @@ venv\Scripts\activate
 pip install -r requirements-dev.txt
 python -m src.data.download   # Football-Data.co.uk (E0 + E1) y snapshots de Elo
 python -m src.data.load       # data/processed/matches.parquet + data_quality.json
+python -m src.features.tune_elo   # (opcional) re-ajusta el Elo -> configs/elo_params.json
+python -m src.features.build  # data/processed/features.parquet + elo_history.parquet
 pytest
 ```
 

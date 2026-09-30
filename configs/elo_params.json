@@ -1,0 +1,130 @@
+{
+  "params": {
+    "k0": 7.5,
+    "lam": 1.0,
+    "home_advantage": 59.4,
+    "season_regression": 0.05,
+    "initial_gap": 250,
+    "newcomer_offset": -50
+  },
+  "criterion": "log loss de logit multinomial resultado ~ diferencia de Elo, Premier League, temporadas de entrenamiento",
+  "reference_log_loss": {
+    "paper_params": 0.9748708741222533,
+    "clubelo": 0.9742318122625291,
+    "tuned": 0.9735850750893975,
+    "n_matches": 7220,
+    "seasons": "2002-2021"
+  },
+  "trace": [
+    {
+      "pass": 0,
+      "k0": 10,
+      "lam": 1.0,
+      "home_advantage": 59.4,
+      "season_regression": 0.0,
+      "initial_gap": 100,
+      "newcomer_offset": 0,
+      "log_loss": 0.9748124100409749
+    },
+    {
+      "pass": 1,
+      "k0": 7.5,
+      "lam": 1.0,
+      "home_advantage": 59.4,
+      "season_regression": 0.0,
+      "initial_gap": 100,
+      "newcomer_offset": 0,
+      "log_loss": 0.9744902777512825
+    },
+    {
+      "pass": 1,
+      "k0": 7.5,
+      "lam": 1.0,
+      "home_advantage": 59.4,
+      "season_regression": 0.0,
+      "initial_gap": 100,
+      "newcomer_offset": 0,
+      "log_loss": 0.9744902777512825
+    },
+    {
+      "pass": 1,
+      "k0": 7.5,
+      "lam": 1.0,
+      "home_advantage": 59.4,
+      "season_regression": 0.05,
+      "initial_gap": 100,
+      "newcomer_offset": 0,
+      "log_loss": 0.9743843083117274
+    },
+    {
+      "pass": 1,
+      "k0": 7.5,
+      "lam": 1.0,
+      "home_advantage": 59.4,
+      "season_regression": 0.05,
+      "initial_gap": 250,
+      "newcomer_offset": 0,
+      "log_loss": 0.9736753119911092
+    },
+    {
+      "pass": 1,
+      "k0": 7.5,
+      "lam": 1.0,
+      "home_advantage": 59.4,
+      "season_regression": 0.05,
+      "initial_gap": 250,
+      "newcomer_offset": -50,
+      "log_loss": 0.9735850750893975
+    },
+    {
+      "pass": 2,
+      "k0": 7.5,
+      "lam": 1.0,
+      "home_advantage": 59.4,
+      "season_regression": 0.05,
+      "initial_gap": 250,
+      "newcomer_offset": -50,
+      "log_loss": 0.9735850750893975
+    },
+    {
+      "pass": 2,
+      "k0": 7.5,
+      "lam": 1.0,
+      "home_advantage": 59.4,
+      "season_regression": 0.05,
+      "initial_gap": 250,
+      "newcomer_offset": -50,
+      "log_loss": 0.9735850750893975
+    },
+    {
+      "pass": 2,
+      "k0": 7.5,
+      "lam": 1.0,
+      "home_advantage": 59.4,
+      "season_regression": 0.05,
+      "initial_gap": 250,
+      "newcomer_offset": -50,
+      "log_loss": 0.9735850750893975
+    },
+    {
+      "pass": 2,
+      "k0": 7.5,
+      "lam": 1.0,
+      "home_advantage": 59.4,
+      "season_regression": 0.05,
+      "initial_gap": 250,
+      "newcomer_offset": -50,
+      "log_loss": 0.9735850750893975
+    },
+    {
+      "pass": 2,
+      "k0": 7.5,
+      "lam": 1.0,
+      "home_advantage": 59.4,
+      "season_regression": 0.05,
+      "initial_gap": 250,
+      "newcomer_offset": -50,
+      "log_loss": 0.9735850750893975
+    }
+  ]
+}
