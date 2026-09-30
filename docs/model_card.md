@@ -227,6 +227,29 @@ fijados antes de mirar (`src/analysis/error_analysis.py`, `reports/analysis/anal
 * **Consecuencias:** candidatos preregistrados a partir de acá (ventaja de local reciente, información de pretemporada
   y un modelo con las cinco ligas); ver las secciones siguientes.
 
+### Ventaja de local estimada con temporadas recientes (candidato L, 30/09/2026) · **sin señal**
+
+* **Preregistro** ([docs/preregistro_local.md](preregistro_local.md)): los interceptos de las dos regresiones se
+  reestiman con las 3 temporadas anteriores, con la pendiente del Elo fija (intercepto de máxima verosimilitud exacto).
+  Principal: las cuatro ligas de la replicación, 2015-16 a 2025-26.
+
+| Liga | Candidato − base | IC 95% | P(local) base → candidato (real) |
+|---|---|---|---|
+| **Cuatro ligas (principal)** | **−0,0001** | **[−0,0008; +0,0007]** | — |
+| España | −0,0001 | [−0,0012; +0,0009] | 46,9% → 45,8% (45,7%) |
+| Italia | −0,0016 | [−0,0032; +0,0001] | 45,8% → 43,9% (42,3%) |
+| Alemania | +0,0021 | [+0,0011; +0,0031] | 46,0% → 46,0% (44,2%) |
+| Francia | −0,0002 | [−0,0020; +0,0015] | 45,6% → 44,7% (43,8%) |
+| Premier (descriptivo) | +0,0004 | [−0,0013; +0,0021] | 46,2% → 44,6% (44,3%) |
+
+* **Lectura:** el candidato corrige el sesgo promedio (en la Premier, de 46,2% a 44,6% contra 44,3% real) pero **no
+  mejora el log loss**. Un desvío promedio de ~2 puntos pesa muy poco partido a partido, y estimar el nivel con solo 3
+  temporadas agrega ruido (la proporción de victorias locales varía ±2,5 puntos por azar entre temporadas). El sesgo
+  de local es real pero explica una parte ínfima de la brecha con el mercado: esa brecha está en la información de cada
+  partido (ver el corte por desacuerdo), no en el promedio.
+* Por el preregistro, no se registra en paralelo; el sesgo queda como limitación conocida.
+  Reporte: `reports/challengers/ventaja_local_2026-09-30.json`; código: `src/models/home_level.py`.
+
 ### Replicación de los tiros en otras ligas y relación Elo → goles entre ligas (30/09/2026)
 
 * **Preregistro** ([docs/preregistro_replicacion.md](preregistro_replicacion.md)), commiteado antes de evaluar. Mismo
