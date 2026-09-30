@@ -1,96 +1,116 @@
-# Marcador Probable · Premier League
+# Marcador Probable · Premier League match predictor
 
-Modelo de Machine Learning que estima la **probabilidad de cada marcador exacto** de un partido de la Premier League
-(y de ahí local / empate / visitante), evaluado con honestidad contra el mercado de apuestas. Incluye el pipeline de
-datos, la experimentación, una API y una web interactiva.
+**An end-to-end, honestly evaluated football forecasting system:** it predicts the probability of every exact score of a
+Premier League match (and from it home / draw / away), serves it through an API and a live website, logs every
+prediction before kick-off in a tamper-evident ledger, and tests every improvement with pre-registered experiments.
 
-> **Resultado en una línea:** en test (2023-26), el modelo queda a ~0,02 de log loss del mercado (Bet365 pre-cierre),
-> una brecha estadísticamente significativa: **no le gana al mercado**, pero está bien calibrado y un modelo de 4
-> parámetros empata con Dixon-Coles y XGBoost. Detalle en el [model card](docs/model_card.md).
+**[Live site](https://ignaciogil23.github.io/futbol-predict/)** (Spanish UI) · **[Model card](docs/model_card.md)** ·
+[Versión en español](README.es.md)
 
-## Qué hay adentro
+![Home page: featured match with the full score-probability grid](docs/img/home.png)
 
-| Etapa | Qué se hizo | Dónde |
-|---|---|---|
-| Datos | Descarga de Football-Data.co.uk (Premier + Championship, 2000-2026), parser robusto (recupera 90 partidos que un dataset derivado había perdido), validaciones automáticas | `src/data/` |
-| EDA | Calidad de datos, auditoría de fuga temporal, distribución de goles, ventaja de local por era COVID, calibración del mercado | `notebooks/01_eda.ipynb` |
-| Features | Elo propio partido a partido (ajustado solo con entrenamiento), forma, tabla, descanso, head-to-head; tests de "invariancia al futuro" contra la fuga | `src/features/`, `notebooks/02_features.ipynb` |
-| Modelos | Frecuencias, logit sobre Elo, Dixon-Coles (MLE con gradiente analítico), Poisson GLM, XGBoost Poisson; split temporal, bootstrap pareado vs mercado, MLflow | `src/models/`, `notebooks/03_modelo.ipynb` |
-| Servicio | Modelo exportado como JSON (sin pickle), consultas "a una fecha" sin fuga, FastAPI + Docker multi-etapa, deploy en Cloud Run | `src/serving/`, `src/api/`, `Dockerfile`, `docs/deploy_cloud_run.md` |
-| Web | React + TypeScript + D3: próximas jornadas y previa con grilla de marcadores, fichas de equipo, revisión histórica fuera de muestra, ventaja de local, metodología | `web/` |
-| Automatización | CI, publicación de la web, deploy de la API, monitoreo diario y reentrenamiento por PR | `.github/workflows/` |
+## Results in 30 seconds
 
-## Decisiones que vale la pena mirar
-
-* **Auditar la fuente antes de modelar.** El README del dataset original decía "Bet365" para las cuotas; cruzándolo con
-  los CSV originales resultó ser una mezcla de casas según la temporada. Por eso la fuente base cambió.
-* **Anti-fuga verificada, no supuesta.** Toda variable del día *D* usa partidos de días anteriores. Tests que borran los
-  resultados desde *D* y exigen que las variables del día *D* no cambien, en datos sintéticos y reales. Durante el
-  desarrollo detectaron una fuga real (el Elo de arranque de un equipo recién ascendido, consultado antes de su debut,
-  dependía de resultados posteriores) y un error de tipos; ambos quedaron corregidos y cubiertos por tests.
-* **Lo simple ganó.** Con validación temporal y comparación pareada, ninguna variable extra ni modelo más complejo
-  mejoró al Poisson con diferencia de Elo. Se reporta así.
-* **El mismo modelo en Python y en TypeScript**, verificado a 10 decimales con vectores exportados desde Python: la
-  previa "de hoy" se calcula en el navegador al instante; la API queda para fechas históricas.
-
-## Monitoreo en producción
-
-* **Registro inmutable** (rama `monitoring`): antes de cada partido se guarda la predicción, una sola vez, con la
-  versión del modelo y las cuotas del momento. El workflow verifica que solo se agreguen filas.
-* **Evaluación diaria** contra el resultado y el mercado: brecha de log loss, goles y empates esperados contra reales
-  y residuo de localía, en ventanas de 190 partidos. Los umbrales salen de un backtest de 10 temporadas
-  (`configs/monitoring_thresholds.json`), no de valores elegidos a ojo.
-* **Alertas** como issues de GitHub, que disparan una evaluación de modelos candidatos.
-* **Reentrenamiento champion/challenger**: el anual (1 de julio) llega como PR con controles de sanidad; los
-  candidatos se promueven solo con una mejora ≥ 0,005 de log loss y un IC 95% pareado por debajo de 0.
-* Página pública: `/#/monitoreo` en la web.
-
-## Reproducir
-
-```bash
-python -m venv venv
-venv\Scripts\activate                      # Windows (en Linux/macOS: source venv/bin/activate)
-pip install -r requirements-dev.txt
-
-python -m src.data.download                # Football-Data.co.uk (E0 + E1) y snapshots de ClubElo
-python -m src.data.load                    # data/processed/matches.parquet + data_quality.json
-python -m src.features.tune_elo            # (opcional) re-ajusta el Elo -> configs/elo_params.json
-python -m src.features.build               # features.parquet + elo_history.parquet
-python -m src.models.experiments --stage validation   # selección (registra en MLflow: mlflow.db)
-python -m src.models.experiments --stage test         # evaluación final (una sola vez)
-python -m src.serving.production           # modelo de producción -> models/production/model.json
-python -m src.export.site --out web/public/data       # JSON para la web
-pytest
-```
-
-API local:
-
-```bash
-uvicorn src.api.main:app --reload
-```
-
-Web local (requiere haber corrido el export):
-
-```bash
-cd web && npm install && npm run dev
-```
-
-## Despliegue
-
-* **Web:** GitHub Pages, publicada por `.github/workflows/deploy.yml` (lunes y jueves, o a mano). La URL de la API se
-  configura en la variable de Actions `API_URL`.
-* **API:** Google Cloud Run, desplegada por `.github/workflows/deploy-api.yml` con Workload Identity Federation (sin
-  claves JSON). Escala a cero, máximo 2 instancias; la imagen descarga y procesa los datos al construirse, así que los
-  datos no se versionan. Configuración inicial paso a paso: [docs/deploy_cloud_run.md](docs/deploy_cloud_run.md).
-* La imagen de la API es mínima (FastAPI, numpy, pandas: sin scipy ni pyarrow); arranca en ~5 s y usa ~125 MB de RAM
-  con los datos completos (medido localmente).
-
-## Datos y atribución
-
-| Dato | Fuente |
+| Question | Answer |
 |---|---|
-| Resultados, estadísticas y cuotas | [Football-Data.co.uk](https://www.football-data.co.uk/) ([notes.txt](https://www.football-data.co.uk/notes.txt)) |
-| Elo de comparación (ClubElo) | [Club Football Match Data](https://github.com/xgabora/Club-Football-Match-Data) (A. Gábor), `EloRatings.csv` |
-| Calendario de las próximas jornadas | [openfootball/england](https://github.com/openfootball/england) (dominio público) |
+| **Does it beat the betting market?** | **No.** On the untouched test seasons (2023-24 to 2025-26, 1,140 matches) log loss is **0.988** vs **0.966** for Bet365 pre-closing odds and **0.944** for Pinnacle closing; the gap to Bet365 is +0.022 (95% CI 0.013 to 0.031). It is well calibrated (ECE 0.022). |
+| **Is it competitive with published work?** | **Yes.** On the exact 3,300 matches of Ley, Van de Wiele & Van Eetvelde (2019, *Statistical Modelling*), RPS **0.1942** vs **0.1953** for the best of their 10 models (difference within our CI; protocol differences documented). |
+| **What actually improves it?** | **Shots.** Adding recent shots and shots on target helps in the Premier League in 11 of 11 seasons (−0.004 to −0.005 log loss) and **replicates in Spain, Italy, Germany and France** (15,583 matches, −0.0049, CI [−0.0063, −0.0035]). It sits right at the pre-registered promotion margin, so it is being logged in parallel for a final decision in July 2027. |
+| **What does not?** | Form, table, rest, head-to-head, Dixon-Coles, a bivariate Poisson, XGBoost (even trained on 5 leagues), starting line-ups, a recent home-advantage fix and squad market values: each was tested and documented. |
+| **Where is the gap to the market?** | Not in the averages but in match-level information: half of the gap comes from the 14% of matches where model and market disagree by 10+ points, and matchdays 1-5 double it (transfers the ratings have not absorbed yet). |
 
-Proyecto educativo. **No es una recomendación de apuestas.**
+## Architecture
+
+```mermaid
+flowchart LR
+    FD[Football-Data.co.uk<br/>results, stats, odds] --> ETL[Load + validate<br/>robust CSV parser, quality checks]
+    OF[openfootball<br/>fixtures] --> ETL
+    ETL --> FE[Features without leakage<br/>own Elo, shots, form...<br/>future-invariance tests]
+    FE --> EXP[Experiments<br/>temporal split, MLflow,<br/>paired bootstrap vs market]
+    EXP --> ART[Model artifact<br/>JSON params + hash version]
+    ART --> API[FastAPI on Cloud Run<br/>Docker, Workload Identity]
+    ART --> WEB[React + TS + D3 site<br/>same model re-implemented in TS]
+    ART --> MON[Daily monitoring<br/>append-only ledger, alerts,<br/>shadow models, xG capture]
+    MON --> RT[Retraining<br/>champion/challenger via PR]
+    FPL[Fantasy PL API<br/>live xG] --> MON
+    GHA{{GitHub Actions orchestrates CI, deploys, monitoring and retraining}}
+```
+
+## How the model works
+
+1. **Own Elo rating** updated match by match over the Premier League and Championship, with a goal-difference factor
+   (Hvattum & Arntzen 2010), tuned only on training seasons.
+2. **Two Poisson regressions** (home goals, away goals) on the Elo difference give the expected goals of each side;
+   their product gives the probability of every score, and summing cells gives home / draw / away.
+3. **Selection by evidence, not by complexity:** frequencies, an Elo logit, Dixon-Coles, the Poisson GLM and XGBoost were
+   statistically indistinguishable in validation, so the simplest one won.
+
+## Engineering decisions worth a look
+
+* **Leakage is tested, not assumed.** Every feature for day *D* uses only matches before *D*. Tests blank all results
+  from *D* on and require features for *D* to stay identical. They caught a real leak (a promoted team's starting Elo
+  depended on later results).
+* **Evaluation that cannot be gamed.** Temporal split with a test set used once; log loss as the primary metric; the
+  market (Shin de-margining) as the benchmark; paired bootstrap confidence intervals; a fixed promotion rule
+  (≥ 0.005 log loss and CI below 0).
+* **Pre-registration.** Each new candidate has a protocol committed to git *before* its code and results
+  (`docs/preregistro_*.md`), so the history proves the order. Other leagues serve as a test bed, so the Premier League
+  data are not reused over and over.
+* **Tamper-evident monitoring.** Predictions are appended to a ledger on a separate branch before kick-off and never
+  rewritten; alert thresholds come from a 10-season backtest; retraining arrives as a pull request with sanity checks.
+* **Portable, auditable artifact.** The model is JSON parameters (no pickle) with a hash version; the website runs the
+  same model in TypeScript, verified against Python test vectors.
+* **Security.** Cloud Run deploys via Workload Identity Federation (no long-lived keys); the runtime service account
+  has no permissions; the API image excludes scipy and pyarrow.
+
+![Monitoring page](docs/img/monitoring.png)
+
+## Experiments log
+
+| Candidate | Where tested | Log loss vs baseline | Outcome |
+|---|---|---|---|
+| Shots + shots on target | Premier League 2015-26; 4 other leagues | −0.004 / −0.005; replicated: −0.0049 | In parallel logging until July 2027 |
+| Fantasy xG (rolling) | Premier League 2023-26 | −0.0059 (fragile: CI touches 0 after multiplicity correction) | In parallel logging until July 2027 |
+| Bivariate Poisson (Karlis & Ntzoufras 2003) | Premier League 2015-23 | exact-score log loss **worse** | Discarded (the draw excess did not persist after 2015) |
+| Starting line-up strength | Premier League 2023-26 | +0.0006 | Discarded, and with it the injury-data collection |
+| Recent home advantage | 4 leagues | −0.0001 | Fixes the home bias, no log-loss gain |
+| Squad market value (Transfermarkt) | 4 leagues | −0.0008 (−0.0023 on matchdays 1-5) | Minimal; no live source |
+| Pooled 5-league GLM / XGBoost | 4 leagues | +0.0001 / +0.0019 vs the shots model | Nothing beyond shots; XGBoost worse |
+
+Full tables, confidence intervals and reasoning: [model card](docs/model_card.md).
+
+## Tech stack
+
+Python 3.11 · pandas · scikit-learn · XGBoost · MLflow · FastAPI · Docker · Google Cloud Run · GitHub Actions ·
+React · TypeScript · Vite · D3 · pytest (169 tests)
+
+## Reproduce
+
+```bash
+python -m venv venv && source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements-dev.txt
+python -m src.data.download && python -m src.data.load  # Football-Data (E0 + E1)
+python -m src.features.build
+python -m src.models.experiments --stage validation     # model selection (MLflow: mlflow.db)
+python -m src.serving.production                        # models/production/model.json
+python -m src.export.site --out web/public/data         # JSON for the website
+pytest
+uvicorn src.api.main:app --reload                       # API
+cd web && npm install && npm run dev                    # website
+```
+
+Other experiments (other leagues, Fantasy, Transfermarkt) have their own entry points; each script documents its usage
+in its docstring and each pre-registration names the command.
+
+## Data and attribution
+
+| Data | Source |
+|---|---|
+| Results, match statistics and odds (England, Spain, Italy, Germany, France) | [Football-Data.co.uk](https://www.football-data.co.uk/) |
+| Fixtures | [openfootball/england](https://github.com/openfootball/england) (public domain) |
+| ClubElo ratings (comparison only) | [Club-Football-Match-Data](https://github.com/xgabora/Club-Football-Match-Data) |
+| Player xG and line-ups | [Fantasy Premier League](https://fantasy.premierleague.com/) API and the [vaastav/Fantasy-Premier-League](https://github.com/vaastav/Fantasy-Premier-League) archive |
+| Squad market values | [dcaribou/transfermarkt-datasets](https://github.com/dcaribou/transfermarkt-datasets) |
+
+Raw data are downloaded at build time and not versioned; only aggregated reports are published.
+Educational project. **Not betting advice.**
