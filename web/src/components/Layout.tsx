@@ -10,6 +10,7 @@ const LINKS = [
   { to: '/equipos', label: 'Equipos' },
   { to: '/revision', label: 'Revisión' },
   { to: '/ventaja-local', label: 'Ventaja de local' },
+  { to: '/monitoreo', label: 'Monitoreo' },
   { to: '/metodologia', label: 'Cómo funciona' },
 ]
 

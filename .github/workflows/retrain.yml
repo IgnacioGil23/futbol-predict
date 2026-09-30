@@ -1,0 +1,77 @@
+name: Reentrenamiento (champion / challenger)
+
+# anual (1 de julio o a mano): reentrena la misma configuración con la temporada terminada y,
+#   si pasa los controles de sanidad, abre un PR con el modelo nuevo. Nada llega a producción sin aprobar el PR.
+# candidatos (a mano o disparado por una alerta del monitoreo): compara configuraciones alternativas
+#   contra la actual y publica el reporte en un issue `model-review`.
+#
+# Requiere: Settings > Actions > General > "Allow GitHub Actions to create and approve pull requests".
+on:
+  schedule:
+    - cron: "0 7 1 7 *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "anual = PR con el modelo reentrenado · candidatos = reporte de alternativas"
+        type: choice
+        options: [anual, candidatos]
+        default: anual
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: retrain
+  cancel-in-progress: false
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    env:
+      MODE: ${{ github.event.inputs.mode || 'anual' }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements.txt
+
+      - name: Datos y features
+        run: |
+          python -m src.data.download
+          python -m src.data.load
+          python -m src.features.build
+
+      - name: Reentrenar / evaluar
+        run: |
+          mkdir -p reports/retrain
+          python -m src.models.retrain --mode "$MODE" --report "reports/retrain/${MODE}_$(date -u +%F).md"
+
+      - name: Abrir PR con el modelo nuevo (anual)
+        if: env.MODE == 'anual'
+        run: |
+          REPORT="reports/retrain/anual_$(date -u +%F).md"
+          if git diff --quiet models/production/model.json; then
+            echo "El modelo reentrenado es idéntico al actual: no hay PR que abrir."; exit 0
+          fi
+          BRANCH="retrain/$(date -u +%F)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add models/production/model.json "$REPORT"
+          git commit -m "Reentrenamiento anual del modelo ($(date -u +%F))"
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "Reentrenamiento anual del modelo ($(date -u +%F))" \
+            --body-file "$REPORT"
+
+      - name: Publicar el reporte de candidatos (issue)
+        if: env.MODE == 'candidatos'
+        run: |
+          REPORT="reports/retrain/candidatos_$(date -u +%F).md"
+          gh label create model-review --color 1D76DB --description "Evaluación de modelos candidatos" --force
+          gh issue create --title "Evaluación de candidatos ($(date -u +%F))" --label model-review --body-file "$REPORT"

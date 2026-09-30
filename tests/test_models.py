@@ -146,3 +146,17 @@ def test_challenger_rule_requires_margin_and_significance():
     assert tiny["ci_high"] < 0 and not tiny["promote"]
     noisy = compare(champ, champ - 0.006 + rng.normal(0, 1.0, 3000))                 # margen alcanzado, pero es ruido
     assert not noisy["promote"]
+
+
+def test_candidates_report_flags_promotion(monkeypatch):
+    from datetime import date
+    import src.models.retrain as retrain
+    fake = {"seasons": ["2023-24"], "candidates": [
+        {"candidate": "a", "diff": -0.009, "ci_low": -0.012, "ci_high": -0.006, "promote": True},
+        {"candidate": "b", "diff": -0.001, "ci_low": -0.004, "ci_high": 0.002, "promote": False}]}
+    monkeypatch.setattr(retrain, "run_challengers", lambda seasons, features: fake)
+    text, promote = retrain.candidates_report(pd.DataFrame(), date(2027, 7, 1))
+    assert promote and "cumple la regla" in text and "| a | -0.0090" in text
+    fake["candidates"][0]["promote"] = False
+    text, promote = retrain.candidates_report(pd.DataFrame(), date(2027, 7, 1))
+    assert not promote and "se mantiene el modelo actual" in text

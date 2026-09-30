@@ -18,7 +18,7 @@ datos, la experimentación, una API y una web interactiva.
 | Modelos | Frecuencias, logit sobre Elo, Dixon-Coles (MLE con gradiente analítico), Poisson GLM, XGBoost Poisson; split temporal, bootstrap pareado vs mercado, MLflow | `src/models/`, `notebooks/03_modelo.ipynb` |
 | Servicio | Modelo exportado como JSON (sin pickle), consultas "a una fecha" sin fuga, FastAPI + Docker multi-etapa, deploy en Cloud Run | `src/serving/`, `src/api/`, `Dockerfile`, `docs/deploy_cloud_run.md` |
 | Web | React + TypeScript + D3: próximas jornadas y previa con grilla de marcadores, fichas de equipo, revisión histórica fuera de muestra, ventaja de local, metodología | `web/` |
-| Automatización | CI (tests Python y TS, build de la web, build y smoke test de la imagen), publicación de la web y deploy de la API dos veces por semana | `.github/workflows/` |
+| Automatización | CI, publicación de la web, deploy de la API, monitoreo diario y reentrenamiento por PR | `.github/workflows/` |
 
 ## Decisiones que vale la pena mirar
 
@@ -32,6 +32,18 @@ datos, la experimentación, una API y una web interactiva.
   mejoró al Poisson con diferencia de Elo. Se reporta así.
 * **El mismo modelo en Python y en TypeScript**, verificado a 10 decimales con vectores exportados desde Python: la
   previa "de hoy" se calcula en el navegador al instante; la API queda para fechas históricas.
+
+## Monitoreo en producción
+
+* **Registro inmutable** (rama `monitoring`): antes de cada partido se guarda la predicción, una sola vez, con la
+  versión del modelo y las cuotas del momento. El workflow verifica que solo se agreguen filas.
+* **Evaluación diaria** contra el resultado y el mercado: brecha de log loss, goles y empates esperados contra reales
+  y residuo de localía, en ventanas de 190 partidos. Los umbrales salen de un backtest de 10 temporadas
+  (`configs/monitoring_thresholds.json`), no de valores elegidos a ojo.
+* **Alertas** como issues de GitHub, que disparan una evaluación de modelos candidatos.
+* **Reentrenamiento champion/challenger**: el anual (1 de julio) llega como PR con controles de sanidad; los
+  candidatos se promueven solo con una mejora ≥ 0,005 de log loss y un IC 95% pareado por debajo de 0.
+* Página pública: `/#/monitoreo` en la web.
 
 ## Reproducir
 

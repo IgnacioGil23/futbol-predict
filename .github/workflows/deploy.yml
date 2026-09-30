@@ -39,6 +39,13 @@ jobs:
           python -m src.features.build
           python -m src.serving.build_state
           python -m src.export.site --out web/public/data
+      - name: Reporte de monitoreo (rama monitoring)
+        run: |
+          if git fetch --depth=1 origin monitoring 2>/dev/null && git show origin/monitoring:reports/latest.json > web/public/data/monitoring.json 2>/dev/null; then
+            echo "Reporte de monitoreo incluido."
+          else
+            rm -f web/public/data/monitoring.json; echo "Todavía no hay reporte de monitoreo."
+          fi
       - uses: actions/setup-node@v7
         with:
           node-version: "22"

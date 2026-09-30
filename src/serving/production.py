@@ -33,6 +33,7 @@ PRODUCTION_DIR = PROJECT_ROOT / "models" / "production"
 MODEL_PATH = PRODUCTION_DIR / "model.json"
 FEATURES = ["elo_diff"]
 ALPHA = 1e-4
+PARAM_DECIMALS = 12
 
 
 def export_params(model: PoissonGLMModel) -> dict:
@@ -40,23 +41,46 @@ def export_params(model: PoissonGLMModel) -> dict:
     out = {}
     for name, pipe in (("home_goals", model.home_), ("away_goals", model.away_)):
         _, scaler, glm = pipe.named_steps.values()
+        # Redondeo a 12 decimales: el orden de las sumas en punto flotante puede variar en ~1e-16
+        # entre corridas y cambiaría el hash de versión sin que cambie el modelo.
         out[name] = {
-            "intercept": float(glm.intercept_),
-            "coef": float(glm.coef_[0]),
-            "feature_mean": float(scaler.mean_[0]),
-            "feature_scale": float(scaler.scale_[0]),
+            "intercept": round(float(glm.intercept_), PARAM_DECIMALS),
+            "coef": round(float(glm.coef_[0]), PARAM_DECIMALS),
+            "feature_mean": round(float(scaler.mean_[0]), PARAM_DECIMALS),
+            "feature_scale": round(float(scaler.scale_[0]), PARAM_DECIMALS),
         }
     return out
 
 
-def train_production(features: pd.DataFrame, today: date | None = None) -> tuple[PoissonGLMModel, dict]:
+def test_metrics_from_experiments() -> dict | None:
+    """Métricas de la evaluación única en test (solo existen donde se corrieron los experimentos)."""
+    path = PREDICTIONS_DIR / "test_results.csv"
+    if not path.exists():
+        return None
+    test_results = pd.read_csv(path)
+    main = test_results[test_results.config.str.startswith("family=poisson_glm")].iloc[0]
+    market = test_results.set_index("config")
+    return {
+        "seasons": "2023-24 a 2025-26",
+        "model": {k: float(main[k]) for k in ("log_loss", "rps", "brier", "accuracy", "ece")} | {"n": int(main["n"])},
+        "bet365_pre_closing": {k: float(market.loc["mercado_bet365_precierre", k]) for k in ("log_loss", "rps", "brier", "accuracy")},
+        "pinnacle_closing": {k: float(market.loc["mercado_pinnacle_cierre", k]) for k in ("log_loss", "rps", "brier", "accuracy")}
+        | {"n": int(market.loc["mercado_pinnacle_cierre", "n"])},
+    }
+
+
+def train_production(features: pd.DataFrame, today: date | None = None,
+                     previous_meta: dict | None = None) -> tuple[PoissonGLMModel, dict]:
+    """Entrena con todas las temporadas completas. Las métricas de test describen la CONFIGURACIÓN
+    (evaluada una sola vez): si no están los resultados de los experimentos (p. ej. en GitHub
+    Actions), se conservan las del modelo anterior."""
     current = season_start_year(today or date.today())
     train = features[(features.season_start >= min(TRAIN_SEASONS)) & (features.season_start < current)
                      & features.played]
     model = PoissonGLMModel(FEATURES, alpha=ALPHA).fit(train)
-    test_results = pd.read_csv(PREDICTIONS_DIR / "test_results.csv")
-    main = test_results[test_results.config.str.startswith("family=poisson_glm")].iloc[0]
-    market = test_results.set_index("config")
+    test_metrics = test_metrics_from_experiments() or (previous_meta or {}).get("test_metrics")
+    if test_metrics is None:
+        raise FileNotFoundError("No hay métricas de test: correr los experimentos o pasar el modelo anterior")
     meta = {
         "model": "Poisson (goles del local y del visitante) sobre la diferencia de Elo",
         "features": FEATURES,
@@ -64,13 +88,7 @@ def train_production(features: pd.DataFrame, today: date | None = None) -> tuple
         "trained_on": {"seasons": f"{train.season.min()} a {train.season.max()}", "matches": int(len(train))},
         "trained_at": pd.Timestamp.now().isoformat(timespec="seconds"),
         "elo_params": json.loads(ELO_PARAMS_PATH.read_text(encoding="utf-8"))["params"],
-        "test_metrics": {
-            "seasons": "2023-24 a 2025-26",
-            "model": {k: float(main[k]) for k in ("log_loss", "rps", "brier", "accuracy", "ece")} | {"n": int(main["n"])},
-            "bet365_pre_closing": {k: float(market.loc["mercado_bet365_precierre", k]) for k in ("log_loss", "rps", "brier", "accuracy")},
-            "pinnacle_closing": {k: float(market.loc["mercado_pinnacle_cierre", k]) for k in ("log_loss", "rps", "brier", "accuracy")}
-            | {"n": int(market.loc["mercado_pinnacle_cierre", "n"])},
-        },
+        "test_metrics": test_metrics,
     }
     return model, {"params": export_params(model), "meta": meta}
 

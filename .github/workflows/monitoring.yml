@@ -1,14 +1,20 @@
-name: Monitoreo · registrar predicciones
+name: Monitoreo · registrar y evaluar predicciones
 
-# Todos los días: registra la predicción de cada partido de Premier publicado con
-# fecha posterior a hoy (UTC) y la guarda en la rama `monitoring` (registro inmutable).
+# Todos los días:
+#  1. registra la predicción de cada partido de Premier publicado con fecha posterior a hoy (UTC)
+#     en la rama `monitoring` (registro inmutable);
+#  2. evalúa las predicciones ya jugadas contra el resultado y contra el mercado;
+#  3. si algún indicador sale de su rango de alerta, abre (o comenta) un issue `model-alert`;
+#  4. si hubo cambios, vuelve a publicar la web para que la página de monitoreo se actualice.
 on:
   schedule:
     - cron: "0 6 * * *"
   workflow_dispatch:
 
 permissions:
-  contents: write   # para escribir en la rama monitoring
+  contents: write   # escribir en la rama monitoring
+  issues: write     # abrir/comentar alertas
+  actions: write    # disparar la publicación de la web
 
 concurrency:
   group: monitoring
@@ -51,13 +57,42 @@ jobs:
           print("Integridad verificada: el registro anterior quedó intacto.")
           EOF
 
+      - name: Evaluar contra los resultados
+        run: |
+          python -m src.monitoring.evaluate --ledger monitoring-branch/ledger/predictions.csv \
+            --out monitoring-branch/reports --issue-body /tmp/issue.md
+
       - name: Guardar en la rama monitoring
+        id: save
         working-directory: monitoring-branch
         run: |
-          if git diff --quiet; then echo "Sin predicciones nuevas."; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           NEW=$(git diff --numstat ledger/predictions.csv | cut -f1)
-          git add ledger/predictions.csv
-          git commit -m "Registrar ${NEW} predicciones ($(date -u +%F)) · modelo ${GITHUB_SHA::7}"
+          git add ledger/predictions.csv reports/
+          if git diff --cached --quiet; then echo "Sin cambios."; echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          STATUS=$(python -c "import json;print(json.load(open('reports/latest.json'))['status'])")
+          git commit -m "Monitoreo $(date -u +%F): ${NEW:-0} predicciones nuevas · estado ${STATUS}"
           git push origin monitoring
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Alerta (issue)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ ! -f /tmp/issue.md ]; then echo "Sin alertas."; exit 0; fi
+          gh label create model-alert --color B60205 --description "Alerta del monitoreo del modelo" --force
+          OPEN=$(gh issue list --label model-alert --state open --json number --jq '.[0].number')
+          if [ -n "$OPEN" ]; then
+            gh issue comment "$OPEN" --body-file /tmp/issue.md
+          else
+            gh issue create --title "Monitoreo: alerta del modelo ($(date -u +%F))" --label model-alert --body-file /tmp/issue.md
+            # Alerta nueva: evaluar automáticamente modelos candidatos (el reporte llega como issue).
+            gh workflow run retrain.yml --ref main -f mode=candidatos
+          fi
+
+      - name: Publicar la web con el reporte nuevo
+        if: steps.save.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main

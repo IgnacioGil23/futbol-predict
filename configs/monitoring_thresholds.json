@@ -1,0 +1,52 @@
+{
+  "computed_on": "2026-09-30",
+  "window": 190,
+  "backtest": {
+    "seasons": "2016-17 a 2025-26",
+    "matches": 3800,
+    "rolling_windows": 3611,
+    "method": "predicciones fuera de muestra del modelo de producción (reentrenamiento anual); mercado = Bet365 pre-cierre sin margen (Shin)"
+  },
+  "levels": {
+    "atencion": "fuera de [p2.5, p97.5]",
+    "alerta": "fuera de [p0.5, p99.5]"
+  },
+  "indicators": {
+    "gap_vs_market": {
+      "description": "Brecha de log loss contra Bet365 pre-cierre (modelo − mercado)",
+      "one_sided": true,
+      "p0.5": -0.015998836995907047,
+      "p2.5": -0.008557056460032401,
+      "median": 0.018755160681422946,
+      "p97.5": 0.035850057322023926,
+      "p99.5": 0.038543749553622095
+    },
+    "goals_ratio": {
+      "description": "Goles reales / goles esperados",
+      "one_sided": false,
+      "p0.5": 0.9071453403760511,
+      "p2.5": 0.9368253548086063,
+      "median": 1.0435262197237398,
+      "p97.5": 1.2363637057924954,
+      "p99.5": 1.272253871517736
+    },
+    "draws_diff_pp": {
+      "description": "Empates reales − esperados (puntos porcentuales)",
+      "one_sided": false,
+      "p0.5": -7.799850853997485,
+      "p2.5": -4.8576734158859765,
+      "median": -0.732278437251886,
+      "p97.5": 6.544590155614532,
+      "p99.5": 8.441502691961066
+    },
+    "home_residual": {
+      "description": "Diferencia de gol real − esperada del local (goles por partido)",
+      "one_sided": false,
+      "p0.5": -0.42766945192498695,
+      "p2.5": -0.39189989589194835,
+      "median": -0.09130338714597616,
+      "p97.5": 0.10043032595787042,
+      "p99.5": 0.1787338675671875
+    }
+  }
+}

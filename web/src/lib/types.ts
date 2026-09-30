@@ -109,3 +109,27 @@ export interface ApiPrediction {
   }
   warnings: string[]
 }
+
+export type MonitoringStatus = 'ok' | 'atencion' | 'alerta' | 'insuficiente'
+export interface MonitoringIndicator {
+  description: string; value: number | null; n: number; status: MonitoringStatus; status_label: string
+  normal_range: [number, number]; alert_range: [number, number]; backtest_median: number; one_sided: boolean
+}
+export interface MonitoringReport {
+  generated_at: string; window: number; status: MonitoringStatus; status_label: string
+  counts: { logged: number; logged_live: number; logged_reconstructed: number; evaluated: number; evaluated_live: number; pending: number }
+  model_versions: string[]
+  thresholds: { computed_on: string; backtest: { seasons: string; matches?: number } }
+  indicators: Record<string, MonitoringIndicator>
+  season: null | {
+    season: string; matches: number; with_market: number; live: number
+    model: Metrics; market: Metrics | null; gap_vs_market: number | null; gap_ci: [number, number] | null
+    goals: { expected: number; actual: number }; draws: { expected: number; actual: number }
+  }
+  calibration: CalibrationBin[]
+  cumulative: { date: string; n: number; gap: number | null; source: string }[]
+  recent: {
+    date: string; home_team: string; away_team: string; score: [number, number]; result: Outcome
+    p: [number, number, number]; market: [number, number, number] | null; p_actual: number; source: string; model_version: string
+  }[]
+}

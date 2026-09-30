@@ -3,6 +3,7 @@ import { Layout } from './components/Layout'
 import { Home } from './pages/Home'
 import { HomeAdvantagePage } from './pages/HomeAdvantage'
 import { Method } from './pages/Method'
+import { Monitoring } from './pages/Monitoring'
 import { Preview } from './pages/Preview'
 import { Review } from './pages/Review'
 import { TeamDetail, Teams } from './pages/Teams'
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="revision" element={<Review />} />
           <Route path="ventaja-local" element={<HomeAdvantagePage />} />
           <Route path="metodologia" element={<Method />} />
+          <Route path="monitoreo" element={<Monitoring />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
