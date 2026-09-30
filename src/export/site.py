@@ -23,6 +23,7 @@ from src.config import PREMIER_LEAGUE, TEST_SEASONS, season_label, season_start_
 from src.data.fixtures import FIXTURES_URL, fetch_fixtures
 from src.data.schedule import SCHEDULE_URL, check_against_results, fetch_schedule
 from src.data.teams import display_name, slug
+from src.export.xg import build_xg
 from src.features.build import FEATURES_PATH
 from src.metrics import OUTCOMES, reliability_table, summarize
 from src.models.experiments import predict_feature_model, prepare
@@ -281,6 +282,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=Path("web/public/data"))
     parser.add_argument("--today", type=str, default=None, help="Fecha de referencia (AAAA-MM-DD); por defecto, hoy")
+    parser.add_argument("--xg-ledger", type=Path, default=None,
+                        help="Registro de xG de la temporada en curso (rama monitoring: ledger/xg_team_matches.csv)")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     today = pd.Timestamp(args.today or date.today())
@@ -295,6 +298,7 @@ def main() -> None:
     review = export_review(out, features, season_start_year(today.date()))
     pl = store.matches[(store.matches.division == PREMIER_LEAGUE) & store.matches.home_goals.notna()]
     write(out / "home_advantage.json", home_advantage(pl))
+    write(out / "xg.json", build_xg(store, args.xg_ledger))
     export_meta(out, store, predictor, today, upcoming["matches"])
     logger.info("Exportado en %s: %d equipos actuales, %d próximos partidos en %d jornadas, %d temporadas de revisión",
                 out, len(teams), upcoming["matches"], upcoming["matchdays"], review["seasons"])
