@@ -141,9 +141,11 @@ def verify_append_only(old_text: str, new_text: str) -> None:
         raise LedgerIntegrityError("El registro existente cambió: solo se permite agregar filas al final.")
 
 
-def append_entries(path: Path, entries: pd.DataFrame, columns: list[str] = COLUMNS) -> int:
+def append_entries(path: Path, entries: pd.DataFrame, columns: list[str] = COLUMNS, key: list[str] = KEY,
+                   order: list[str] | None = None) -> int:
     """Agrega filas al final del archivo (sin reescribir lo existente) y verifica la integridad.
 
+    `key` identifica una fila (por defecto, un partido); `order`, cómo se ordenan las filas nuevas.
     Con `entries` vacío y el archivo inexistente, lo crea solo con el encabezado."""
     old_text = path.read_text(encoding="utf-8") if path.exists() else ""
     if entries.empty:
@@ -152,11 +154,11 @@ def append_entries(path: Path, entries: pd.DataFrame, columns: list[str] = COLUM
             path.write_text(serialize_rows(entries, header=True, columns=columns), encoding="utf-8", newline="\n")
         return 0
     existing = read_ledger(path, columns)
-    keys = set(map(tuple, existing[KEY].astype(str).to_numpy())) if len(existing) else set()
-    dupes = [k for k in map(tuple, entries[KEY].astype(str).to_numpy()) if k in keys]
-    if dupes or entries.duplicated(KEY).any():
-        raise LedgerIntegrityError(f"Partidos ya registrados o repetidos: {dupes[:3]}")
-    entries = entries.sort_values(["match_date", "home_team"])
+    keys = set(map(tuple, existing[key].astype(str).to_numpy())) if len(existing) else set()
+    dupes = [k for k in map(tuple, entries[key].astype(str).to_numpy()) if k in keys]
+    if dupes or entries.duplicated(key).any():
+        raise LedgerIntegrityError(f"Filas ya registradas o repetidas: {dupes[:3]}")
+    entries = entries.sort_values(order or ["match_date", "home_team"])
     new_text = old_text + serialize_rows(entries, header=not old_text, columns=columns)
     verify_append_only(old_text, new_text)
     path.parent.mkdir(parents=True, exist_ok=True)

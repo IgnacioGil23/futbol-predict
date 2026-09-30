@@ -162,7 +162,8 @@ p { margin: 0; }
   .grid-main { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
 }
 
-.section { padding: 40px 0; }
+/* Solo vertical: `container section` necesita conservar el margen lateral de .container. */
+.section { padding-top: 40px; padding-bottom: 40px; }
 .section-head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
 
 .btn {

@@ -154,18 +154,30 @@ export function Monitoring() {
         </div>
       </div>
 
-      {r.shadow && (
+      {r.shadows && r.shadows.length > 0 && (
         <div className="card" style={{ marginTop: 16 }}>
-          <span className="eyebrow">Modelo en evaluación</span>
-          <h3 style={{ margin: '4px 0 6px', fontSize: '1.05rem' }}>{r.shadow.candidate}</h3>
-          <p className="small" style={{ margin: 0 }}>
-            <strong className="tabular">{r.shadow.logged}</strong> predicciones registradas en paralelo
-            ({r.shadow.logged_live} en vivo · {r.shadow.logged_reconstructed} reconstruidas), en un{' '}
-            <a href={`${REPO}/blob/monitoring/ledger/shadow_predictions.csv`} target="_blank" rel="noreferrer">registro aparte</a>.
-            No reemplaza al modelo publicado ni se muestran resultados parciales: se evalúa una sola vez,{' '}
-            {r.shadow.evaluation}, con una regla fijada de antemano en el{' '}
-            <a href={`${REPO}/blob/main/docs/preregistro_tiros.md`} target="_blank" rel="noreferrer">preregistro</a>.
+          <span className="eyebrow">Modelos en evaluación</span>
+          <p className="small" style={{ margin: '6px 0 10px' }}>
+            Registran sus predicciones en paralelo, antes de cada partido. No reemplazan al modelo publicado ni se
+            muestran resultados parciales: se evalúan una sola vez, {r.shadows[0].evaluation}, con reglas fijadas de
+            antemano. Si los dos cumplen su regla, se elige uno (el desempate también está preregistrado).
           </p>
+          <div className="grid grid-2">
+            {r.shadows.map((s) => (
+              <div key={s.name} className="stat">
+                <strong style={{ fontSize: '0.95rem' }}>{s.candidate}</strong>
+                <span className="small">
+                  <strong className="tabular">{s.logged}</strong> predicciones ({s.logged_live} en vivo ·{' '}
+                  {s.logged_reconstructed} reconstruidas)
+                </span>
+                <span className="small muted">
+                  <a href={`${REPO}/blob/monitoring/ledger/${s.ledger}`} target="_blank" rel="noreferrer">Registro</a>
+                  {' · '}
+                  <a href={`${REPO}/blob/main/${s.preregistration}`} target="_blank" rel="noreferrer">Preregistro</a>
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

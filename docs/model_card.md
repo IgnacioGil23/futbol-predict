@@ -201,6 +201,15 @@ entrenado con las anteriores:
 * **Decisión, como fija el preregistro:** A no pasa directo a producción. Se registra en paralelo durante 2026-27 y se
   decide en julio de 2027 junto con el candidato de tiros; como probablemente miden la misma señal, se elegirá uno.
 * Reporte: `reports/challengers/fpl_2026-09-30.json`; código: `src/features/fpl_features.py`, `src/models/fpl_eval.py`.
+* **Registro en paralelo durante 2026-27** ([preregistro](preregistro_xg.md), commiteado antes de congelar el
+  candidato): A quedó congelado (`models/shadow_xg/model.json`, versión `a12662418789`, corrección estimada con 1.369
+  partidos sobre el modelo de producción `ced0b252cafe`, cuyos parámetros se copian dentro del artefacto). El monitoreo
+  diario captura el xG por equipo de cada partido terminado desde la API de Fantasy (`ledger/xg_team_matches.csv`,
+  solo se agregan filas y el primer valor es el definitivo) y registra la predicción de A antes de cada partido
+  (`ledger/shadow_xg_predictions.csv`). Controles: el xG capturado en vivo coincide con el del archivo en la fecha 1
+  de 2026-27 (20/20 equipos-partido) y las variables calculadas con la historia guardada coinciden con las de la prueba
+  histórica. En julio de 2027 se decide con la regla de siempre y, si A y los tiros cumplen, con el desempate
+  preregistrado (ante una diferencia no concluyente, los tiros).
 
 ## 6. Limitaciones
 

@@ -6,8 +6,14 @@ Protocolo completo en docs/preregistro_fpl.md (commit 6ae9c2d, anterior a este c
   α = 1e-4) en los partidos del archivo de Fantasy anteriores a S.
 * Regla por candidato: diferencia media de log loss ≤ -0,005 e IC 95% pareado por debajo de 0.
 
+Evaluación final (julio de 2027, docs/preregistro_xg.md): A con la temporada 2026-27 registrada en paralelo, y la
+elección preregistrada entre A y el candidato de tiros.
+
 Uso:
     python -m src.models.fpl_eval --out reports/challengers
+    python -m src.models.fpl_eval --final --ledger monitoring-branch/ledger/predictions.csv \\
+        --xg-ledger monitoring-branch/ledger/shadow_xg_predictions.csv \\
+        --shots-ledger monitoring-branch/ledger/shadow_predictions.csv
 """
 
 import argparse
@@ -167,11 +173,98 @@ def run() -> dict:
     }
 
 
+# ------------------------------------------------------------------ evaluación final (docs/preregistro_xg.md)
+
+def a_historical(df: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
+    """Log loss por partido de producción y de A en 2023-24..2025-26 (la prueba preregistrada)."""
+    d = pd.concat([season_predictions(df, s, CANDIDATES["A_xg"])[0] for s in EVAL_SEASONS], ignore_index=True)
+    res = d["result"].to_numpy()
+    prod = pd.Series(per_match_ll(d[["prod_h", "prod_d", "prod_a"]].to_numpy(), res), index=d["match_id"])
+    cand = pd.Series(per_match_ll(d[["cand_h", "cand_d", "cand_a"]].to_numpy(), res), index=d["match_id"])
+    return prod, cand
+
+
+def choose(a_decision: dict, shots_decision: dict, head_to_head: dict | None) -> dict:
+    """Regla de elección preregistrada entre A y el candidato de tiros."""
+    a, s = a_decision["promote"], shots_decision["promote"]
+    if a and not s:
+        return {"chosen": "xg", "reason": "solo A cumple su regla"}
+    if s and not a:
+        return {"chosen": "tiros", "reason": "solo el candidato de tiros cumple su regla"}
+    if not a and not s:
+        return {"chosen": None, "reason": "ninguno cumple su regla: se mantiene el modelo de producción"}
+    if head_to_head["ci_high"] < 0:
+        return {"chosen": "xg", "reason": "cumplen los dos y A es mejor (IC 95% de A − tiros por debajo de 0)"}
+    if head_to_head["ci_low"] > 0:
+        return {"chosen": "tiros", "reason": "cumplen los dos y tiros es mejor (IC 95% de A − tiros por encima de 0)"}
+    return {"chosen": "tiros", "reason": "cumplen los dos sin diferencia concluyente: desempate a favor de tiros"}
+
+
+def final(df: pd.DataFrame, main_ledger: pd.DataFrame, xg_ledger: pd.DataFrame, shots_ledger: pd.DataFrame,
+          store, season: int) -> dict:
+    from src.models import confirm_shots
+
+    main_ll = confirm_shots.ledger_log_loss(main_ledger[main_ledger.season_start.astype(int) == season], store)
+    xg_ll = confirm_shots.ledger_log_loss(xg_ledger[xg_ledger.season_start.astype(int) == season], store)
+    both = main_ll.index.intersection(xg_ll.index)
+    live = both[(main_ll.loc[both, "source"] == "vivo").to_numpy() & (xg_ll.loc[both, "source"] == "vivo").to_numpy()]
+    prod_hist, a_hist = a_historical(df)
+    a_prod = pd.concat([prod_hist, main_ll.loc[both, "ll"]])
+    a_cand = pd.concat([a_hist, xg_ll.loc[both, "ll"]])
+    a_decision = compare(a_prod, a_cand)
+
+    shots_report = confirm_shots.final(df, main_ledger, shots_ledger, store, season)
+    shots_hist = confirm_shots.per_match_log_loss(
+        confirm_shots.walk_forward(df, confirm_shots.CANDIDATE, confirm_shots.CONFIRM_SEASONS), df)
+    shots_ll = confirm_shots.ledger_log_loss(shots_ledger[shots_ledger.season_start.astype(int) == season], store)
+    shots_all = pd.concat([shots_hist, shots_ll["ll"]])
+    head = None
+    if a_decision["promote"] and shots_report["decision"]["promote"]:
+        common = a_cand.index.intersection(shots_all.index)
+        # compare(x, y) mide y − x: acá, A − tiros
+        head = compare(shots_all[common], a_cand[common])
+    return {
+        "date": date.today().isoformat(), "preregistration": "docs/preregistro_xg.md",
+        "seasons": [season_label(s) for s in EVAL_SEASONS] + [season_label(season)],
+        "a_decision": a_decision,
+        "a_secondary": {"solo_" + season_label(season): compare(main_ll.loc[both, "ll"], xg_ll.loc[both, "ll"]),
+                        "solo_en_vivo": compare(main_ll.loc[live, "ll"], xg_ll.loc[live, "ll"]) if len(live) else None},
+        "a_coverage": {"main_evaluated": int(len(main_ll)), "xg_evaluated": int(len(xg_ll)), "paired": int(len(both)),
+                       "paired_live": int(len(live)), "main_without_xg": int(len(main_ll.index.difference(xg_ll.index)))},
+        "shots": shots_report,
+        "head_to_head_a_minus_shots": head,
+        "choice": choose(a_decision, shots_report["decision"], head),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=Path("reports/challengers"))
+    parser.add_argument("--final", action="store_true", help="Evaluación final preregistrada (julio de 2027)")
+    parser.add_argument("--ledger", type=Path, default=Path("monitoring/ledger/predictions.csv"))
+    parser.add_argument("--xg-ledger", type=Path, default=Path("monitoring/ledger/shadow_xg_predictions.csv"))
+    parser.add_argument("--shots-ledger", type=Path, default=Path("monitoring/ledger/shadow_predictions.csv"))
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    if args.final:
+        from src.monitoring.ledger import read_ledger
+        from src.monitoring.shadow_ledger import SHADOW_COLUMNS, SHADOW_XG_COLUMNS
+        from src.serving.store import MatchStore
+
+        df = load_frame()
+        xg = read_ledger(args.xg_ledger, SHADOW_XG_COLUMNS)
+        season = int(xg.season_start.astype(int).max())
+        played = int(df[df.season_start == season].played.sum())
+        if played < 380:
+            raise SystemExit(f"La temporada {season_label(season)} no terminó ({played}/380): el preregistro "
+                             "fija la evaluación al final de la temporada")
+        report = final(df, read_ledger(args.ledger), xg, read_ledger(args.shots_ledger, SHADOW_COLUMNS),
+                       MatchStore.load(), season)
+        args.out.mkdir(parents=True, exist_ok=True)
+        path = args.out / f"evaluacion_final_xg_y_tiros_{report['date']}.json"
+        path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+        logger.info("Elección: %s (%s) -> %s", report["choice"]["chosen"], report["choice"]["reason"], path)
+        return
     report = run()
     args.out.mkdir(parents=True, exist_ok=True)
     path = args.out / f"fpl_{report['date']}.json"

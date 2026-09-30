@@ -73,13 +73,19 @@ def join_results(ledger: pd.DataFrame, store: MatchStore) -> pd.DataFrame:
     return merged
 
 
-def shadow_summary(shadow: pd.DataFrame | None) -> dict | None:
-    """Solo cuántos partidos registró el modelo en evaluación: el preregistro prohíbe mirar resultados
-    parciales (docs/preregistro_tiros.md)."""
-    if shadow is None:
-        return None
+SHADOW_MODELS = {
+    "tiros": {"candidate": "Elo + tiros y tiros al arco (vida media 4)", "ledger": "shadow_predictions.csv",
+              "preregistration": "docs/preregistro_tiros.md"},
+    "xg": {"candidate": "Producción + xG reciente de Fantasy (vida media 4)", "ledger": "shadow_xg_predictions.csv",
+           "preregistration": "docs/preregistro_xg.md"},
+}
+
+
+def shadow_summary(name: str, shadow: pd.DataFrame) -> dict:
+    """Solo cuántos partidos registró un modelo en evaluación: los preregistros prohíben mirar resultados
+    parciales."""
     return {
-        "candidate": "Elo + tiros y tiros al arco (vida media 4)",
+        "name": name, **SHADOW_MODELS[name],
         "model_versions": sorted(shadow.model_version.dropna().unique().tolist()),
         "logged": int(len(shadow)),
         "logged_live": int((shadow.source == "vivo").sum()),
@@ -89,7 +95,7 @@ def shadow_summary(shadow: pd.DataFrame | None) -> dict | None:
 
 
 def evaluate(ledger: pd.DataFrame, store: MatchStore, thresholds: dict, now: datetime | None = None,
-             shadow: pd.DataFrame | None = None) -> dict:
+             shadows: dict[str, pd.DataFrame] | None = None) -> dict:
     now = now or datetime.now(timezone.utc)
     window = thresholds["window"]
     joined = join_results(ledger, store)
@@ -107,7 +113,7 @@ def evaluate(ledger: pd.DataFrame, store: MatchStore, thresholds: dict, now: dat
         },
         "model_versions": sorted(ledger.model_version.dropna().unique().tolist()),
         "thresholds": {"computed_on": thresholds["computed_on"], "backtest": thresholds["backtest"]},
-        "shadow": shadow_summary(shadow),
+        "shadows": [shadow_summary(name, df) for name, df in (shadows or {}).items()],
     }
     if joined.empty:
         report.update({"status": "insuficiente", "status_label": LABELS["insuficiente"], "indicators": {},
@@ -212,14 +218,16 @@ def main() -> None:
     parser.add_argument("--ledger", type=Path, default=DEFAULT_LEDGER)
     parser.add_argument("--out", type=Path, default=Path("monitoring/reports"))
     parser.add_argument("--issue-body", type=Path, default=None, help="Escribe el cuerpo del issue si hay alerta")
-    parser.add_argument("--shadow-ledger", type=Path, default=None, help="Registro del modelo en evaluación")
+    parser.add_argument("--shadow-ledger", type=Path, default=None, help="Registro del modelo con tiros")
+    parser.add_argument("--shadow-xg-ledger", type=Path, default=None, help="Registro del modelo con xG")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    shadow = None
-    if args.shadow_ledger and args.shadow_ledger.exists():
-        from src.monitoring.shadow_ledger import SHADOW_COLUMNS
-        shadow = read_ledger(args.shadow_ledger, SHADOW_COLUMNS)
-    report = evaluate(read_ledger(args.ledger), MatchStore.load(), load_thresholds(), shadow=shadow)
+    from src.monitoring.shadow_ledger import SHADOW_COLUMNS, SHADOW_XG_COLUMNS
+    shadows = {name: read_ledger(path, columns)
+               for name, path, columns in (("tiros", args.shadow_ledger, SHADOW_COLUMNS),
+                                           ("xg", args.shadow_xg_ledger, SHADOW_XG_COLUMNS))
+               if path is not None and path.exists()}
+    report = evaluate(read_ledger(args.ledger), MatchStore.load(), load_thresholds(), shadows=shadows)
     args.out.mkdir(parents=True, exist_ok=True)
     latest = args.out / "latest.json"
     if report_changed(latest, report):

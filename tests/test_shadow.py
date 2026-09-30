@@ -10,7 +10,7 @@ from src.features.build import POST_MATCH_COLUMNS, build_features
 from src.models import confirm_shots
 from src.models.feature_models import PoissonGLMModel
 from src.monitoring.ledger import COLUMNS, LedgerIntegrityError, append_entries, read_ledger
-from src.monitoring.shadow_ledger import SHADOW_COLUMNS, new_live_entries, reconstructed_entries
+from src.monitoring.shadow_ledger import SHADOW_COLUMNS, new_live_entries, reconstructed_entries, shots_model
 from src.serving.shadow import FEATURES, SHOT_COLUMNS, ShadowPredictor, candidate_features, export_glm, shot_features_for
 from test_features import PARAMS, full_frame, make_league
 from test_serving_api import store_from
@@ -93,14 +93,15 @@ def test_live_entries_only_future_and_first_is_final(tmp_path, setup):
     matches, store, predictor = setup
     path = tmp_path / "shadow.csv"
     fx = fixtures_from(matches, FUTURE_FROM - pd.Timedelta(days=7))   # incluye partidos ya jugados
-    first = new_live_entries(fx, matches, store, predictor, read_ledger(path, SHADOW_COLUMNS), NOW, "abc")
+    model = shots_model(matches, predictor)
+    first = new_live_entries(fx, model, store, read_ledger(path, SHADOW_COLUMNS), NOW, "abc")
     assert len(first) > 0 and (pd.to_datetime(first.match_date).dt.date > NOW.date()).all()
     assert set(first.source) == {"vivo"} and list(first.columns) == SHADOW_COLUMNS
     assert not first[SHOT_COLUMNS].isna().any().any()
     np.testing.assert_allclose(first[["p_home", "p_draw", "p_away"]].sum(axis=1), 1.0)
     assert append_entries(path, first, columns=SHADOW_COLUMNS) == len(first)
     text = path.read_text(encoding="utf-8")
-    again = new_live_entries(fx, matches, store, predictor, read_ledger(path, SHADOW_COLUMNS), NOW, "abc")
+    again = new_live_entries(fx, model, store, read_ledger(path, SHADOW_COLUMNS), NOW, "abc")
     assert again.empty and path.read_text(encoding="utf-8") == text
     with pytest.raises(LedgerIntegrityError):
         append_entries(path, first, columns=SHADOW_COLUMNS)
@@ -108,7 +109,7 @@ def test_live_entries_only_future_and_first_is_final(tmp_path, setup):
 
 def test_reconstructed_seed_is_flagged_and_empty_seed_creates_header(tmp_path, setup):
     matches, store, predictor = setup
-    rec = reconstructed_entries(matches, store, predictor, NOW, "abc")
+    rec = reconstructed_entries(matches, shots_model(matches, predictor), store, NOW, "abc")
     played_2006 = matches[(matches.division == "E0") & (matches.season_start == 2006) & matches.home_goals.notna()]
     assert len(rec) == len(played_2006) > 0 and set(rec.source) == {"reconstruido"}
     empty = tmp_path / "empty.csv"
@@ -153,3 +154,11 @@ def test_final_pairs_only_matches_logged_by_both_models(monkeypatch):
     assert solo["n"] == 30 and solo["diff"] == pytest.approx(np.log(0.5) - np.log(0.6))
     assert rep["secondary"]["solo_en_vivo"]["n"] == 25
     assert set(rep["secondary"]["por_temporada"]) == {"2023-24", "2026-27"}
+
+
+def test_shots_ledger_format_is_unchanged():
+    # El registro de tiros está en marcha desde el 30/09/2026: sus columnas no pueden cambiar.
+    assert SHADOW_COLUMNS == [
+        "season", "season_start", "home_team", "away_team", "match_date", "logged_at_utc", "source", "model_version",
+        "code_commit", "elo_home", "elo_away", "sot_f_hl4_home", "sot_a_hl4_home", "sh_f_hl4_home", "sh_a_hl4_home",
+        "sot_f_hl4_away", "sot_a_hl4_away", "sh_f_hl4_away", "sh_a_hl4_away", "lam", "mu", "p_home", "p_draw", "p_away"]

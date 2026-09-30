@@ -57,31 +57,34 @@ jobs:
           print("Integridad verificada: el registro anterior quedó intacto.")
           EOF
 
-      # Modelo en evaluación (docs/preregistro_tiros.md). Si falla, se descarta lo que haya escrito y el
-      # monitoreo del modelo de producción sigue: esos partidos quedan fuera de la comparación.
+      # Modelos en evaluación (docs/preregistro_tiros.md y docs/preregistro_xg.md). Cada paso es protegido: si
+      # falla, se descartan sus cambios del día y el monitoreo del modelo de producción sigue; esos partidos
+      # quedan fuera de la comparación.
       - name: Registrar predicciones del modelo en evaluación (tiros)
         run: |
-          SHADOW=monitoring-branch/ledger/shadow_predictions.csv
-          if [ -f "$SHADOW" ]; then cp "$SHADOW" /tmp/shadow_before.csv; else : > /tmp/shadow_before.csv; fi
-          set +e
-          python -m src.monitoring.shadow_ledger --ledger "$SHADOW" && python - <<'EOF'
-          from pathlib import Path
-          from src.monitoring.ledger import verify_append_only
-          verify_append_only(Path("/tmp/shadow_before.csv").read_text(encoding="utf-8"),
-                             Path("monitoring-branch/ledger/shadow_predictions.csv").read_text(encoding="utf-8"))
-          print("Integridad verificada (modelo en evaluación).")
-          EOF
-          STATUS=$?
-          set -e
-          if [ $STATUS -ne 0 ]; then
-            if [ -s /tmp/shadow_before.csv ]; then cp /tmp/shadow_before.csv "$SHADOW"; else rm -f "$SHADOW"; fi
-            echo "::warning::Falló el registro del modelo en evaluación; se descartaron sus cambios de hoy."
-          fi
+          python -m src.monitoring.guarded --file monitoring-branch/ledger/shadow_predictions.csv \
+            --label "el registro del modelo con tiros" -- \
+            python -m src.monitoring.shadow_ledger --model tiros --ledger monitoring-branch/ledger/shadow_predictions.csv
+
+      - name: Capturar el xG de los partidos terminados
+        run: |
+          python -m src.monitoring.guarded --file monitoring-branch/ledger/xg_team_matches.csv \
+            --label "la captura del xG" -- \
+            python -m src.monitoring.xg_capture --ledger monitoring-branch/ledger/xg_team_matches.csv
+
+      - name: Registrar predicciones del modelo en evaluación (xG)
+        run: |
+          python -m src.monitoring.guarded --file monitoring-branch/ledger/shadow_xg_predictions.csv \
+            --label "el registro del modelo con xG" -- \
+            python -m src.monitoring.shadow_ledger --model xg \
+              --ledger monitoring-branch/ledger/shadow_xg_predictions.csv \
+              --xg-ledger monitoring-branch/ledger/xg_team_matches.csv
 
       - name: Evaluar contra los resultados
         run: |
           python -m src.monitoring.evaluate --ledger monitoring-branch/ledger/predictions.csv \
             --shadow-ledger monitoring-branch/ledger/shadow_predictions.csv \
+            --shadow-xg-ledger monitoring-branch/ledger/shadow_xg_predictions.csv \
             --out monitoring-branch/reports --issue-body /tmp/issue.md
 
       - name: Guardar en la rama monitoring
