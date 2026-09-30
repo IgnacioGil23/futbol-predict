@@ -274,6 +274,27 @@ fijados antes de mirar (`src/analysis/error_analysis.py`, `reports/analysis/anal
   Los coeficientes tienen el signo esperado en todas las ligas. Por el preregistro se documenta; no hay fuente en vivo
   para producción. Reporte: `reports/challengers/valor_plantel_2026-09-30.json`.
 
+### Modelos entrenados con las cinco ligas (P-GLM y P-XGB, 30/09/2026) · **no agregan sobre los tiros**
+
+* **Preregistro** ([docs/preregistro_combinado.md](preregistro_combinado.md)): Poisson (P-GLM) y XGBoost con
+  hiperparámetros fijos (P-XGB), entrenados con las cinco primeras divisiones juntas (hasta 34.445 partidos) con todas
+  las variables de Football-Data, tiros incluidos, y un indicador por liga. Principal: las cuatro ligas, 2015-16 a
+  2025-26, contra el modelo de cada liga (B0); secundario, contra el candidato de tiros de cada liga (B1).
+
+| Candidato | vs B0 (Elo por liga) | vs B1 (tiros por liga) | Premier vs B0 (descriptivo) |
+|---|---|---|---|
+| P-GLM | −0,0049 [−0,0064; −0,0033] | +0,0001 [−0,0009; +0,0010] | −0,0058 [−0,0090; −0,0028] |
+| P-XGB | −0,0030 [−0,0046; −0,0015] | **+0,0019** [+0,0007; +0,0030] | −0,0023 [−0,0052; +0,0006] |
+
+* **Lectura:** los dos mejoran al Elo solo, pero **toda la mejora es la de los tiros**: P-GLM empata con el candidato de
+  tiros de cada liga, y combinar ligas y sumar forma, tabla, descanso y cara a cara no agrega nada. XGBoost queda **peor**
+  que el modelo lineal con tiros (IC por encima de 0): con 5 veces más datos tampoco encuentra patrones no lineales que
+  valgan; en su importancia dominan la diferencia de Elo, los goles recientes y los tiros. Cumple "señal" y no la regla:
+  se documenta. Reporte: `reports/challengers/combinado_2026-09-30.json`; código: `src/models/pooled.py`.
+* **Conclusión de esta ronda** (análisis de errores + tres candidatos): con datos de resultados y estadísticas de partido
+  no queda nada importante por exprimir más allá de los tiros; la brecha con el mercado está en información que esos
+  datos no tienen.
+
 ### Replicación de los tiros en otras ligas y relación Elo → goles entre ligas (30/09/2026)
 
 * **Preregistro** ([docs/preregistro_replicacion.md](preregistro_replicacion.md)), commiteado antes de evaluar. Mismo
