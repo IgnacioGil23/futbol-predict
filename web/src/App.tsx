@@ -6,6 +6,7 @@ import { Method } from './pages/Method'
 import { Preview } from './pages/Preview'
 import { Review } from './pages/Review'
 import { TeamDetail, Teams } from './pages/Teams'
+import { Upcoming } from './pages/Upcoming'
 
 function NotFound() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Home />} />
+          <Route path="proximos" element={<Upcoming />} />
           <Route path="previa" element={<Preview />} />
           <Route path="equipos" element={<Teams />} />
           <Route path="equipos/:slug" element={<TeamDetail />} />

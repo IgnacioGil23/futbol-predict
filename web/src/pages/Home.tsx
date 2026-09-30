@@ -4,19 +4,21 @@ import { OutcomeBar } from '../components/OutcomeBar'
 import { ScoreHeatmap } from '../components/ScoreHeatmap'
 import { formatDate, num, pct, useData } from '../lib/data'
 import { forecast } from '../lib/model'
-import type { FixturesFile, HomeAdvantageFile, MetaFile, ModelFile, StateFile } from '../lib/types'
+import type { HomeAdvantageFile, MetaFile, ModelFile, StateFile, UpcomingFile } from '../lib/types'
 import './home.css'
 
 export function Home() {
   const meta = useData<MetaFile>('meta.json')
   const state = useData<StateFile>('state.json')
   const model = useData<ModelFile>('model.json')
-  const fixtures = useData<FixturesFile>('fixtures.json')
+  const upcoming = useData<UpcomingFile>('upcoming.json')
   const ha = useData<HomeAdvantageFile>('home_advantage.json')
 
   const teams = [...(state.data?.teams ?? [])].sort((a, b) => b.elo - a.elo)
-  const fixture = fixtures.data?.matches[0]
-  // Partido destacado: el primer partido publicado o, si no hay, el cruce de los dos mejores por Elo.
+  const nextMd = upcoming.data?.matchdays[0]
+  // Partido destacado: el "partido grande" de la próxima jornada (mayor Elo combinado) o,
+  // si no hay calendario, el cruce de los dos mejores por Elo.
+  const fixture = nextMd ? [...nextMd.matches].sort((a, b) => (b.elo.home + b.elo.away) - (a.elo.home + a.elo.away))[0] : undefined
   const featured = fixture
     ? { home: fixture.home_team, away: fixture.away_team, homeName: fixture.home_name, awayName: fixture.away_name,
         grid: fixture.score_grid, probs: fixture.probabilities, market: fixture.market, date: fixture.date, lam: fixture.expected_goals.home, mu: fixture.expected_goals.away }
@@ -55,7 +57,7 @@ export function Home() {
           <div className="card hero-card">
             {featured ? (
               <>
-                <span className="eyebrow">{fixture ? `Próximo partido · ${formatDate(featured.date!)}` : 'Si se enfrentaran hoy'}</span>
+                <span className="eyebrow">{fixture ? `Partido destacado · jornada ${nextMd!.matchday} · ${formatDate(featured.date!, { weekday: 'long', day: 'numeric', month: 'long' })}` : 'Si se enfrentaran hoy'}</span>
                 <h3 style={{ margin: '6px 0 4px', fontSize: '1.5rem' }}>{featured.homeName} vs {featured.awayName}</h3>
                 <p className="card-sub">Goles esperados {num(featured.lam)} – {num(featured.mu)}</p>
                 <ScoreHeatmap grid={featured.grid} homeName={featured.homeName} awayName={featured.awayName} size={5} />
@@ -63,7 +65,7 @@ export function Home() {
                   <OutcomeBar probs={featured.probs} homeName={featured.homeName} awayName={featured.awayName} market={featured.market} />
                 </div>
                 <Link className="btn" style={{ marginTop: 14 }}
-                      to={`/previa?home=${encodeURIComponent(featured.home)}&away=${encodeURIComponent(featured.away)}`}>
+                      to={fixture ? `/proximos?jornada=${nextMd!.matchday}&partido=${encodeURIComponent(`${featured.home}|${featured.away}`)}` : `/previa?home=${encodeURIComponent(featured.home)}&away=${encodeURIComponent(featured.away)}`}>
                   Ver la previa completa →
                 </Link>
               </>
@@ -76,18 +78,20 @@ export function Home() {
         <div className="grid grid-2">
           <div className="card">
             <span className="eyebrow">Próximos partidos</span>
-            <h3 style={{ margin: '6px 0 12px' }}>Esta semana en la Premier</h3>
-            {fixtures.data && fixtures.data.matches.length === 0 && (
+            <h3 style={{ margin: '6px 0 12px' }}>{nextMd ? `Jornada ${nextMd.matchday}` : 'Próxima jornada'}</h3>
+            {upcoming.data && !nextMd && (
               <p className="small muted">
-                Football-Data todavía no publicó los partidos de la próxima fecha (suele hacerlo pocos días antes).
-                Mientras tanto, podés armar cualquier cruce en la <Link to="/previa">previa</Link>.
+                No hay partidos pendientes publicados en el calendario. Mientras tanto, podés armar cualquier cruce en la{' '}
+                <Link to="/previa">previa</Link>.
               </p>
             )}
             <ul className="fixture-list">
-              {fixtures.data?.matches.map((m) => (
+              {nextMd?.matches.map((m) => (
                 <li key={`${m.home_team}-${m.away_team}`}>
-                  <Link to={`/previa?home=${encodeURIComponent(m.home_team)}&away=${encodeURIComponent(m.away_team)}`}>
-                    <span className="muted small tabular">{formatDate(m.date, { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                  <Link to={`/proximos?jornada=${nextMd.matchday}&partido=${encodeURIComponent(`${m.home_team}|${m.away_team}`)}`}>
+                    <span className="muted small tabular">
+                      {formatDate(m.date, { weekday: 'short', day: 'numeric', month: 'short' })}{m.kickoff_ar ? ` ${m.kickoff_ar.slice(11)}` : ''}
+                    </span>
                     <span className="fx-teams">{m.home_name} <span className="muted">vs</span> {m.away_name}</span>
                     <span className="fx-probs tabular small">
                       <span style={{ color: 'var(--home)' }}>{pct(m.probabilities.home)}</span> ·{' '}
@@ -98,6 +102,7 @@ export function Home() {
                 </li>
               ))}
             </ul>
+            {nextMd && <Link className="btn" style={{ marginTop: 12 }} to="/proximos">Ver la jornada completa →</Link>}
           </div>
           <div className="card">
             <span className="eyebrow">Ranking Elo</span>

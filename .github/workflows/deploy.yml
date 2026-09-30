@@ -3,6 +3,13 @@ name: Actualizar datos y publicar
 on:
   schedule:
     - cron: "0 6 * * 1,4"   # lunes y jueves, 06:00 UTC
+  push:                     # y cuando cambia la web o lo que se exporta
+    branches: [main]
+    paths:
+      - "web/**"
+      - "src/**"
+      - "models/**"
+      - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 permissions:

@@ -62,3 +62,6 @@ export function formatDate(iso: string, opts: Intl.DateTimeFormatOptions = { day
   const [y, m, d] = iso.slice(0, 10).split('-').map(Number)
   return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('es-AR', { ...opts, timeZone: 'UTC' })
 }
+
+/** Misma fecha dos años antes (para recortar la evolución del Elo a dos temporadas). */
+export const twoSeasonsBefore = (iso: string) => `${Number(iso.slice(0, 4)) - 2}${iso.slice(4, 10)}`

@@ -5,6 +5,7 @@ import type { MetaFile } from '../lib/types'
 import './layout.css'
 
 const LINKS = [
+  { to: '/proximos', label: 'Próximos' },
   { to: '/previa', label: 'Previa' },
   { to: '/equipos', label: 'Equipos' },
   { to: '/revision', label: 'Revisión' },

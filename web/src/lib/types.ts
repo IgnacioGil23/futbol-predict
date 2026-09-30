@@ -48,16 +48,24 @@ export interface TeamFile { team: string; name: string; slug: string; seasons: T
 
 export interface Probabilities { home: number; draw: number; away: number }
 
-export interface Fixture {
-  date: string; time: string | null; home_team: string; away_team: string; home_name: string; away_name: string
+export interface UpcomingMatch {
+  date: string; kickoff_ar: string | null
+  home_team: string; away_team: string; home_name: string; away_name: string; home_slug: string; away_slug: string
   elo: { home: number; away: number }
   expected_goals: { home: number; away: number }
   probabilities: Probabilities
   score_grid: number[][]
+  top_scores: { home_goals: number; away_goals: number; probability: number }[]
   market: Probabilities | null
   context: { form_home: FormMatch[]; form_away: FormMatch[]; rest_home: Rest; rest_away: Rest; head_to_head: H2H }
 }
-export interface FixturesFile { generated_for: string; source: string; matches: Fixture[] }
+export interface UpcomingMatchday { matchday: number; from: string; to: string; matches: UpcomingMatch[] }
+export interface UpcomingFile {
+  generated_for: string; season: string; model_version: string; timezone: string
+  sources: { schedule: string; odds: string }
+  quality: { played_in_schedule?: number; not_found_in_football_data?: string[]; score_mismatches?: string[]; schedule_error?: string }
+  matchdays: UpcomingMatchday[]
+}
 
 export interface ReviewSeasonSummary {
   season: string; matches: number; compared_matches: number
@@ -83,7 +91,7 @@ export interface HomeAdvantageFile {
 }
 
 export interface MetaFile {
-  generated_at: string; as_of: string; last_match_in_data: string; fixtures_published: number
+  generated_at: string; as_of: string; last_match_in_data: string; upcoming_matches: number; model_version: string
   model: ModelMeta
   sources: { name: string; url: string; use: string }[]
 }

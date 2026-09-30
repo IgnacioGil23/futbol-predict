@@ -245,3 +245,5 @@ p { margin: 0; }
 
 .review-detail { scroll-margin-top: 72px; }
 @media (min-width: 900px) { .review-detail { position: sticky; top: 76px; } }
+
+.big-num { font-size: 1.6rem; font-family: var(--display); }

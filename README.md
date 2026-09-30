@@ -17,7 +17,7 @@ datos, la experimentación, una API y una web interactiva.
 | Features | Elo propio partido a partido (ajustado solo con entrenamiento), forma, tabla, descanso, head-to-head; tests de "invariancia al futuro" contra la fuga | `src/features/`, `notebooks/02_features.ipynb` |
 | Modelos | Frecuencias, logit sobre Elo, Dixon-Coles (MLE con gradiente analítico), Poisson GLM, XGBoost Poisson; split temporal, bootstrap pareado vs mercado, MLflow | `src/models/`, `notebooks/03_modelo.ipynb` |
 | Servicio | Modelo exportado como JSON (sin pickle), consultas "a una fecha" sin fuga, FastAPI + Docker multi-etapa, deploy en Cloud Run | `src/serving/`, `src/api/`, `Dockerfile`, `docs/deploy_cloud_run.md` |
-| Web | React + TypeScript + D3: previa con grilla de marcadores, fichas de equipo, revisión histórica fuera de muestra, ventaja de local, metodología | `web/` |
+| Web | React + TypeScript + D3: próximas jornadas y previa con grilla de marcadores, fichas de equipo, revisión histórica fuera de muestra, ventaja de local, metodología | `web/` |
 | Automatización | CI (tests Python y TS, build de la web, build y smoke test de la imagen), publicación de la web y deploy de la API dos veces por semana | `.github/workflows/` |
 
 ## Decisiones que vale la pena mirar
@@ -79,5 +79,6 @@ cd web && npm install && npm run dev
 |---|---|
 | Resultados, estadísticas y cuotas | [Football-Data.co.uk](https://www.football-data.co.uk/) ([notes.txt](https://www.football-data.co.uk/notes.txt)) |
 | Elo de comparación (ClubElo) | [Club Football Match Data](https://github.com/xgabora/Club-Football-Match-Data) (A. Gábor), `EloRatings.csv` |
+| Calendario de las próximas jornadas | [openfootball/england](https://github.com/openfootball/england) (dominio público) |
 
 Proyecto educativo. **No es una recomendación de apuestas.**

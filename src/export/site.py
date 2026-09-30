@@ -21,6 +21,7 @@ import requests
 from src.analysis.home_advantage import home_advantage
 from src.config import PREMIER_LEAGUE, TEST_SEASONS, season_label, season_start_year
 from src.data.fixtures import FIXTURES_URL, fetch_fixtures
+from src.data.schedule import SCHEDULE_URL, check_against_results, fetch_schedule
 from src.data.teams import display_name, slug
 from src.features.build import FEATURES_PATH
 from src.metrics import OUTCOMES, reliability_table, summarize
@@ -141,31 +142,72 @@ def export_teams(out: Path, store: MatchStore) -> None:
     write(out / "teams.json", sorted(index, key=lambda t: t["name"]))
 
 
-def export_fixtures(out: Path, store: MatchStore, predictor: EloPoissonPredictor, today: pd.Timestamp) -> int:
+def export_upcoming(out: Path, store: MatchStore, predictor: EloPoissonPredictor, today: pd.Timestamp,
+                    n_matchdays: int = 3) -> dict:
+    """Próximas jornadas (calendario de openfootball) con la predicción y el contexto de cada partido.
+
+    Las cuotas de Bet365 se agregan cuando Football-Data ya publicó el partido en
+    fixtures.csv (pocos días antes). Los horarios van en hora de Argentina.
+    """
+    season = season_start_year(today.date())
+    quality: dict = {}
+    try:
+        schedule = fetch_schedule(season)
+    except requests.RequestException as err:  # la web sigue funcionando sin el calendario
+        logger.warning("No se pudo descargar el calendario: %s", err)
+        schedule = pd.DataFrame(columns=["matchday", "date", "time_uk", "kickoff_ar", "home_team", "away_team", "played"])
+        quality["schedule_error"] = str(err)
     try:
         fixtures = fetch_fixtures()
-    except requests.RequestException as err:  # la web sigue funcionando sin la lista de próximos partidos
-        logger.warning("No se pudieron descargar los próximos partidos: %s", err)
-        fixtures = pd.DataFrame()
-    items = []
-    for f in fixtures.itertuples(index=False):
-        home, away, day = f.HomeTeam, f.AwayTeam, pd.Timestamp(f.date)
-        try:
-            elo_h, elo_a = store.elo_as_of(home, day), store.elo_as_of(away, day)
-        except KeyError:
-            logger.warning("Equipo desconocido en fixtures: %s / %s", home, away)
-            continue
-        items.append({
-            "date": day.date(), "time": getattr(f, "Time", None), "home_team": home, "away_team": away,
-            "home_name": display_name(home), "away_name": display_name(away),
-            **prediction_payload(predictor, elo_h, elo_a),
-            "market": market_probs([getattr(f, "B365H", np.nan), getattr(f, "B365D", np.nan), getattr(f, "B365A", np.nan)]),
-            "context": {"form_home": store.recent_form(home, day), "form_away": store.recent_form(away, day),
-                        "rest_home": store.rest(home, day), "rest_away": store.rest(away, day),
-                        "head_to_head": store.head_to_head(home, away, day, n=6)},
-        })
-    write(out / "fixtures.json", {"generated_for": today.date(), "source": FIXTURES_URL, "matches": items})
-    return len(items)
+    except requests.RequestException as err:
+        logger.warning("No se pudieron descargar las cuotas de los próximos partidos: %s", err)
+        fixtures = pd.DataFrame(columns=["HomeTeam", "AwayTeam", "B365H", "B365D", "B365A"])
+    odds = {(f.HomeTeam, f.AwayTeam): [f.B365H, f.B365D, f.B365A] for f in fixtures.itertuples(index=False)}
+
+    results = store.matches[(store.matches.division == PREMIER_LEAGUE) & (store.matches.season_start == season)
+                            & store.matches.home_goals.notna()]
+    if len(schedule):
+        quality.update(check_against_results(schedule, results))
+        if quality["not_found_in_football_data"] or quality["score_mismatches"]:
+            logger.warning("El calendario y Football-Data no coinciden: %s", quality)
+    already_played = set(zip(results.home_team, results.away_team))
+    pending = schedule[~schedule["played"].astype(bool) & (schedule["date"] >= today.normalize())]
+    pending = pending[[(h, a) not in already_played for h, a in zip(pending.home_team, pending.away_team)]]
+    known = set(store.teams(PREMIER_LEAGUE, season))
+    order = pending.groupby("matchday")["date"].min().sort_values().index[:n_matchdays]
+
+    matchdays = []
+    for md in order:
+        games = pending[pending.matchday == md].sort_values(["date", "time_uk", "home_team"], na_position="last")
+        items = []
+        for g in games.itertuples(index=False):
+            if g.home_team not in known or g.away_team not in known:
+                logger.warning("Equipo del calendario sin datos: %s vs %s", g.home_team, g.away_team)
+                continue
+            day = pd.Timestamp(g.date)
+            elo_h, elo_a = store.elo_as_of(g.home_team, day), store.elo_as_of(g.away_team, day)
+            items.append({
+                "date": day.date(), "kickoff_ar": g.kickoff_ar,
+                "home_team": g.home_team, "away_team": g.away_team,
+                "home_name": display_name(g.home_team), "away_name": display_name(g.away_team),
+                "home_slug": slug(g.home_team), "away_slug": slug(g.away_team),
+                **prediction_payload(predictor, elo_h, elo_a),
+                "market": market_probs(odds[(g.home_team, g.away_team)]) if (g.home_team, g.away_team) in odds else None,
+                "context": {"form_home": store.recent_form(g.home_team, day), "form_away": store.recent_form(g.away_team, day),
+                            "rest_home": store.rest(g.home_team, day), "rest_away": store.rest(g.away_team, day),
+                            "head_to_head": store.head_to_head(g.home_team, g.away_team, day, n=6)},
+            })
+        if items:
+            matchdays.append({"matchday": int(md), "from": items[0]["date"], "to": items[-1]["date"], "matches": items})
+
+    payload = {
+        "generated_for": today.date(), "season": season_label(season), "model_version": predictor.version,
+        "timezone": "America/Argentina/Buenos_Aires",
+        "sources": {"schedule": SCHEDULE_URL.format(season=season_label(season)), "odds": FIXTURES_URL},
+        "quality": quality, "matchdays": matchdays,
+    }
+    write(out / "upcoming.json", payload)
+    return {"matchdays": len(matchdays), "matches": sum(len(m["matches"]) for m in matchdays)}
 
 
 def export_review(out: Path, features: pd.DataFrame, current_season: int) -> dict:
@@ -214,17 +256,20 @@ def export_review(out: Path, features: pd.DataFrame, current_season: int) -> dic
     return {"seasons": len(summary)}
 
 
-def export_meta(out: Path, store: MatchStore, predictor: EloPoissonPredictor, today: pd.Timestamp, n_fixtures: int) -> None:
+def export_meta(out: Path, store: MatchStore, predictor: EloPoissonPredictor, today: pd.Timestamp, n_upcoming: int) -> None:
     played = store.matches[store.matches.home_goals.notna()]
     write(out / "meta.json", {
         "generated_at": pd.Timestamp.now().isoformat(timespec="seconds"),
         "as_of": today.date(),
         "last_match_in_data": played.date.max().date(),
-        "fixtures_published": n_fixtures,
+        "upcoming_matches": n_upcoming,
+        "model_version": predictor.version,
         "model": predictor.meta,
         "sources": [
             {"name": "Football-Data.co.uk", "url": "https://www.football-data.co.uk/",
              "use": "Resultados, estadísticas y cuotas de Premier League y Championship"},
+            {"name": "openfootball/england (dominio público)", "url": "https://github.com/openfootball/england",
+             "use": "Calendario de las próximas jornadas (días y horarios)"},
             {"name": "ClubElo (vía Club Football Match Data, A. Gábor)",
              "url": "https://github.com/xgabora/Club-Football-Match-Data",
              "use": "Solo para comparar contra el Elo propio (no se usa para predecir)"},
@@ -246,13 +291,13 @@ def main() -> None:
     export_model(out, predictor)
     teams = export_state(out, store, today)
     export_teams(out, store)
-    n_fixtures = export_fixtures(out, store, predictor, today)
+    upcoming = export_upcoming(out, store, predictor, today)
     review = export_review(out, features, season_start_year(today.date()))
     pl = store.matches[(store.matches.division == PREMIER_LEAGUE) & store.matches.home_goals.notna()]
     write(out / "home_advantage.json", home_advantage(pl))
-    export_meta(out, store, predictor, today, n_fixtures)
-    logger.info("Exportado en %s: %d equipos actuales, %d próximos partidos, %d temporadas de revisión",
-                out, len(teams), n_fixtures, review["seasons"])
+    export_meta(out, store, predictor, today, upcoming["matches"])
+    logger.info("Exportado en %s: %d equipos actuales, %d próximos partidos en %d jornadas, %d temporadas de revisión",
+                out, len(teams), upcoming["matches"], upcoming["matchdays"], review["seasons"])
 
 
 if __name__ == "__main__":
