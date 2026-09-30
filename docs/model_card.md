@@ -211,6 +211,22 @@ entrenado con las anteriores:
   histórica. En julio de 2027 se decide con la regla de siempre y, si A y los tiros cumplen, con el desempate
   preregistrado (ante una diferencia no concluyente, los tiros).
 
+### Análisis de errores: dónde pierde el modelo contra el mercado (30/09/2026)
+
+Descriptivo (no elige ningún modelo). Premier 2015-16 a 2025-26 (4.180 partidos), cada temporada predicha por el
+modelo de producción entrenado con las anteriores, contra Bet365 pre-cierre. Brecha media: +0,016 de log loss. Cortes
+fijados antes de mirar (`src/analysis/error_analysis.py`, `reports/analysis/analisis_errores_2026-09-30.json`):
+
+* **Sesgo de local.** Probabilidad media de victoria local: modelo 46,2%, mercado 44,5%, realidad 44,3% (visitante:
+  30,3%, 31,8% y 32,0%). El modelo queda por encima del mercado en las 11 temporadas: la ventaja de local se estima con
+  toda la historia desde 2002-03, cuando era mayor (ver la limitación sobre la ventaja de local).
+* **Primeras fechas y ascendidos.** En las fechas 1 a 5 la brecha es +0,031 (el doble del promedio; 25% de la brecha con
+  13% de los partidos), y +0,050 cuando juega un ascendido. Desde la fecha 20, +0,014.
+* **Desacuerdo.** Cuando modelo y mercado difieren en menos de 5 puntos en P(local) (53% de los partidos), la brecha es
+  +0,001; cuando difieren 10 puntos o más (14%), +0,059: la mitad de la brecha total.
+* **Consecuencias:** candidatos preregistrados a partir de acá (ventaja de local reciente, información de pretemporada
+  y un modelo con las cinco ligas); ver las secciones siguientes.
+
 ### Replicación de los tiros en otras ligas y relación Elo → goles entre ligas (30/09/2026)
 
 * **Preregistro** ([docs/preregistro_replicacion.md](preregistro_replicacion.md)), commiteado antes de evaluar. Mismo
