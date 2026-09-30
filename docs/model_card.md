@@ -85,6 +85,23 @@ Las familias no se distinguen entre sí (IC pareados de ±0,004 a ±0,009 que in
 +0,022 frente a Bet365 pre-cierre (IC 95% 0,013 a 0,031) y +0,028 frente a Pinnacle cierre (IC 95% 0,017 a 0,038).
 **El modelo no supera al mercado**; la brecha es estable temporada a temporada. Está bien calibrado (ECE 0,022).
 
+## 5 bis. Experimentos posteriores al modelo de producción
+
+### Tiros y tiros al arco (30/09/2026) · **no se promovió**
+
+* **Hipótesis:** los tiros y los tiros al arco miden el rendimiento con menos azar que los goles, y el modelo no los usaba.
+* **Protocolo, fijado antes de ver los resultados:** validación temporal en 8 temporadas (2015-16 a 2022-23, 3.040 partidos);
+  6 candidatos (Elo + tiros al arco, con o sin tiros, con vida media de 4, 8 o 16 partidos) contra el modelo de
+  producción, en los mismos partidos. Regla: se promueve solo si mejora el log loss en al menos 0,005 **y** el IC 95%
+  pareado queda completamente por debajo de 0. El test 2023-26 no se usó.
+* **Resultado del mejor candidato** (Elo + tiros + tiros al arco, vida media 4): −0,0042 de log loss, IC 95%
+  [−0,0078; −0,0007]. Mejora en las **8 de 8 temporadas** (test de signos, p = 0,004).
+* **Decisión: no se promueve.** La mejora no alcanza el margen de 0,005 y, corrigiendo por haber probado 6
+  candidatos (IC 99,2%), el intervalo incluye el 0 ([−0,0090; +0,0006]).
+* **Lectura:** el efecto parece real pero chico (~20% de la brecha con el mercado). Las variables de tiros quedan
+  en el pipeline y se vuelven a evaluar en el reentrenamiento anual, en temporadas que no se usaron para elegir el
+  candidato (2023-24 en adelante). Reporte completo: `reports/challengers/challengers_2026-09-30.json`.
+
 ## 6. Limitaciones
 
 * No conoce lesiones, suspensiones, alineaciones, fichajes ni cambios de entrenador: el mercado sí, y por eso predice mejor.

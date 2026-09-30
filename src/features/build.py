@@ -21,7 +21,7 @@ from src.config import FEATURES_PATH_NAME, PROCESSED_DIR, PROJECT_ROOT, PREMIER_
 from src.data.load import load_matches
 from src.features.elo import EloParams, compute_elo
 from src.features.h2h import h2h_features
-from src.features.team_state import form_rest_features, table_features
+from src.features.team_state import SHOT_STATS, SHOTS_HALFLIVES, form_rest_features, shot_features, table_features
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +44,7 @@ POST_MATCH_COLUMNS = [
 TEAM_FEATURES = [
     f"ppg_last{FORM_WINDOW}", "gf_ewm", "ga_ewm", "rest_days", "matches_last21", "season_opener",
     "games_played", "ppg", "gdpg", "position",
+    *[f"{stat}_hl{hl}" for hl in SHOTS_HALFLIVES for stat in SHOT_STATS],
 ]
 
 
@@ -61,7 +62,8 @@ def build_features(matches: pd.DataFrame, elo_params: EloParams | None = None,
     elo, history = compute_elo(matches, elo_params)
     form = form_rest_features(matches, FORM_WINDOW, GOALS_HALFLIFE)
     table = table_features(matches)
-    team = form.merge(table, on=["match_id", "team"], how="outer")
+    shots = shot_features(matches)
+    team = form.merge(table, on=["match_id", "team"], how="outer").merge(shots, on=["match_id", "team"], how="outer")
     h2h = h2h_features(matches, elo, H2H_SHRINKAGE)
 
     keep = ["match_id", "division", "season", "season_start", "date", "time", "home_team", "away_team",

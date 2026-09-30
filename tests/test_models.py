@@ -133,3 +133,16 @@ def test_numpy_poisson_pmf_matches_scipy():
     k = np.arange(0, 11)[None, :]
     lam = np.array([0.05, 0.4, 1.37, 2.9, 6.5])[:, None]
     np.testing.assert_allclose(poisson_pmf(k, lam), poisson.pmf(k, lam), rtol=1e-12, atol=0)
+
+
+def test_challenger_rule_requires_margin_and_significance():
+    from src.models.challenger import MIN_IMPROVEMENT, compare
+    rng = np.random.default_rng(0)
+    idx = pd.Index([f"m{i}" for i in range(3000)])
+    champ = pd.Series(rng.normal(1.0, 0.3, 3000), index=idx)
+    clearly_better = compare(champ, champ - 0.02 + rng.normal(0, 0.05, 3000))
+    assert clearly_better["promote"] and clearly_better["ci_high"] < 0
+    tiny = compare(champ, champ - MIN_IMPROVEMENT / 2 + rng.normal(0, 0.001, 3000))   # significativa pero menor al margen
+    assert tiny["ci_high"] < 0 and not tiny["promote"]
+    noisy = compare(champ, champ - 0.006 + rng.normal(0, 1.0, 3000))                 # margen alcanzado, pero es ruido
+    assert not noisy["promote"]

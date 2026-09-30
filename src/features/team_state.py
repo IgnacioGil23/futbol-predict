@@ -28,6 +28,16 @@ def team_long(matches: pd.DataFrame) -> pd.DataFrame:
         "away_team": "team", "home_team": "opponent", "away_goals": "gf", "home_goals": "ga"})
     away["is_home"] = False
     long = pd.concat([home, away], ignore_index=True)
+    # Tiros y tiros al arco desde la perspectiva del equipo (NaN si el dataset no los trae).
+    for name, own, opp in (("sh", "shots", "shots"), ("sot", "shots_on_target", "shots_on_target")):
+        own_col, opp_col = f"home_{own}", f"away_{opp}"
+        if own_col in matches and opp_col in matches:
+            h_for, a_for = matches[f"home_{own}"].astype(float), matches[f"away_{own}"].astype(float)
+            long[f"{name}_f"] = pd.concat([h_for, a_for], ignore_index=True)
+            long[f"{name}_a"] = pd.concat([a_for, h_for], ignore_index=True)
+        else:
+            long[f"{name}_f"] = np.nan
+            long[f"{name}_a"] = np.nan
     long["gf"] = long["gf"].astype(float)
     long["ga"] = long["ga"].astype(float)
     long["played"] = long["gf"].notna() & long["ga"].notna()
@@ -80,6 +90,30 @@ def form_rest_features(matches: pd.DataFrame, form_window: int = 5, goals_halfli
     out["matches_last21"] = (now["n_played"].fillna(0) - before_window.values).astype(int)
     out["season_opener"] = now["last_season"].ne(now["season_start"])
     return out.reset_index(drop=True)
+
+
+SHOTS_HALFLIVES = (4, 8, 16)
+SHOT_STATS = ("sh_f", "sh_a", "sot_f", "sot_a")
+
+
+def shot_features(matches: pd.DataFrame, halflives: tuple[int, ...] = SHOTS_HALFLIVES) -> pd.DataFrame:
+    """Tiros y tiros al arco a favor / en contra, media exponencial de los partidos ANTERIORES.
+
+    Mismo patrón anti-fuga que el resto: estado después de cada partido jugado y
+    as-of estricto antes del día del partido. Una columna por estadística y vida
+    media (en partidos): p. ej. sot_f_hl8 = tiros al arco a favor, vida media 8.
+    """
+    long = team_long(matches)
+    played = long[long["played"]].copy()
+    g = played.groupby("team", sort=False)
+    cols = []
+    for hl in halflives:
+        for stat in SHOT_STATS:
+            col = f"{stat}_hl{hl}"
+            played[col] = g[stat].transform(lambda s, hl=hl: s.ewm(halflife=hl).mean())
+            cols.append(col)
+    now = _asof_before(long[["match_id", "team", "date"]], played, ["team"], cols)
+    return now[["match_id", "team"] + cols].reset_index(drop=True)
 
 
 def table_features(matches: pd.DataFrame) -> pd.DataFrame:

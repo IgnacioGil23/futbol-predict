@@ -47,9 +47,14 @@ def make_league(seed: int = 0, seasons=(2000, 2001, 2002)) -> pd.DataFrame:
 def full_frame(df: pd.DataFrame) -> pd.DataFrame:
     """Completa las columnas que build_features espera de matches.parquet."""
     df = df.copy()
+    rng = np.random.default_rng(7)
     for col in POST_MATCH_COLUMNS:
         if col not in df:
             df[col] = 0.0
+    # Tiros aleatorios (los tiros al arco no superan a los tiros): así las features de tiros se ejercitan.
+    for side in ("home", "away"):
+        df[f"{side}_shots"] = rng.integers(3, 25, len(df)).astype(float)
+        df[f"{side}_shots_on_target"] = np.minimum(df[f"{side}_shots"], rng.integers(0, 12, len(df))).astype(float)
     for col in ["time", "b365_home", "b365_draw", "b365_away", "psc_home", "psc_draw", "psc_away",
                 "clubelo_home", "clubelo_away"]:
         df[col] = np.nan
@@ -83,17 +88,26 @@ def test_features_do_not_depend_on_results_from_the_same_day_or_later(cutoff_ind
     pd.testing.assert_frame_equal(a, b, check_dtype=False)
 
 
-def test_no_post_match_column_is_used_as_feature_input():
-    # Cambiar las estadísticas del propio partido no puede cambiar ninguna feature de ese partido.
+@pytest.mark.parametrize("day_index", [3, 9, 15])
+def test_same_day_match_stats_do_not_affect_that_days_features(day_index):
+    # Las estadísticas de un partido (tiros, tarjetas...) solo se conocen al terminar: alterar las de los
+    # partidos del día D no puede cambiar ninguna feature de los partidos de ese día. (Las de partidos
+    # ANTERIORES sí son información legítima: por ejemplo, los tiros promedio de las últimas fechas.)
     matches = full_frame(make_league())
+    day = pd.Timestamp(np.sort(matches.loc[matches.division == "E0", "date"].unique())[day_index])
     tampered = matches.copy()
+    on_day = tampered.date == day
     for col in POST_MATCH_COLUMNS:
         if col not in ("home_goals", "away_goals", "result"):
-            tampered[col] = 99
+            tampered.loc[on_day, col] = 99
     a, _ = build_features(matches, PARAMS)
     b, _ = build_features(tampered, PARAMS)
     cols = [c for c in a.columns if c not in POST_MATCH_COLUMNS]
-    pd.testing.assert_frame_equal(a[cols], b[cols])
+    pd.testing.assert_frame_equal(a.loc[a.date == day, cols].reset_index(drop=True),
+                                  b.loc[b.date == day, cols].reset_index(drop=True))
+    # ...y efectivamente se usan en los días siguientes (si no, el test no probaría nada).
+    later = a.date > day
+    assert not a.loc[later, "sot_f_hl8_home"].equals(b.loc[later, "sot_f_hl8_home"])
 
 
 def test_elo_update_is_zero_sum_and_follows_formula():
@@ -172,3 +186,20 @@ def test_h2h_residual_perspective_and_shrinkage():
     assert h.loc["m3", "h2h_residual"] == pytest.approx(0.9 / 4)
     # m2 (local B): perspectiva de B = -(1 - 0.6) / (1 + 2)
     assert h.loc["m2", "h2h_residual"] == pytest.approx(-0.4 / 3)
+
+
+def test_shot_features_are_ewm_of_previous_matches_only():
+    from src.features.team_state import shot_features
+    df = pd.DataFrame({
+        "match_id": ["m1", "m2", "m3"], "date": pd.to_datetime(["2020-08-01", "2020-08-08", "2020-08-15"]),
+        "season_start": 2020, "division": "E0", "home_team": ["A", "A", "A"], "away_team": ["B", "C", "B"],
+        "home_goals": [1.0, 0.0, np.nan], "away_goals": [0.0, 0.0, np.nan],
+        "home_shots": [10.0, 20.0, np.nan], "away_shots": [5.0, 7.0, np.nan],
+        "home_shots_on_target": [4.0, 8.0, np.nan], "away_shots_on_target": [1.0, 3.0, np.nan],
+    })
+    f = shot_features(df, halflives=(1,)).set_index(["match_id", "team"])
+    assert np.isnan(f.loc[("m1", "A"), "sot_f_hl1"])                    # sin partidos previos
+    assert f.loc[("m2", "A"), "sot_f_hl1"] == 4.0                        # solo el partido anterior
+    # EWM con vida media 1 sobre [4, 8]: pesos 0,5 y 1 (ajustado) -> (0,5*4 + 8) / 1,5
+    assert f.loc[("m3", "A"), "sot_f_hl1"] == pytest.approx((0.5 * 4 + 8) / 1.5)
+    assert f.loc[("m3", "A"), "sot_a_hl1"] == pytest.approx((0.5 * 1 + 3) / 1.5)
