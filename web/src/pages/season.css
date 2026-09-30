@@ -6,6 +6,9 @@
 .prob-bar[data-tone='down'] { background: var(--away); }
 .prob-text { position: relative; }
 
+.eval-table td > div { white-space: nowrap; }
+.eval-table td > div + div { margin-top: 2px; }
+
 .pos-grid { display: grid; gap: 2px; min-width: 640px; font-size: 0.78rem; }
 .pos-row { display: contents; }
 .pos-head { font-weight: 650; color: var(--muted); text-align: center; padding: 4px 0; }

@@ -73,13 +73,15 @@ function Evaluation({ ev }: { ev: SeasonEvaluation }) {
         <a href={`${REPO}/blob/main/docs/preregistro_temporada.md`} target="_blank" rel="noreferrer">preregistro</a>.
       </p>
       <div className="card">
-        <h3>Mejora contra una simulación que no conoce la fuerza de los equipos</h3>
+        <h3>Error de la simulación y mejora contra una que no conoce la fuerza de los equipos</h3>
         <p className="card-sub">
-          Habilidad = cuánto baja el error (Brier) frente al mismo simulador con todos los equipos iguales, que solo
-          conoce la tabla. 0% = no aporta; 100% = acierta todo. Entre corchetes, el intervalo de 95% entre temporadas.
+          <strong>Error</strong> (Brier): la diferencia al cuadrado entre la probabilidad y lo que pasó; más bajo es mejor.
+          Se compara con el mismo simulador con todos los equipos iguales, que solo conoce la tabla.{' '}
+          <strong>Mejora</strong>: cuánto baja el error frente a ese simulador (0% = no aporta; entre corchetes, el
+          intervalo de 95% entre temporadas).
         </p>
         <div className="table-wrap">
-          <table className="table">
+          <table className="table eval-table">
             <thead>
               <tr><th>Momento</th>{events.map((e) => <th key={e} className="num">{EVENT_LABEL[e]}</th>)}</tr>
             </thead>
@@ -91,8 +93,14 @@ function Evaluation({ ev }: { ev: SeasonEvaluation }) {
                     const r = ev.table.find((x) => x.event === e && x.cutoff === c)!
                     return (
                       <td key={e} className="num">
-                        <strong className="tabular">{pct(r.producto.skill)}</strong>
-                        <span className="small muted tabular"> [{pct(r.producto.skill_ci[0])}; {pct(r.producto.skill_ci[1])}]</span>
+                        <div className="tabular">
+                          Error <strong>{num(r.producto.brier, 3)}</strong>
+                          <span className="muted"> vs {num(r.base_iguales.brier, 3)}</span>
+                        </div>
+                        <div className="small tabular">
+                          Mejora <strong>{pct(r.producto.skill)}</strong>
+                          <span className="muted"> [{pct(r.producto.skill_ci[0])}; {pct(r.producto.skill_ci[1])}]</span>
+                        </div>
                       </td>
                     )
                   })}
@@ -101,6 +109,15 @@ function Evaluation({ ev }: { ev: SeasonEvaluation }) {
             </tbody>
           </table>
         </div>
+        <p className="small muted" style={{ marginTop: 8 }}>
+          <strong>Por qué la mejora se achica aunque el modelo acierte cada vez más:</strong> el error de la simulación
+          baja mucho a lo largo de la temporada (en el top 4, de{' '}
+          {num(ev.table.find((x) => x.event === 'top4' && x.cutoff === cutoffs[0])!.producto.brier, 3)} a{' '}
+          {num(ev.table.find((x) => x.event === 'top4' && x.cutoff === cutoffs[cutoffs.length - 1])!.producto.brier, 3)}),
+          pero el del simulador que solo conoce la tabla también: cerca del final, la tabla ya define casi todo y la
+          fuerza de los equipos solo importa en los pocos casos que siguen abiertos. En la última fecha, los dos serían
+          prácticamente iguales.
+        </p>
       </div>
       <div className="grid grid-2" style={{ marginTop: 16 }}>
         {(['top4', 'descenso'] as const).map((e) => (
