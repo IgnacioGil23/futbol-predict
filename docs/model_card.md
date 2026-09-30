@@ -250,6 +250,30 @@ fijados antes de mirar (`src/analysis/error_analysis.py`, `reports/analysis/anal
 * Por el preregistro, no se registra en paralelo; el sesgo queda como limitación conocida.
   Reporte: `reports/challengers/ventaja_local_2026-09-30.json`; código: `src/models/home_level.py`.
 
+### Valor de mercado del plantel (Transfermarkt, candidato V, 30/09/2026) · **señal mínima, sin fuente en vivo**
+
+* **Por qué Transfermarkt y no los precios de Fantasy:** en 302 jugadores de la Premier 2025-26, el precio inicial de
+  Fantasy correlaciona 0,57 (Spearman) con el valor de Transfermarkt, y sus **variaciones** apenas 0,25: el precio de
+  Fantasy sigue la demanda de los usuarios del juego, no el valor del jugador.
+* **Datos:** `dcaribou/transfermarkt-datasets` (valuaciones y transferencias; recolección detenida en julio de 2026).
+  Valor del plantel en la fecha de cada partido con eventos anteriores a esa fecha (`src/data/transfermarkt.py`);
+  clubes vinculados a Football-Data por fecha y marcador en el 99,9%-100% de los partidos.
+* **Preregistro** ([docs/preregistro_valor.md](preregistro_valor.md)): d = log(valor local) − log(valor visitante)
+  como corrección sin intercepto sobre el modelo base de cada liga; principal en las cuatro ligas, 2015-16 a 2025-26.
+
+| | Candidato − base | IC 95% |
+|---|---|---|
+| **Cuatro ligas (principal)** | **−0,0008** | **[−0,0016; −0,00001]** |
+| Cuatro ligas, fechas 1 a 5 | −0,0023 | [−0,0045; −0,0001] |
+| Italia / Francia / España / Alemania | −0,0030 / −0,0009 / +0,0004 / +0,0006 | — |
+| Premier (descriptivo) | −0,0013 (fechas 1 a 5: −0,0047) | [−0,0023; −0,0003] |
+
+* **Lectura:** cumple "señal" por el mínimo posible (el IC toca el 0) y queda lejos de la regla. El efecto es ~5% de la
+  brecha con el mercado y, como se esperaba, se concentra en las primeras fechas (−0,0023), pero ni ahí explica más que
+  una parte chica de la brecha de esas fechas (+0,031). Es heterogéneo: claro en Italia, nulo en España y Alemania.
+  Los coeficientes tienen el signo esperado en todas las ligas. Por el preregistro se documenta; no hay fuente en vivo
+  para producción. Reporte: `reports/challengers/valor_plantel_2026-09-30.json`.
+
 ### Replicación de los tiros en otras ligas y relación Elo → goles entre ligas (30/09/2026)
 
 * **Preregistro** ([docs/preregistro_replicacion.md](preregistro_replicacion.md)), commiteado antes de evaluar. Mismo
