@@ -1,0 +1,1737 @@
+{
+  "generated": "2026-09-30",
+  "source": "https://www.football-data.co.uk",
+  "leagues": {
+    "ESP": {
+      "name": "España",
+      "seasons": {
+        "SP1 2000-01": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP1 2001-02": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP1 2002-03": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP1 2003-04": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP1 2004-05": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP1 2005-06": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2006-07": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2007-08": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2008-09": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2009-10": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2010-11": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2011-12": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2012-13": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2013-14": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2014-15": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2015-16": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2016-17": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2017-18": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2018-19": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2019-20": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2020-21": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2021-22": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2022-23": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2023-24": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2024-25": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP1 2025-26": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP2 2000-01": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2001-02": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2002-03": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2003-04": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2004-05": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2005-06": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2006-07": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2007-08": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2008-09": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2009-10": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2010-11": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2011-12": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2012-13": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2013-14": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2014-15": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2015-16": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2016-17": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "SP2 2017-18": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP2 2018-19": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.9545454545454546
+        },
+        "SP2 2019-20": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP2 2020-21": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP2 2021-22": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP2 2022-23": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP2 2023-24": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP2 2024-25": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "SP2 2025-26": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        }
+      },
+      "long_rows": {
+        "SP1 2004-05": 112,
+        "SP2 2001-02": 48,
+        "SP2 2002-03": 223,
+        "SP2 2003-04": 304,
+        "SP2 2007-08": 16
+      },
+      "invalid_odds_rows": 1,
+      "incomplete_seasons": [],
+      "first_full_shots_season": "2005-06"
+    },
+    "ITA": {
+      "name": "Italia",
+      "seasons": {
+        "I1 2000-01": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I1 2001-02": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I1 2002-03": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I1 2003-04": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I1 2004-05": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I1 2005-06": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.9631578947368421
+        },
+        "I1 2006-07": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2007-08": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2008-09": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2009-10": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2010-11": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2011-12": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2012-13": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.9973684210526316
+        },
+        "I1 2013-14": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2014-15": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2015-16": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2016-17": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2017-18": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2018-19": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2019-20": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2020-21": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2021-22": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2022-23": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2023-24": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2024-25": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I1 2025-26": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I2 2000-01": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2001-02": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2002-03": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2003-04": {
+          "teams": 24,
+          "matches": 552,
+          "expected": 552,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2004-05": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2005-06": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2006-07": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2007-08": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2008-09": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2009-10": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2010-11": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2011-12": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2012-13": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2013-14": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2014-15": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2015-16": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2016-17": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "I2 2017-18": {
+          "teams": 22,
+          "matches": 462,
+          "expected": 462,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I2 2018-19": {
+          "teams": 19,
+          "matches": 342,
+          "expected": 342,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.9970760233918129
+        },
+        "I2 2019-20": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I2 2020-21": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.9973684210526316
+        },
+        "I2 2021-22": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I2 2022-23": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I2 2023-24": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I2 2024-25": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "I2 2025-26": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        }
+      },
+      "long_rows": {
+        "I1 2003-04": 112,
+        "I1 2004-05": 80,
+        "I2 2001-02": 48,
+        "I2 2002-03": 221,
+        "I2 2003-04": 224,
+        "I2 2004-05": 368
+      },
+      "invalid_odds_rows": 2,
+      "incomplete_seasons": [],
+      "first_full_shots_season": "2006-07"
+    },
+    "GER": {
+      "name": "Alemania",
+      "seasons": {
+        "D1 2000-01": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2001-02": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2002-03": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D1 2003-04": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D1 2004-05": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D1 2005-06": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D1 2006-07": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2007-08": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2008-09": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2009-10": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2010-11": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2011-12": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2012-13": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2013-14": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2014-15": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2015-16": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2016-17": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2017-18": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2018-19": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2019-20": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2020-21": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2021-22": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2022-23": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2023-24": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D1 2024-25": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.9967320261437909
+        },
+        "D1 2025-26": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D2 2000-01": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.47058823529411764
+        },
+        "D2 2001-02": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.9901960784313726
+        },
+        "D2 2002-03": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D2 2003-04": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D2 2004-05": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D2 2005-06": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D2 2006-07": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D2 2007-08": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D2 2008-09": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D2 2009-10": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D2 2010-11": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D2 2011-12": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D2 2012-13": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D2 2013-14": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D2 2014-15": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D2 2015-16": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D2 2016-17": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "D2 2017-18": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D2 2018-19": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D2 2019-20": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D2 2020-21": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D2 2021-22": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D2 2022-23": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D2 2023-24": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D2 2024-25": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "D2 2025-26": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        }
+      },
+      "long_rows": {
+        "D1 2002-03": 16,
+        "D1 2003-04": 112,
+        "D2 2002-03": 163,
+        "D2 2003-04": 291,
+        "D2 2004-05": 35
+      },
+      "invalid_odds_rows": 0,
+      "incomplete_seasons": [],
+      "first_full_shots_season": "2006-07"
+    },
+    "FRA": {
+      "name": "Francia",
+      "seasons": {
+        "F1 2000-01": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F1 2001-02": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F1 2002-03": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F1 2003-04": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F1 2004-05": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F1 2005-06": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.9973684210526316
+        },
+        "F1 2006-07": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2007-08": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2008-09": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2009-10": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2010-11": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2011-12": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2012-13": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2013-14": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2014-15": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2015-16": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2016-17": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.9973684210526316
+        },
+        "F1 2017-18": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2018-19": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2019-20": {
+          "teams": 20,
+          "matches": 279,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": false,
+          "shots": 1.0
+        },
+        "F1 2020-21": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2021-22": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2022-23": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2023-24": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2024-25": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F1 2025-26": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F2 2000-01": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2001-02": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2002-03": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2003-04": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2004-05": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2005-06": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2006-07": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2007-08": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2008-09": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2009-10": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2010-11": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2011-12": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2012-13": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2013-14": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2014-15": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2015-16": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2016-17": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.0
+        },
+        "F2 2017-18": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F2 2018-19": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F2 2019-20": {
+          "teams": 20,
+          "matches": 280,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": false,
+          "shots": 1.0
+        },
+        "F2 2020-21": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.9973684210526316
+        },
+        "F2 2021-22": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.9973684210526316
+        },
+        "F2 2022-23": {
+          "teams": 20,
+          "matches": 380,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 0.9973684210526316
+        },
+        "F2 2023-24": {
+          "teams": 20,
+          "matches": 379,
+          "expected": 380,
+          "repeated_pairs": 0,
+          "complete": false,
+          "shots": 1.0
+        },
+        "F2 2024-25": {
+          "teams": 18,
+          "matches": 306,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": true,
+          "shots": 1.0
+        },
+        "F2 2025-26": {
+          "teams": 18,
+          "matches": 305,
+          "expected": 306,
+          "repeated_pairs": 0,
+          "complete": false,
+          "shots": 1.0
+        }
+      },
+      "long_rows": {
+        "F1 2002-03": 189,
+        "F1 2003-04": 157,
+        "F2 2001-02": 29,
+        "F2 2002-03": 221,
+        "F2 2003-04": 365,
+        "F2 2007-08": 32
+      },
+      "invalid_odds_rows": 2,
+      "incomplete_seasons": [
+        "F1 2019-20",
+        "F2 2019-20",
+        "F2 2023-24",
+        "F2 2025-26"
+      ],
+      "first_full_shots_season": "2005-06"
+    }
+  }
+}

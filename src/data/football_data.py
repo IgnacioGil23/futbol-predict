@@ -169,6 +169,7 @@ def read_season(path: Path, division: str, start_year: int) -> pd.DataFrame:
 
 ODDS_BOOKS = ("b365", "b365c", "ps", "psc", "avg")
 OUTCOMES = ("home", "draw", "away")
+MAX_BOOKSUM = 1.25   # margen de más del 25% en un 1X2: no es un mercado real (ver validate_rows)
 
 
 def clean_odds(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -177,7 +178,9 @@ def clean_odds(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     Un trío es imposible si alguna cuota es <= 1 (Football-Data usa 0 como
     "sin dato" en algunas filas) o si la suma de probabilidades implícitas de
     una misma casa es < 1: ninguna casa publica un mercado con margen negativo,
-    así que es un error de carga. Las cuotas máximas (max_*) no se chequean
+    así que es un error de carga. También si la suma supera MAX_BOOKSUM (un caso
+    en la Segunda española 2004-05: 1,80 / 1,80 / 2,87, margen del 46%; en la
+    Premier no hay ninguno). Las cuotas máximas (max_*) no se chequean
     porque combinan casas distintas y ahí una suma < 1 sí es posible.
 
     Devuelve (df limpio, reporte de filas afectadas).
@@ -189,7 +192,7 @@ def clean_odds(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
         odds = df[cols]
         complete = odds.notna().all(axis=1)
         booksum = (1 / odds).sum(axis=1, min_count=3)
-        invalid = complete & ((odds <= 1.0).any(axis=1) | (booksum < 1.0))
+        invalid = complete & ((odds <= 1.0).any(axis=1) | (booksum < 1.0) | (booksum > MAX_BOOKSUM))
         if invalid.any():
             report = df.loc[invalid, ["division", "season", "date", "home_team", "away_team"]].copy()
             report["book"] = book
@@ -222,7 +225,7 @@ def validate_rows(df: pd.DataFrame) -> None:
         booksum = (1 / odds).sum(axis=1)
         # Se asume que clean_odds() ya corrió: acá solo se detectan márgenes
         # absurdamente altos, típicos de columnas corridas.
-        if ((odds <= 1.0).any(axis=1) | (booksum < 1.0) | (booksum > 1.25)).any():
+        if ((odds <= 1.0).any(axis=1) | (booksum < 1.0) | (booksum > MAX_BOOKSUM)).any():
             problems.append(f"cuotas {book} imposibles (¿falta correr clean_odds o hay columnas corridas?)")
     if df.duplicated(["date", "home_team", "away_team"]).any():
         problems.append("partidos duplicados")

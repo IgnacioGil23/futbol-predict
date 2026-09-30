@@ -53,11 +53,14 @@ def expected_home(rating_home, rating_away, home_advantage: float):
     return 1.0 / (1.0 + 10.0 ** ((np.asarray(rating_away) - np.asarray(rating_home) - home_advantage) / 400.0))
 
 
-def compute_elo(matches: pd.DataFrame, params: EloParams = EloParams()) -> tuple[pd.DataFrame, pd.DataFrame]:
+def compute_elo(matches: pd.DataFrame, params: EloParams = EloParams(),
+                top_division: str = "E0") -> tuple[pd.DataFrame, pd.DataFrame]:
     """Calcula el Elo previo a cada partido.
 
     `matches` necesita: match_id, date, season_start, division, home_team,
     away_team, home_goals, away_goals (NaN = partido todavía no jugado).
+    `top_division`: la división que arranca `initial_gap` puntos arriba (E0 en Inglaterra; en la
+    replicación en otras ligas, su primera división).
 
     Devuelve:
       per_match: match_id, elo_home, elo_away, elo_expected_home (con ventaja de local).
@@ -84,7 +87,7 @@ def compute_elo(matches: pd.DataFrame, params: EloParams = EloParams()) -> tuple
         teams_by_div = {d: members[(season, d)] for d in divisions}
         if not ratings:  # primera temporada de los datos
             for division, teams in teams_by_div.items():
-                start = BASE_RATING + (params.initial_gap if division == "E0" else 0.0)
+                start = BASE_RATING + (params.initial_gap if division == top_division else 0.0)
                 for team in teams:
                     ratings[team] = start
             return

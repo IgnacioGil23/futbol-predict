@@ -59,7 +59,7 @@ def build_features(matches: pd.DataFrame, elo_params: EloParams | None = None,
                    division: str = PREMIER_LEAGUE) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Features de todos los partidos de `division`, usando la historia de todas las divisiones."""
     elo_params = elo_params or load_elo_params()
-    elo, history = compute_elo(matches, elo_params)
+    elo, history = compute_elo(matches, elo_params, top_division=division)
     form = form_rest_features(matches, FORM_WINDOW, GOALS_HALFLIFE)
     table = table_features(matches)
     shots = shot_features(matches)
@@ -80,7 +80,9 @@ def build_features(matches: pd.DataFrame, elo_params: EloParams | None = None,
                         left_on=["match_id", f"{side}_team"], right_on=["match_id", "team"], how="left"
                         ).drop(columns="team")
     out = out.merge(h2h, on="match_id", how="left")
-    out["no_crowds"] = (eras.assign_era(out["date"]) == eras.NO_CROWDS).astype(int)
+    # Las eras son las fechas de Inglaterra: en otras ligas (replicación) hay partidos fuera de ellas (p. ej. la
+    # Bundesliga volvió en mayo de 2020) y cuentan como "no sin público". En la Premier no hay ninguno.
+    out["no_crowds"] = (eras.assign_era(out["date"]) == eras.NO_CROWDS).fillna(False).astype(int)
     out["played"] = out["home_goals"].notna()
     return out.sort_values(["date", "match_id"]).reset_index(drop=True), history
 
