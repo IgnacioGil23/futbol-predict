@@ -129,3 +129,17 @@ def test_predict_rejects_team_outside_e0_e1_that_season(client):
     # En la liga sintética, "N2004" entra a E1 recién en 2005: no hay Elo vigente en 2004-05.
     r = client.get("/predict", params={"home": "A", "away": "N2004", "date": "2004-10-01"})
     assert r.status_code == 422 and "no jugaba" in r.json()["detail"]
+
+
+def test_serving_csv_roundtrip_gives_same_answers(league, tmp_path):
+    from src.serving.store import read_serving_matches, write_serving_matches
+    store = store_from(league)
+    path = tmp_path / "serving.csv.gz"
+    write_serving_matches(store.matches, path)
+    reloaded = MatchStore(read_serving_matches(path))
+    day = pd.Timestamp(np.sort(league.date.unique())[15])
+    for team in store.teams():
+        assert reloaded.elo_as_of(team, day) == pytest.approx(store.elo_as_of(team, day), abs=1e-5)
+        assert reloaded.recent_form(team, day) == store.recent_form(team, day)
+        assert reloaded.rest(team, day) == store.rest(team, day)
+    pd.testing.assert_frame_equal(reloaded.standings("E0", 2005, day), store.standings("E0", 2005, day))

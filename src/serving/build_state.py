@@ -1,4 +1,4 @@
-"""Genera data/processed/serving_matches.parquet (partidos E0+E1 con Elo) para la API.
+"""Genera data/processed/serving_matches.csv.gz (partidos E0+E1 con Elo) para la API.
 
 Solo depende de pandas/numpy (sin scikit-learn, XGBoost ni MLflow), para que el
 build de la imagen Docker sea liviano. Requiere haber corrido antes:
@@ -13,7 +13,7 @@ import logging
 from src.data.load import load_matches
 from src.features.build import load_elo_params
 from src.features.elo import compute_elo
-from src.serving.store import SERVING_MATCHES_PATH, build_serving_matches
+from src.serving.store import SERVING_MATCHES_PATH, build_serving_matches, write_serving_matches
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +22,7 @@ def build_state():
     matches = load_matches()
     elo, history = compute_elo(matches, load_elo_params())
     serving = build_serving_matches(matches, elo, history)
-    SERVING_MATCHES_PATH.parent.mkdir(parents=True, exist_ok=True)
-    serving.to_parquet(SERVING_MATCHES_PATH, index=False)
+    write_serving_matches(serving)
     return serving
 
 

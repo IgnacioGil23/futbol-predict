@@ -16,9 +16,9 @@ datos, la experimentación, una API y una web interactiva.
 | EDA | Calidad de datos, auditoría de fuga temporal, distribución de goles, ventaja de local por era COVID, calibración del mercado | `notebooks/01_eda.ipynb` |
 | Features | Elo propio partido a partido (ajustado solo con entrenamiento), forma, tabla, descanso, head-to-head; tests de "invariancia al futuro" contra la fuga | `src/features/`, `notebooks/02_features.ipynb` |
 | Modelos | Frecuencias, logit sobre Elo, Dixon-Coles (MLE con gradiente analítico), Poisson GLM, XGBoost Poisson; split temporal, bootstrap pareado vs mercado, MLflow | `src/models/`, `notebooks/03_modelo.ipynb` |
-| Servicio | Modelo exportado como JSON (sin pickle), consultas "a una fecha" sin fuga, FastAPI + Docker multi-etapa | `src/serving/`, `src/api/`, `Dockerfile` |
+| Servicio | Modelo exportado como JSON (sin pickle), consultas "a una fecha" sin fuga, FastAPI + Docker multi-etapa, deploy en Cloud Run | `src/serving/`, `src/api/`, `Dockerfile`, `docs/deploy_cloud_run.md` |
 | Web | React + TypeScript + D3: previa con grilla de marcadores, fichas de equipo, revisión histórica fuera de muestra, ventaja de local, metodología | `web/` |
-| Automatización | CI (tests Python y TS, build de la web, build y smoke test de la imagen), actualización y publicación semanal | `.github/workflows/` |
+| Automatización | CI (tests Python y TS, build de la web, build y smoke test de la imagen), publicación de la web y deploy de la API dos veces por semana | `.github/workflows/` |
 
 ## Decisiones que vale la pena mirar
 
@@ -67,9 +67,11 @@ cd web && npm install && npm run dev
 
 * **Web:** GitHub Pages, publicada por `.github/workflows/deploy.yml` (lunes y jueves, o a mano). La URL de la API se
   configura en la variable de Actions `API_URL`.
-* **API:** Render (plan gratuito, Docker) según `render.yaml`. La imagen descarga y procesa los datos al construirse: los
-  datos no se versionan. El plan gratuito suspende el servicio tras 15 minutos sin tráfico (el primer pedido tarda ~1
-  minuto); por eso la web no depende de la API para lo principal.
+* **API:** Google Cloud Run, desplegada por `.github/workflows/deploy-api.yml` con Workload Identity Federation (sin
+  claves JSON). Escala a cero, máximo 2 instancias; la imagen descarga y procesa los datos al construirse, así que los
+  datos no se versionan. Configuración inicial paso a paso: [docs/deploy_cloud_run.md](docs/deploy_cloud_run.md).
+* La imagen de la API es mínima (FastAPI, numpy, pandas: sin scipy ni pyarrow); arranca en ~5 s y usa ~125 MB de RAM
+  con los datos completos (medido localmente).
 
 ## Datos y atribución
 

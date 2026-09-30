@@ -23,10 +23,10 @@ COPY requirements-api.txt .
 RUN pip install --no-cache-dir -r requirements-api.txt
 COPY src/ src/
 COPY models/production/model.json models/production/model.json
-COPY --from=data /app/data/processed/serving_matches.parquet data/processed/serving_matches.parquet
+COPY --from=data /app/data/processed/serving_matches.csv.gz data/processed/serving_matches.csv.gz
 USER app
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
   CMD python -c "import urllib.request,os; urllib.request.urlopen(f'http://127.0.0.1:{os.getenv(\"PORT\", \"8000\")}/health', timeout=4)"
-# Render define la variable PORT; localmente se usa 8000.
+# Cloud Run define la variable PORT (8080); localmente se usa 8000.
 CMD ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

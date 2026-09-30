@@ -44,7 +44,7 @@ jobs:
       - run: npm run build
         working-directory: web
         env:
-          # URL pública de la API en Render (Settings > Secrets and variables > Actions > Variables).
+          # URL pública de la API en Cloud Run (Settings > Secrets and variables > Actions > Variables).
           VITE_API_URL: ${{ vars.API_URL }}
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
@@ -60,15 +60,3 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
-
-  refresh-api:
-    # La imagen de la API descarga los datos al construirse: redeploy para que use los partidos nuevos.
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Disparar deploy en Render (si está configurado)
-        env:
-          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
-        run: |
-          if [ -z "$HOOK" ]; then echo "RENDER_DEPLOY_HOOK no configurado: se omite"; exit 0; fi
-          curl -fsS -X POST "$HOOK" > /dev/null && echo "Deploy de la API solicitado"

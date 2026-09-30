@@ -24,7 +24,8 @@ import pandas as pd
 
 from src.config import PROCESSED_DIR
 
-SERVING_MATCHES_PATH = PROCESSED_DIR / "serving_matches.parquet"
+# CSV comprimido (no parquet): así la imagen de la API no necesita pyarrow.
+SERVING_MATCHES_PATH = PROCESSED_DIR / "serving_matches.csv.gz"
 
 
 def build_serving_matches(matches: pd.DataFrame, elo_per_match: pd.DataFrame, elo_history: pd.DataFrame) -> pd.DataFrame:
@@ -42,6 +43,21 @@ def build_serving_matches(matches: pd.DataFrame, elo_per_match: pd.DataFrame, el
     for col in ("division", "season", "home_team", "away_team"):
         df[col] = df[col].astype(str)
     return df.sort_values(["date", "match_id"]).reset_index(drop=True)
+
+
+def write_serving_matches(df: pd.DataFrame, path: Path = SERVING_MATCHES_PATH) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    out = df.copy()
+    out["date"] = out["date"].dt.strftime("%Y-%m-%d")
+    out.to_csv(path, index=False, float_format="%.6f", compression="gzip")
+
+
+def read_serving_matches(path: Path = SERVING_MATCHES_PATH) -> pd.DataFrame:
+    df = pd.read_csv(path, compression="gzip", keep_default_na=False, na_values=[""],
+                     dtype={"home_team": str, "away_team": str, "division": str, "season": str, "match_id": str})
+    df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
+    df["result"] = df["result"].astype("string")
+    return df
 
 
 @dataclass
@@ -86,7 +102,7 @@ class MatchStore:
 
     @classmethod
     def load(cls, path: Path = SERVING_MATCHES_PATH) -> "MatchStore":
-        return cls(pd.read_parquet(path))
+        return cls(read_serving_matches(path))
 
     # ------------------------------------------------------------------ básicos
     def teams(self, division: str | None = None, season_start: int | None = None) -> list[str]:

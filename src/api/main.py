@@ -11,6 +11,7 @@ Endpoints:
 """
 
 import os
+from contextlib import asynccontextmanager
 from datetime import date as Date
 from datetime import timedelta
 from functools import lru_cache
@@ -30,7 +31,28 @@ MIN_DATE = Date(2005, 8, 1)
 MAX_DAYS_AHEAD = 60
 GRID_SIZE = 7  # la grilla que se devuelve va de 0 a 6 goles (el resto de la masa se informa aparte)
 
+
+@lru_cache(maxsize=1)
+def get_store() -> MatchStore:
+    return MatchStore.load()
+
+
+@lru_cache(maxsize=1)
+def get_predictor() -> EloPoissonPredictor:
+    return EloPoissonPredictor.load()
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # Carga datos y modelo al arrancar: uvicorn no acepta conexiones hasta terminar,
+    # así que Cloud Run nunca envía pedidos a una instancia a medio cargar.
+    get_store()
+    get_predictor()
+    yield
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title="Premier League · predicción de marcadores",
     description="Dos regresiones de Poisson sobre la diferencia de Elo. Datos: Football-Data.co.uk.",
     version="1.0.0",
@@ -41,16 +63,6 @@ app.add_middleware(
     allow_methods=["GET"],
     allow_headers=["*"],
 )
-
-
-@lru_cache(maxsize=1)
-def get_store() -> MatchStore:
-    return MatchStore.load()
-
-
-@lru_cache(maxsize=1)
-def get_predictor() -> EloPoissonPredictor:
-    return EloPoissonPredictor.load()
 
 
 def last_data_date(store: MatchStore) -> Date:

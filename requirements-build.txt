@@ -1,4 +1,5 @@
-# Etapa de build de la imagen: descargar y procesar datos (sin scikit-learn/XGBoost/MLflow).
+# Etapa de datos de la imagen: descargar y procesar (sin scikit-learn/XGBoost/MLflow).
 -r requirements-api.txt
 requests==2.34.2
 urllib3==2.7.0
+pyarrow==25.0.1

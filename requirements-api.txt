@@ -1,8 +1,7 @@
 # Dependencias mínimas de la imagen de la API (versiones del entorno de desarrollo).
+# Sin scipy ni pyarrow: la API usa una Poisson en numpy y lee un CSV comprimido.
 fastapi==0.141.1
 uvicorn==0.52.4
 pydantic==2.13.5
 numpy==2.4.6
 pandas==3.0.5
-pyarrow==25.0.1
-scipy==1.17.1

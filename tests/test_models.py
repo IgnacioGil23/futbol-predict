@@ -6,7 +6,7 @@ from scipy.optimize import approx_fprime
 from src.metrics import ranked_probability_score
 from src.models.dixon_coles import DixonColesModel, DixonColesParams
 from src.models.feature_models import PoissonGLMModel, fit_rho
-from src.models.scoreline import exact_score_log_loss, outcome_probabilities, score_matrix
+from src.models.scoreline import exact_score_log_loss, outcome_probabilities, poisson_pmf, score_matrix
 
 
 def test_score_matrix_is_a_distribution_and_matches_poisson():
@@ -126,3 +126,10 @@ def test_poisson_glm_recovers_linear_log_rates():
     assert coefs.loc["f1", "goles_local"] == pytest.approx(0.3, abs=0.03)
     assert coefs.loc["f1", "goles_visitante"] == pytest.approx(-0.2, abs=0.03)
     assert abs(coefs.loc["f2", "goles_local"]) < 0.03
+
+
+def test_numpy_poisson_pmf_matches_scipy():
+    from scipy.stats import poisson
+    k = np.arange(0, 11)[None, :]
+    lam = np.array([0.05, 0.4, 1.37, 2.9, 6.5])[:, None]
+    np.testing.assert_allclose(poisson_pmf(k, lam), poisson.pmf(k, lam), rtol=1e-12, atol=0)

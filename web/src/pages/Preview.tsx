@@ -161,7 +161,7 @@ export function Preview() {
         <div className="grid grid-main" style={{ marginTop: 16 }}>
           <div className="skeleton" style={{ minHeight: 420 }} />
           <div className="skeleton" style={{ minHeight: 420 }} />
-          {!isToday && <p className="small muted">Consultando la API… si estuvo inactiva, el primer pedido puede tardar hasta un minuto (plan gratuito).</p>}
+          {!isToday && <p className="small muted">Consultando la API… si el servicio estaba en reposo (escala a cero cuando no hay tráfico), el primer pedido tarda unos segundos más.</p>}
         </div>
       )}
 

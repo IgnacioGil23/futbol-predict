@@ -13,9 +13,21 @@ típicos de la Premier es del orden de 1e-6).
 """
 
 import numpy as np
-from scipy.stats import poisson
 
 MAX_GOALS = 10
+
+
+def poisson_pmf(k: np.ndarray, lam: np.ndarray) -> np.ndarray:
+    """P(X = k) para X ~ Poisson(lam), en escala logarítmica para estabilidad numérica.
+
+    Implementada con numpy (sin scipy) para que la imagen de la API sea liviana;
+    tests/test_models.py verifica que coincide con scipy.stats.poisson.pmf.
+    """
+    k = np.asarray(k, dtype=float)
+    lam = np.asarray(lam, dtype=float)
+    max_k = int(k.max()) if k.size else 0
+    log_fact = np.concatenate([[0.0], np.cumsum(np.log(np.arange(1, max_k + 1)))])
+    return np.exp(k * np.log(lam) - lam - log_fact[k.astype(int)])
 
 
 def dixon_coles_tau(lam: np.ndarray, mu: np.ndarray, rho: float) -> np.ndarray:
@@ -35,8 +47,8 @@ def score_matrix(lam, mu, rho: float = 0.0, max_goals: int = MAX_GOALS) -> np.nd
     lam = np.atleast_1d(np.asarray(lam, dtype=float))
     mu = np.atleast_1d(np.asarray(mu, dtype=float))
     goals = np.arange(max_goals + 1)
-    p_home = poisson.pmf(goals[None, :], lam[:, None])
-    p_away = poisson.pmf(goals[None, :], mu[:, None])
+    p_home = poisson_pmf(goals[None, :], lam[:, None])
+    p_away = poisson_pmf(goals[None, :], mu[:, None])
     matrix = p_home[:, :, None] * p_away[:, None, :]
     if rho != 0.0:
         tau = dixon_coles_tau(lam, mu, rho)
