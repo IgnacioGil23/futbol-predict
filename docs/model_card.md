@@ -211,6 +211,50 @@ entrenado con las anteriores:
   histórica. En julio de 2027 se decide con la regla de siempre y, si A y los tiros cumplen, con el desempate
   preregistrado (ante una diferencia no concluyente, los tiros).
 
+### Replicación de los tiros en otras ligas y relación Elo → goles entre ligas (30/09/2026)
+
+* **Preregistro** ([docs/preregistro_replicacion.md](preregistro_replicacion.md)), commiteado antes de evaluar. Mismo
+  candidato y mismo modelo de base que en la Premier, en España, Italia, Alemania y Francia (primera y segunda división de
+  Football-Data, mismos controles; `reports/replication/calidad_ligas.json`), Elo con los parámetros de Inglaterra sin
+  reajustar, temporadas 2015-16 a 2025-26 (15.583 partidos). Es evidencia complementaria: no cambia la decisión de julio
+  de 2027 sobre la Premier.
+
+| Liga | Partidos | Candidato − base (log loss) | IC 95% | Temporadas que mejora |
+|---|---|---|---|---|
+| España | 4.180 | −0,0041 | [−0,0069; −0,0013] | 8/11 |
+| Italia | 4.180 | −0,0062 | [−0,0091; −0,0034] | 11/11 |
+| Alemania | 3.366 | −0,0054 | [−0,0088; −0,0019] | 9/11 |
+| Francia | 3.857 | −0,0039 | [−0,0065; −0,0012] | 8/11 |
+| **Las cuatro (principal)** | **15.583** | **−0,0049** | **[−0,0063; −0,0035]** | — |
+
+* **La señal se replica:** mejora en las cuatro ligas, cada una con su IC por debajo de 0, y en el conjunto. **No alcanza
+  la "magnitud relevante" preregistrada** (≤ −0,005): queda en −0,0049. El efecto es consistente con la Premier
+  (−0,0042 en la selección, −0,0052 en la confirmación): los tiros aportan de verdad, y el tamaño está justo en el borde
+  del margen de promoción. Con el sesgo en contra declarado (segundas divisiones sin tiros antes de 2017-18), es
+  probablemente una estimación conservadora.
+* **Contexto:** el modelo de base queda detrás de Bet365 pre-cierre en todas las ligas (de +0,016 a +0,022 de log loss),
+  como en la Premier.
+
+**Relación Elo → goles, 2005-06 a 2025-26** (IC 95% por bootstrap de partidos):
+
+| Liga | Goles del local con Elo parejo | × por cada 100 puntos a favor | Goles del visitante con Elo parejo | × por cada 100 puntos a favor del local | Empates |
+|---|---|---|---|---|---|
+| Inglaterra | 1,48 [1,45; 1,50] | 1,18 [1,17; 1,19] | 1,14 [1,12; 1,17] | 0,85 [0,84; 0,85] | 24,3% |
+| España | 1,46 [1,44; 1,49] | 1,19 [1,18; 1,21] | 1,08 [1,06; 1,11] | 0,85 [0,84; 0,86] | 24,9% |
+| Italia | 1,44 [1,41; 1,46] | 1,16 [1,15; 1,18] | 1,13 [1,11; 1,15] | 0,85 [0,84; 0,86] | 26,4% |
+| Alemania | 1,61 [1,58; 1,64] | 1,18 [1,17; 1,20] | 1,27 [1,24; 1,30] | 0,85 [0,84; 0,86] | 25,1% |
+| Francia | 1,40 [1,37; 1,42] | 1,19 [1,17; 1,20] | 1,07 [1,04; 1,09] | 0,84 [0,83; 0,85] | 27,3% |
+
+* **La forma de la relación es casi universal:** 100 puntos de Elo a favor multiplican los goles del local por 1,16 a
+  1,19 y los del visitante por 0,84 a 0,85 en las cinco ligas. Lo que cambia es el **nivel**: la Bundesliga tiene más
+  goles con Elo parejo y la Ligue 1, menos.
+* **Transferencia** (modelo entrenado en otra liga, prediciendo 2023-24 a 2025-26): las diferencias contra el modelo de la
+  propia liga van de −0,002 a +0,005; la mayoría no se distinguen de 0. Las que empeoran de forma clara son, sobre todo,
+  por el nivel de goles (por ejemplo, España predicha con el modelo de Alemania: +0,0042).
+* **Lectura:** por eso sumar ligas no mejoraría el modelo de la Premier (la pendiente ya está bien estimada y el nivel
+  es propio de cada liga), pero sí sirve para validar que una señal no es una casualidad de una liga.
+* Reporte: `reports/replication/replicacion_2026-09-30.json`; código: `src/data/leagues.py`, `src/models/replication.py`.
+
 ## 6. Limitaciones
 
 * No conoce lesiones, suspensiones, alineaciones, fichajes ni cambios de entrenador: el mercado sí, y por eso predice mejor.
