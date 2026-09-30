@@ -37,14 +37,14 @@ export interface H2H {
   last: { date: string; home_team: string; away_team: string; score: string; division: string }[]
 }
 
-export interface TeamIndexItem { team: string; name: string; slug: string; premier_seasons: number; last_premier_season: string }
+export interface TeamIndexItem { team: string; name: string; slug: string; badge: string | null; short: string; premier_seasons: number; last_premier_season: string }
 export interface TeamSeason {
   season: string; played: number; points: number; position: number
   goals_for_per_game: number; goals_against_per_game: number; league_goals_per_team_game: number
   attack_vs_league_pct: number; defence_vs_league_pct: number
 }
 export interface EloPoint { date: string; elo: number; division: string; opponent: string; home: boolean; score: string }
-export interface TeamFile { team: string; name: string; slug: string; seasons: TeamSeason[]; elo: EloPoint[] }
+export interface TeamFile { team: string; name: string; slug: string; badge: string | null; short: string; seasons: TeamSeason[]; elo: EloPoint[] }
 
 export interface XgTeamRow {
   team: string; name: string; slug: string; played: number

@@ -248,3 +248,12 @@ p { margin: 0; }
 @media (min-width: 900px) { .review-detail { position: sticky; top: 76px; } }
 
 .big-num { font-size: 1.6rem; font-family: var(--display); }
+
+/* Escudo o iniciales de un equipo (components/TeamBadge.tsx) */
+.team-badge { flex: none; object-fit: contain; }
+.team-initials {
+  display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;
+  background: var(--surface-2); color: var(--ink-2); font-weight: 700; letter-spacing: 0.02em;
+  border: 1px solid var(--line);
+}
+.team-card { display: flex; align-items: center; gap: 12px; }

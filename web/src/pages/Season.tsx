@@ -45,8 +45,11 @@ function PositionGrid({ teams }: { teams: SeasonTeam[] }) {
         ))}
       </div>
       <p className="small muted" style={{ marginTop: 8 }}>
-        Cada celda: probabilidad de terminar en esa posición (se muestra el número desde 10%). Columnas 1-4: zona de
-        Champions por posición; 18-20: descenso.
+        <strong>Cómo leerla:</strong> cada fila es un equipo y cada columna, una posición final. Cuanto más intenso el
+        color, más probable es que termine ahí (el número, en %, se muestra desde 10%). Cada fila suma 100%: una fila con
+        el color concentrado en pocas columnas es un equipo con destino bastante claro; una fila con el color repartido,
+        uno que todavía puede terminar en muchos lugares. Columnas 1-4 en azul: puestos de top 4; 18-20 en naranja:
+        descenso.
       </p>
     </div>
   )
@@ -57,8 +60,25 @@ function binLabel(bin: string) {
   return bin.replace(/[[\]()]/g, '').split(', ').map((x) => pct(Math.min(1, Number(x)))).join(' a ')
 }
 
-const EVENT_LABEL ={ campeon: 'Campeón', top4: 'Top 4', descenso: 'Descenso' } as const
+const EVENT_LABEL = { campeon: 'Campeón', top4: 'Top 4', descenso: 'Descenso' } as const
 const CUTOFF_LABEL = (c: number) => (c === 0 ? 'Antes de la fecha 1' : `Tras ${c} partidos`)
+
+/** Explicación de una tabla de calibración, con un ejemplo tomado de sus propios datos. */
+function CalibrationHelp({ rows, event }: { rows: SeasonEvaluation['calibration']['top4']; event: string }) {
+  const example = rows.find((r) => r.bin.startsWith('[0.5')) ?? rows[Math.floor(rows.length / 2)]
+  return (
+    <p className="small muted" style={{ marginTop: 8 }}>
+      <strong>Cómo leerla:</strong> juntamos todas las veces que la simulación dio una probabilidad de {event} dentro de
+      cada tramo. "Casos" es cuántas veces pasó eso, "Media simulada" lo que dijo en promedio y "Pasó" en qué porcentaje de
+      esos casos ocurrió de verdad. Si las dos últimas columnas se parecen, los porcentajes son confiables.
+      {example && (
+        <> Por ejemplo, en {example.n} casos dijo entre {binLabel(example.bin)} (en promedio {pct1(example.predicted)}) y
+          ocurrió el {pct1(example.observed)} de las veces.</>
+      )}{' '}
+      En los tramos con pocos casos, diferencias de algunos puntos son esperables por azar.
+    </p>
+  )
+}
 
 function Evaluation({ ev }: { ev: SeasonEvaluation }) {
   const events = ['campeon', 'top4', 'descenso'] as const
@@ -110,6 +130,13 @@ function Evaluation({ ev }: { ev: SeasonEvaluation }) {
           </table>
         </div>
         <p className="small muted" style={{ marginTop: 8 }}>
+          <strong>Cómo leerla:</strong> cada fila es un momento de la temporada desde el que se simuló. En cada celda, el
+          primer número es el error de nuestra simulación y el segundo, el de la simulación que trata a todos los equipos
+          como iguales; si el nuestro es más bajo, la fuerza de los equipos ayuda a predecir. La "mejora" resume esa
+          diferencia en porcentaje. Si el intervalo entre corchetes no incluye el 0, la mejora es clara; si lo incluye, con
+          solo {ev.seasons.length} temporadas no alcanza para asegurarla.
+        </p>
+        <p className="small muted" style={{ marginTop: 8 }}>
           <strong>Por qué la mejora se achica aunque el modelo acierte cada vez más:</strong> el error de la simulación
           baja mucho a lo largo de la temporada (en el top 4, de{' '}
           {num(ev.table.find((x) => x.event === 'top4' && x.cutoff === cutoffs[0])!.producto.brier, 3)} a{' '}
@@ -139,6 +166,7 @@ function Evaluation({ ev }: { ev: SeasonEvaluation }) {
                 </tbody>
               </table>
             </div>
+            <CalibrationHelp rows={ev.calibration[e]} event={EVENT_LABEL[e].toLowerCase()} />
           </div>
         ))}
       </div>
@@ -188,6 +216,13 @@ export function Season() {
             </tbody>
           </table>
         </div>
+        <p className="small muted" style={{ marginTop: 8 }}>
+          <strong>Cómo leerla:</strong> "Pts (PJ)" son los puntos reales hasta hoy y los partidos jugados; "Pts esperados",
+          el promedio de puntos al final de la temporada en todas las simulaciones. Las últimas cuatro columnas dicen en
+          qué porcentaje de las {num(s.n_sims, 0)} simulaciones el equipo salió campeón, terminó entre los 4 o los 6
+          primeros o descendió. Por ejemplo, {s.teams[0].name} salió campeón en el {prob(s.teams[0].p_champion)} de las
+          simulaciones. "—" significa que no pasó en ninguna.
+        </p>
         <p className="small muted" style={{ marginTop: 8 }}>
           "Top 4" y "Top 6" son posiciones en la tabla: los cupos europeos exactos dependen también de las copas. No se
           modelan descuentos de puntos ni desempates por cara a cara. Modelo {s.model_version}.

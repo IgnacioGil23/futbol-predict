@@ -2,6 +2,7 @@ import { Fragment, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { EloChart } from '../components/EloChart'
 import { FormStrip } from '../components/MatchContext'
+import { TeamBadge } from '../components/TeamBadge'
 import { XgChart } from '../components/XgChart'
 import { formatDate, num, pct, useData } from '../lib/data'
 import type { StateFile, TeamFile, TeamIndexItem, TeamSeason, XgFile, XgSeason } from '../lib/types'
@@ -124,9 +125,12 @@ export function Teams() {
               <h3 style={{ marginBottom: 12 }}>{g.title}</h3>
               <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))' }}>
                 {g.items.map((t) => (
-                  <Link key={t.slug} to={`/equipos/${t.slug}`} className="card" style={{ textDecoration: 'none', padding: 14 }}>
-                    <div style={{ fontWeight: 650 }}>{t.name}</div>
-                    <div className="small muted">{t.premier_seasons} temporadas en Premier · última {t.last_premier_season}</div>
+                  <Link key={t.slug} to={`/equipos/${t.slug}`} className="card team-card" style={{ textDecoration: 'none', padding: 14 }}>
+                    <TeamBadge badge={t.badge} short={t.short} name={t.name} size={40} />
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: 650 }}>{t.name}</div>
+                      <div className="small muted">{t.premier_seasons} temporadas en Premier · última {t.last_premier_season}</div>
+                    </div>
                   </Link>
                 ))}
               </div>
@@ -183,7 +187,10 @@ export function TeamDetail() {
     <div className="container section">
       <div className="section-head">
         <Link to="/equipos" className="small muted">← Equipos</Link>
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.4rem)' }}>{t.name}</h1>
+        <div className="team-card">
+          <TeamBadge badge={t.badge} short={t.short} name={t.name} size={64} />
+          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.4rem)' }}>{t.name}</h1>
+        </div>
         {current && <p className="lede">Elo actual <strong>{num(current.elo, 0)}</strong>{current.table?.played ? ` · ${current.table.position}º con ${current.table.points} puntos en ${current.table.played} partidos` : ''}.</p>}
       </div>
 
