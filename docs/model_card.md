@@ -102,6 +102,40 @@ Las familias no se distinguen entre sí (IC pareados de ±0,004 a ±0,009 que in
   en el pipeline y se vuelven a evaluar en el reentrenamiento anual, en temporadas que no se usaron para elegir el
   candidato (2023-24 en adelante). Reporte completo: `reports/challengers/challengers_2026-09-30.json`.
 
+### Poisson bivariado, solo y con tiros al arco (30/09/2026) · **no se promovió**
+
+* **Hipótesis:** los goles de los dos equipos están correlacionados (Karlis y Ntzoufras 2003) y el modelo, que los
+  trata como independientes, subestima los empates.
+* **Diagnóstico previo, solo en temporadas de entrenamiento** (2003-04 a 2014-15, 4.560 partidos, cada una predicha
+  con un modelo entrenado con las anteriores): empates observados / esperados = 1,08 (IC 95% 1,03 a 1,13); 2-2 = 1,17;
+  3-3 o más = 1,50. Covarianza residual de los goles 0,082 (IC 0,044 a 0,120), positiva en 11 de 12 temporadas.
+  Pasó el filtro fijado de antemano. Script: `src/analysis/draw_diagnostic.py`.
+* **Candidatos:** Poisson bivariado sobre las mismas regresiones, con covarianza constante, proporcional a los goles
+  esperados, o proporcional + diagonal inflada (0-0 a 3-3, ecuación 5 del paper); cada uno con Elo y con Elo + tiros al
+  arco (vida media 4). Estimación en dos etapas: las regresiones fijan los goles esperados y la dependencia se estima
+  por máxima verosimilitud del marcador exacto.
+* **Protocolo:** las mismas 8 temporadas que la evaluación de tiros. Regla fijada de antemano: se promueve si (a) mejora
+  el log loss de local/empate/visitante en al menos 0,005 con IC 95% por debajo de 0, o (b) mejora igual el log loss del
+  marcador exacto sin empeorar local/empate/visitante.
+
+| Candidato (diferencia contra producción) | Local/empate/visitante | Marcador exacto |
+|---|---|---|
+| Bivariado constante | −0,0000 [−0,0008; +0,0008] | **+0,0026** [+0,0006; +0,0046] |
+| Bivariado proporcional | −0,0001 [−0,0008; +0,0006] | **+0,0022** [+0,0003; +0,0040] |
+| Bivariado + diagonal | +0,0006 [−0,0006; +0,0019] | **+0,0024** [+0,0002; +0,0047] |
+| Tiros al arco (referencia) | −0,0030 [−0,0057; −0,0004] | −0,0025 [−0,0062; +0,0010] |
+| Tiros al arco + bivariado proporcional | −0,0032 [−0,0060; −0,0004] | −0,0002 [−0,0045; +0,0040] |
+| Dixon-Coles (referencia) | +0,0003 [−0,0004; +0,0011] | −0,0002 [−0,0013; +0,0008] |
+
+* **Decisión: no se promueve ninguno.** El bivariado **empeora** el marcador exacto (IC por encima de 0) y no cambia
+  local/empate/visitante; sumado a los tiros no agrega nada a lo que ya aportan los tiros solos.
+* **Por qué** (análisis posterior a la decisión): el exceso de empates de 2003-2015 no se repite en 2015-2023. En esas
+  temporadas el modelo actual acierta los empates (711 observados, 715 esperados) y la covarianza residual es −0,03
+  (IC −0,08 a +0,02). El λ₃ estimado baja en cada temporada que se suma (de 0,086 para 2015-16 a 0,040 para 2022-23), pero sigue arrastrando la
+  correlación del período anterior y sobreestima los empates (735 esperados).
+* **Lectura:** la correlación entre los goles existió pero no es estable; un modelo que la fije con la historia
+  empeora. Reporte completo: `reports/bivariate/evaluacion_2026-09-30.json`.
+
 ## 6. Limitaciones
 
 * No conoce lesiones, suspensiones, alineaciones, fichajes ni cambios de entrenador: el mercado sí, y por eso predice mejor.
@@ -117,6 +151,7 @@ Las familias no se distinguen entre sí (IC pareados de ±0,004 a ±0,009 que in
 
 * Maher, M. J. (1982). Modelling association football scores. *Statistica Neerlandica*, 36(3).
 * Dixon, M. J., y Coles, S. G. (1997). Modelling association football scores and inefficiencies in the football betting market. *JRSS C*, 46(2).
+* Karlis, D., y Ntzoufras, I. (2003). Analysis of sports data by using bivariate Poisson models. *The Statistician*, 52(3).
 * Hvattum, L. M., y Arntzen, H. (2010). Using ELO ratings for match result prediction in association football. *International Journal of Forecasting*, 26(3).
 * Štrumbelj, E. (2014). On determining probability forecasts from betting odds. *International Journal of Forecasting*, 30(4).
 * Constantinou, A. C., y Fenton, N. E. (2012). Solving the problem of inadequate scoring rules for assessing probabilistic football forecast models. *JQAS*, 8(1).

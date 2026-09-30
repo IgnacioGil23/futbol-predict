@@ -10,7 +10,13 @@ por la corrección de Dixon y Coles (1997, JRSS C 46(2):265-280) para marcadores
 Sumando celdas se obtienen P(local), P(empate) y P(visitante). La grilla se corta
 en MAX_GOALS goles por equipo y se renormaliza (la masa descartada con lam, mu
 típicos de la Premier es del orden de 1e-6).
+
+Alternativa con goles correlacionados: Poisson bivariado y su versión con la diagonal
+inflada (Karlis y Ntzoufras 2003, The Statistician 52(3):381-393, ecuaciones 1 y 5),
+en `bivariate_poisson_matrix`, `inflate_diagonal` y `BivariateDependence`.
 """
+
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -56,6 +62,91 @@ def score_matrix(lam, mu, rho: float = 0.0, max_goals: int = MAX_GOALS) -> np.nd
             raise ValueError("rho fuera del rango válido para estos lam/mu (tau <= 0)")
         matrix[:, :2, :2] *= tau
     return matrix / matrix.sum(axis=(1, 2), keepdims=True)
+
+
+def bivariate_poisson_matrix(lam1, lam2, lam3, max_goals: int = MAX_GOALS) -> np.ndarray:
+    """Grilla (n, max_goals+1, max_goals+1) del Poisson bivariado BP(lam1, lam2, lam3), renormalizada.
+
+    X = X1 + X3, Y = X2 + X3 con Xk ~ Poisson(lamk) independientes, así que
+        P(x, y) = sum_{k=0}^{min(x,y)} Pois(k; lam3) Pois(x-k; lam1) Pois(y-k; lam2),
+    que es la ecuación (1) de Karlis y Ntzoufras (2003) escrita como convolución. Cada
+    término usa solo celdas dentro de la grilla, así que los valores son exactos antes de
+    renormalizar. Marginales: X ~ Poisson(lam1 + lam3), Y ~ Poisson(lam2 + lam3), cov = lam3.
+    """
+    lam1 = np.atleast_1d(np.asarray(lam1, dtype=float))
+    lam2 = np.atleast_1d(np.asarray(lam2, dtype=float))
+    lam3 = np.broadcast_to(np.asarray(lam3, dtype=float), lam1.shape)
+    if np.any(lam1 <= 0) or np.any(lam2 <= 0) or np.any(lam3 < 0):
+        raise ValueError("el Poisson bivariado requiere lam1, lam2 > 0 y lam3 >= 0")
+    goals = np.arange(max_goals + 1)
+    p1 = poisson_pmf(goals[None, :], lam1[:, None])
+    p2 = poisson_pmf(goals[None, :], lam2[:, None])
+    # lam3 = 0 se evalúa como un valor ínfimo: Pois(0) = 1 y Pois(k >= 1) = 0 sin log(0).
+    p3 = poisson_pmf(goals[None, :], np.maximum(lam3, 1e-300)[:, None])
+    outer = p1[:, :, None] * p2[:, None, :]
+    matrix = np.zeros_like(outer)
+    for k in range(max_goals + 1):              # término k: la grilla desplazada k lugares por la diagonal
+        size = max_goals + 1 - k
+        matrix[:, k:, k:] += p3[:, k, None, None] * outer[:, :size, :size]
+    return matrix / matrix.sum(axis=(1, 2), keepdims=True)
+
+
+def inflate_diagonal(matrix: np.ndarray, p: float, theta) -> np.ndarray:
+    """Ecuación (5) de Karlis y Ntzoufras (2003): (1 - p) * grilla + p * D en la diagonal.
+
+    D es la distribución discreta P(j-j) = theta_j para j = 0..J (el paper indica que
+    J <= 3 suele alcanzar en fútbol)."""
+    theta = np.asarray(theta, dtype=float)
+    if not 0 <= p < 1 or np.any(theta < 0) or not np.isclose(theta.sum(), 1.0):
+        raise ValueError("p debe estar en [0, 1) y theta ser una distribución")
+    out = (1 - p) * matrix
+    j = np.arange(len(theta))
+    out[:, j, j] += p * theta
+    return out
+
+
+@dataclass(frozen=True)
+class BivariateDependence:
+    """Cómo se reparte la probabilidad entre marcadores dados los goles esperados (lam, mu).
+
+    * lam3 > 0 (constante): BP(lam - lam3, mu - lam3, lam3). Las marginales conservan las
+      medias lam y mu de las regresiones.
+    * kappa > 0 (proporcional): lam3 = kappa * min(lam, mu) / (1 + kappa), es decir
+      lam3 = kappa * min(lam1, lam2): válido para cualquier kappa >= 0 y cualquier partido.
+    * p > 0: además se infla la diagonal con theta (ecuación 5). Siguiendo al paper, lam y mu
+      son las medias de la componente bivariada; la media del marcador pasa a ser
+      (1 - p) * lam + p * E[D].
+    Todo en cero equivale a goles independientes (la grilla actual).
+    """
+
+    lam3: float = 0.0
+    kappa: float = 0.0
+    p: float = 0.0
+    theta: tuple[float, ...] = ()
+
+    def __post_init__(self):
+        if self.lam3 and self.kappa:
+            raise ValueError("lam3 constante y kappa proporcional son excluyentes")
+        if self.p and not self.theta:
+            raise ValueError("la inflación de la diagonal requiere theta")
+
+    def shared_rate(self, lam: np.ndarray, mu: np.ndarray) -> np.ndarray:
+        """lam3 de cada partido."""
+        if self.kappa:
+            return self.kappa * np.minimum(lam, mu) / (1 + self.kappa)
+        return np.full(np.shape(lam), self.lam3)
+
+    def matrix(self, lam, mu, max_goals: int = MAX_GOALS) -> np.ndarray:
+        lam = np.atleast_1d(np.asarray(lam, dtype=float))
+        mu = np.atleast_1d(np.asarray(mu, dtype=float))
+        lam3 = self.shared_rate(lam, mu)
+        if np.any(lam3 >= np.minimum(lam, mu)):
+            raise ValueError("lam3 debe ser menor que los goles esperados de ambos equipos")
+        m = bivariate_poisson_matrix(lam - lam3, mu - lam3, lam3, max_goals)
+        return inflate_diagonal(m, self.p, self.theta) if self.p else m
+
+    def to_dict(self) -> dict:
+        return {"lam3": self.lam3, "kappa": self.kappa, "p": self.p, "theta": list(self.theta)}
 
 
 def outcome_probabilities(matrix: np.ndarray) -> np.ndarray:

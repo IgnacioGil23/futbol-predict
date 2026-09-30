@@ -8,6 +8,8 @@ goles devuelven además la grilla de marcadores exactos.
 * PoissonGLMModel: dos regresiones de Poisson (goles del local y del visitante,
   estilo Maher 1982) sobre features; opcionalmente con la corrección de Dixon-Coles
   (rho estimado por máxima verosimilitud sobre entrenamiento) y ponderación temporal.
+* BivariatePoissonGLMModel: las mismas regresiones, con goles correlacionados (Poisson
+  bivariado de Karlis y Ntzoufras 2003, opcionalmente con la diagonal inflada).
 * XGBPoissonModel: gradient boosting con objetivo Poisson (contraste no lineal).
 """
 
@@ -15,14 +17,15 @@ from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import minimize_scalar
+from scipy.optimize import minimize, minimize_scalar
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression, PoissonRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 from src.metrics import OUTCOMES
-from src.models.scoreline import dixon_coles_tau, outcome_probabilities, rho_bounds, score_matrix
+from src.models.scoreline import (MAX_GOALS, BivariateDependence, dixon_coles_tau, outcome_probabilities,
+                                  rho_bounds, score_matrix)
 
 
 @dataclass
@@ -144,6 +147,81 @@ class PoissonGLMModel(_GoalsModel):
         return pd.DataFrame({
             "goles_local": self.home_[-1].coef_, "goles_visitante": self.away_[-1].coef_,
         }, index=self.features)
+
+
+DIAGONAL_J = 3   # inflación sobre 0-0 .. 3-3 (Karlis y Ntzoufras 2003: J <= 3 suele alcanzar en fútbol)
+DEPENDENCES = ("constante", "proporcional", "proporcional+diagonal")
+
+
+def _neg_log_lik(dep: BivariateDependence, lam, mu, x, y) -> float:
+    try:
+        m = dep.matrix(lam, mu)
+    except ValueError:
+        return np.inf
+    return -float(np.sum(np.log(np.clip(m[np.arange(len(x)), x, y], 1e-300, None))))
+
+
+def fit_dependence(kind: str, lam: np.ndarray, mu: np.ndarray, home_goals: np.ndarray,
+                   away_goals: np.ndarray) -> BivariateDependence:
+    """Parámetros de dependencia por máxima verosimilitud del marcador exacto, con lam y mu fijos.
+
+    Segunda etapa de una estimación en dos pasos (igual que fit_rho): las regresiones ya
+    fijaron los goles esperados; acá solo se decide cómo repartir la probabilidad entre
+    marcadores. En el Poisson bivariado las marginales siguen siendo Poisson, así que las
+    regresiones de la primera etapa estiman correctamente sus medias.
+    """
+    x = np.minimum(home_goals.astype(int), MAX_GOALS)
+    y = np.minimum(away_goals.astype(int), MAX_GOALS)
+    if kind == "constante":
+        high = float(np.minimum(lam, mu).min()) * (1 - 1e-6)
+        res = minimize_scalar(lambda v: _neg_log_lik(BivariateDependence(lam3=v), lam, mu, x, y),
+                              bounds=(0.0, high), method="bounded")
+        return BivariateDependence(lam3=float(res.x))
+    kappa = minimize_scalar(lambda v: _neg_log_lik(BivariateDependence(kappa=v), lam, mu, x, y),
+                            bounds=(0.0, 5.0), method="bounded").x
+    if kind == "proporcional":
+        return BivariateDependence(kappa=float(kappa))
+    if kind != "proporcional+diagonal":
+        raise ValueError(f"dependencia desconocida: {kind}")
+
+    def unpack(z) -> BivariateDependence:
+        # theta por softmax con el primer logit fijo en 0: identificable y siempre una distribución
+        logits = np.concatenate([[0.0], z[2:]])
+        theta = np.exp(logits - logits.max())
+        return BivariateDependence(kappa=float(z[0]), p=float(z[1]), theta=tuple(theta / theta.sum()))
+
+    z0 = np.concatenate([[kappa, 0.02], np.zeros(DIAGONAL_J)])
+    res = minimize(lambda z: _neg_log_lik(unpack(z), lam, mu, x, y), z0, method="L-BFGS-B",
+                   bounds=[(0.0, 5.0), (0.0, 0.5)] + [(-10.0, 10.0)] * DIAGONAL_J)
+    return unpack(res.x)
+
+
+class BivariatePoissonGLMModel(PoissonGLMModel):
+    """Las mismas regresiones de goles que PoissonGLMModel, con goles correlacionados.
+
+    `dependence`: "constante" (lam3 fijo), "proporcional" (lam3 = kappa * min(lam1, lam2)) o
+    "proporcional+diagonal" (lo anterior más la inflación de los empates 0-0 .. 3-3).
+    """
+
+    name = "poisson_bivariado"
+
+    def __init__(self, features: list[str], dependence: str, alpha: float = 1e-3):
+        if dependence not in DEPENDENCES:
+            raise ValueError(f"dependencia desconocida: {dependence}")
+        super().__init__(features, alpha=alpha)
+        self.dependence = dependence
+
+    def fit(self, train: pd.DataFrame) -> "BivariatePoissonGLMModel":
+        super().fit(train)
+        lam, mu = self._rates(train)
+        self.dependence_ = fit_dependence(self.dependence, lam, mu, train["home_goals"].to_numpy(float),
+                                          train["away_goals"].to_numpy(float))
+        return self
+
+    def predict(self, df: pd.DataFrame) -> Forecast:
+        lam, mu = self._rates(df)
+        matrix = self.dependence_.matrix(lam, mu)
+        return Forecast(probs=outcome_probabilities(matrix), lam=lam, mu=mu, matrix=matrix)
 
 
 class XGBPoissonModel(_GoalsModel):
