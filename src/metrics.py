@@ -42,6 +42,17 @@ def brier_score(probs, results) -> float:
     return float(np.mean(((probs - one_hot(results)) ** 2).sum(axis=1)))
 
 
+def ranked_probability_score(probs, results) -> float:
+    """RPS medio (Epstein 1969), recomendado para fútbol por Constantinou y Fenton (2012)
+    porque respeta el orden local > empate > visitante. En [0, 1]; menor es mejor.
+    Se reporta como métrica secundaria: Wheatcroft (2019) argumenta en su contra como
+    criterio principal, por eso la principal es el log loss."""
+    probs = _check(probs)
+    cum_p = np.cumsum(probs, axis=1)[:, :-1]
+    cum_o = np.cumsum(one_hot(results), axis=1)[:, :-1]
+    return float(np.mean(((cum_p - cum_o) ** 2).sum(axis=1) / (probs.shape[1] - 1)))
+
+
 def accuracy(probs, results) -> float:
     probs = _check(probs)
     return float(np.mean(np.array(OUTCOMES)[probs.argmax(axis=1)] == np.asarray(results)))
@@ -98,6 +109,7 @@ def summarize(probs, results) -> dict:
         "n": int(len(np.asarray(results))),
         "log_loss": log_loss(probs, results),
         "brier": brier_score(probs, results),
+        "rps": ranked_probability_score(probs, results),
         "accuracy": accuracy(probs, results),
         "ece": expected_calibration_error(probs, results),
     }

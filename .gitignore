@@ -23,3 +23,6 @@ mlartifacts/
 Thumbs.db
 .vscode/
 .idea/
+
+# MLflow (tracking local)
+mlflow.db

@@ -1,0 +1,28 @@
+{
+  "poisson_glm": {
+    "family": "poisson_glm",
+    "features": "elo",
+    "alpha": 0.0001,
+    "dixon_coles": false,
+    "halflife_days": null
+  },
+  "dixon_coles": {
+    "family": "dixon_coles",
+    "xi": 0.004,
+    "l2": 1.0
+  },
+  "xgb_poisson": {
+    "family": "xgb_poisson",
+    "features": "todas",
+    "dixon_coles": true,
+    "max_depth": 2,
+    "n_estimators": 500,
+    "halflife_days": null
+  },
+  "logit_elo": {
+    "family": "logit_elo"
+  },
+  "frecuencias": {
+    "family": "frecuencias"
+  }
+}
