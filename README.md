@@ -7,7 +7,7 @@ prediction before kick-off in a tamper-evident ledger, and tests every improveme
 **[Live site](https://ignaciogil23.github.io/futbol-predict/)** (Spanish UI) · **[Model card](docs/model_card.md)** ·
 [Versión en español](README.es.md)
 
-![Home page: featured match with the full score-probability grid](docs/img/home.png)
+![Home page: featured match with home / draw / away probabilities and the most likely scores](docs/img/home.png)
 
 ## Results in 30 seconds
 
