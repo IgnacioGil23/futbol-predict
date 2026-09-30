@@ -9,7 +9,6 @@ Uso:
 """
 
 import argparse
-import io
 import json
 import logging
 from datetime import date
@@ -21,7 +20,8 @@ import requests
 
 from src.analysis.home_advantage import home_advantage
 from src.config import PREMIER_LEAGUE, TEST_SEASONS, season_label, season_start_year
-from src.data.teams import canonical_team, display_name, slug
+from src.data.fixtures import FIXTURES_URL, fetch_fixtures
+from src.data.teams import display_name, slug
 from src.features.build import FEATURES_PATH
 from src.metrics import OUTCOMES, reliability_table, summarize
 from src.models.experiments import predict_feature_model, prepare
@@ -33,7 +33,6 @@ from src.serving.store import MatchStore
 
 logger = logging.getLogger(__name__)
 
-FIXTURES_URL = "https://www.football-data.co.uk/fixtures.csv"
 FIRST_REVIEW_SEASON = 2005   # después del burn-in del Elo y con 3 temporadas de entrenamiento
 GRID = 7
 
@@ -140,20 +139,6 @@ def export_teams(out: Path, store: MatchStore) -> None:
         index.append({"team": team, "name": display_name(team), "slug": slug(team),
                       "premier_seasons": len(seasons), "last_premier_season": seasons[-1]["season"]})
     write(out / "teams.json", sorted(index, key=lambda t: t["name"]))
-
-
-def fetch_fixtures() -> pd.DataFrame:
-    """Próximos partidos publicados por Football-Data (con cuotas pre-cierre)."""
-    response = requests.get(FIXTURES_URL, timeout=60)
-    response.raise_for_status()
-    df = pd.read_csv(io.StringIO(response.content.decode("utf-8-sig", errors="replace")))
-    df = df[df["Div"] == PREMIER_LEAGUE].copy()
-    if df.empty:
-        return df
-    df["date"] = pd.to_datetime(df["Date"], dayfirst=True)
-    for col in ("HomeTeam", "AwayTeam"):
-        df[col] = df[col].map(canonical_team)
-    return df
 
 
 def export_fixtures(out: Path, store: MatchStore, predictor: EloPoissonPredictor, today: pd.Timestamp) -> int:

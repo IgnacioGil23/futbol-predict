@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 class Health(BaseModel):
     status: str
+    model_version: str
     model_trained_at: str
     last_match_in_data: date
 
@@ -51,6 +52,7 @@ class Context(BaseModel):
 
 
 class PredictionOut(BaseModel):
+    model_version: str
     home_team: str
     away_team: str
     date: date

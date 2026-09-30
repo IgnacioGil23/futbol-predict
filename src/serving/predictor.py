@@ -1,5 +1,6 @@
 """Predicción a partir del artefacto JSON del modelo de producción (sin scikit-learn)."""
 
+import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,11 +26,21 @@ class Prediction:
                 for i in flat]
 
 
+def model_version(params: dict, elo_params: dict | None = None) -> str:
+    """Identificador estable del modelo: hash de la regresión y de los parámetros del Elo.
+
+    Cambia si cambia cualquier número que afecte las predicciones.
+    """
+    canonical = json.dumps({"glm": params, "elo": elo_params or {}}, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:12]
+
+
 class EloPoissonPredictor:
     def __init__(self, artifact: dict):
         self.artifact = artifact
         self.params = artifact["params"]
         self.meta = artifact["meta"]
+        self.version = model_version(self.params, self.meta.get("elo_params"))
 
     @classmethod
     def load(cls, path: Path = DEFAULT_MODEL_PATH) -> "EloPoissonPredictor":

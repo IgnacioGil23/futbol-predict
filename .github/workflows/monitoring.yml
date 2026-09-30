@@ -1,0 +1,63 @@
+name: Monitoreo · registrar predicciones
+
+# Todos los días: registra la predicción de cada partido de Premier publicado con
+# fecha posterior a hoy (UTC) y la guarda en la rama `monitoring` (registro inmutable).
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write   # para escribir en la rama monitoring
+
+concurrency:
+  group: monitoring
+  cancel-in-progress: false
+
+jobs:
+  ledger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Checkout de la rama monitoring
+        uses: actions/checkout@v7
+        with:
+          ref: monitoring
+          path: monitoring-branch
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements.txt
+
+      - name: Datos actualizados y estado de los equipos
+        run: |
+          python -m src.data.download
+          python -m src.data.load
+          python -m src.serving.build_state
+
+      - name: Registrar predicciones de los próximos partidos
+        run: |
+          cp monitoring-branch/ledger/predictions.csv /tmp/before.csv
+          python -m src.monitoring.ledger --ledger monitoring-branch/ledger/predictions.csv
+          python - <<'EOF'
+          from pathlib import Path
+          from src.monitoring.ledger import verify_append_only
+          verify_append_only(Path("/tmp/before.csv").read_text(encoding="utf-8"),
+                             Path("monitoring-branch/ledger/predictions.csv").read_text(encoding="utf-8"))
+          print("Integridad verificada: el registro anterior quedó intacto.")
+          EOF
+
+      - name: Guardar en la rama monitoring
+        working-directory: monitoring-branch
+        run: |
+          if git diff --quiet; then echo "Sin predicciones nuevas."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          NEW=$(git diff --numstat ledger/predictions.csv | cut -f1)
+          git add ledger/predictions.csv
+          git commit -m "Registrar ${NEW} predicciones ($(date -u +%F)) · modelo ${GITHUB_SHA::7}"
+          git push origin monitoring

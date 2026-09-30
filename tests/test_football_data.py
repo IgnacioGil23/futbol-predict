@@ -147,3 +147,16 @@ def test_season_code_and_label():
     assert season_code(2003) == "0304"
     assert season_code(2099) == "9900"
     assert season_label(2019) == "2019-20"
+
+
+def test_parse_fixtures_real_format():
+    from src.data.fixtures import parse_fixtures
+    text = ("﻿Div,Date,Time,HomeTeam,AwayTeam,Referee,B365H,B365D,B365A\n"
+            "EC,29/09/2026,19:00,Boreham Wood,Kidderminster,A Humphries,1.33,5,7.5\n"
+            "E0,03/10/2026,15:00,Nottm Forest,Arsenal,,3.1,3.4,2.3\n"
+            "E0,04/10/2026,16:30,Chelsea,Liverpool,,,,\n")
+    df = parse_fixtures(text)
+    assert list(df.HomeTeam) == ["Nott'm Forest", "Chelsea"]           # solo Premier, nombres canónicos
+    assert list(df.date) == [pd.Timestamp("2026-10-03"), pd.Timestamp("2026-10-04")]   # día/mes, no mes/día
+    assert df.B365H.iloc[0] == 3.1 and np.isnan(df.B365H.iloc[1])
+    assert parse_fixtures("Div,Date,HomeTeam,AwayTeam\nEC,29/09/2026,X,Y\n").empty

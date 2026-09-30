@@ -80,7 +80,7 @@ def root():
 
 @app.get("/health", response_model=Health)
 def health(store: MatchStore = Depends(get_store), predictor: EloPoissonPredictor = Depends(get_predictor)):
-    return Health(status="ok", model_trained_at=predictor.meta["trained_at"],
+    return Health(status="ok", model_version=predictor.version, model_trained_at=predictor.meta["trained_at"],
                   last_match_in_data=last_data_date(store))
 
 
@@ -126,6 +126,7 @@ def _predict_cached(home: str, away: str, day: Date) -> PredictionOut:
     pred = predictor.predict(elos[home], elos[away])
     grid = pred.matrix[:GRID_SIZE, :GRID_SIZE]
     return PredictionOut(
+        model_version=predictor.version,
         home_team=home, away_team=away, date=day,
         elo=EloBlock(home=round(elos[home], 1), away=round(elos[away], 1), diff=round(elos[home] - elos[away], 1)),
         expected_goals=ExpectedGoals(home=round(pred.lam, 3), away=round(pred.mu, 3)),
