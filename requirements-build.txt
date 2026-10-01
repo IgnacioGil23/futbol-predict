@@ -4,3 +4,5 @@ requests==2.34.2
 urllib3==2.7.0
 pyarrow==25.0.1
 tzdata==2026.3
+# El rating basado en cuotas (src/features/odds_elo.py) quita el margen por el método de Shin, que usa scipy.
+scipy==1.17.1
