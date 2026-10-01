@@ -76,8 +76,6 @@ def join_results(ledger: pd.DataFrame, store: MatchStore) -> pd.DataFrame:
 SHADOW_MODELS = {
     "tiros": {"candidate": "Elo + tiros y tiros al arco (vida media 4)", "ledger": "shadow_predictions.csv",
               "preregistration": "docs/preregistro_tiros.md"},
-    "xg": {"candidate": "Producción + xG reciente de Fantasy (vida media 4)", "ledger": "shadow_xg_predictions.csv",
-           "preregistration": "docs/preregistro_xg.md"},
 }
 
 
@@ -219,14 +217,11 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=Path("monitoring/reports"))
     parser.add_argument("--issue-body", type=Path, default=None, help="Escribe el cuerpo del issue si hay alerta")
     parser.add_argument("--shadow-ledger", type=Path, default=None, help="Registro del modelo con tiros")
-    parser.add_argument("--shadow-xg-ledger", type=Path, default=None, help="Registro del modelo con xG")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    from src.monitoring.shadow_ledger import SHADOW_COLUMNS, SHADOW_XG_COLUMNS
-    shadows = {name: read_ledger(path, columns)
-               for name, path, columns in (("tiros", args.shadow_ledger, SHADOW_COLUMNS),
-                                           ("xg", args.shadow_xg_ledger, SHADOW_XG_COLUMNS))
-               if path is not None and path.exists()}
+    from src.monitoring.shadow_ledger import SHADOW_COLUMNS
+    shadows = ({"tiros": read_ledger(args.shadow_ledger, SHADOW_COLUMNS)}
+               if args.shadow_ledger is not None and args.shadow_ledger.exists() else {})
     report = evaluate(read_ledger(args.ledger), MatchStore.load(), load_thresholds(), shadows=shadows)
     args.out.mkdir(parents=True, exist_ok=True)
     latest = args.out / "latest.json"

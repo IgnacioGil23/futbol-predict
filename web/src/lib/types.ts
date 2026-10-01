@@ -57,20 +57,6 @@ export interface TeamFile {
   seasons: TeamSeason[]; elo: EloPoint[]
 }
 
-export interface XgTeamRow {
-  team: string; name: string; slug: string; played: number
-  xg_for: number; xg_against: number; goals_for: number; goals_against: number
-}
-export interface XgSeason {
-  season: string; teams: XgTeamRow[]; league: { xg_per_team_game: number; goals_per_team_game: number }
-  first_date: string; last_date: string; matches: number; partial_start: boolean
-}
-export interface XgMatch {
-  date: string; season: string; opponent: string; home: boolean
-  xg_for: number; xg_against: number; goals_for: number; goals_against: number
-}
-export interface XgFile { source: string; seasons: XgSeason[]; series: Record<string, XgMatch[]> }
-
 export interface SeasonTeam {
   team: string; name: string; slug: string; elo: number; points: number; played: number; expected_points: number
   p_champion: number; p_top4: number; p_top6: number; p_relegation: number; positions: number[]

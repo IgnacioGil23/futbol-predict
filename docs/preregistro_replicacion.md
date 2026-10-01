@@ -11,7 +11,8 @@ promoción (selección: −0,0042, IC [−0,0078; −0,0007]; confirmación 2023
 ¿La señal existe también en España, Italia, Alemania y Francia?
 
 **Alcance:** evidencia complementaria. La decisión sobre la Premier sigue siendo la de
-[preregistro_tiros.md](preregistro_tiros.md) y [preregistro_xg.md](preregistro_xg.md), en julio de 2027; esta
+[preregistro_tiros.md](preregistro_tiros.md), en julio de 2027 (el candidato con xG se retiró el 01/10/2026: ver la
+model card); esta
 replicación no la reemplaza ni la modifica.
 
 ## Datos

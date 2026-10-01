@@ -1,6 +1,6 @@
 """Ejecuta un paso que escribe en un registro de "solo agregar", sin que su falla afecte al resto del monitoreo.
 
-Se usa para los modelos en evaluación y la captura del xG: si el comando falla, o si el archivo cambió de otra
+Se usa para el modelo en evaluación: si el comando falla, o si el archivo cambió de otra
 forma que agregando filas al final, se restaura el contenido anterior (o se borra si no existía), se emite un
 aviso de GitHub Actions y se sale con código 0. El registro del modelo de producción NO pasa por acá: su falla
 sí tiene que cortar el workflow.

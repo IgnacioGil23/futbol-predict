@@ -32,20 +32,19 @@ jobs:
           cache: pip
           cache-dependency-path: requirements*.txt
       - run: pip install -r requirements.txt
-      - name: Rama monitoring (reporte y xG de la temporada en curso)
+      - name: Rama monitoring (reporte de la temporada en curso)
         run: |
           if git fetch --depth=1 origin monitoring 2>/dev/null; then
             git show origin/monitoring:reports/latest.json > /tmp/monitoring.json 2>/dev/null || rm -f /tmp/monitoring.json
-            git show origin/monitoring:ledger/xg_team_matches.csv > /tmp/xg_team_matches.csv 2>/dev/null || rm -f /tmp/xg_team_matches.csv
           fi
-          ls -la /tmp/monitoring.json /tmp/xg_team_matches.csv 2>/dev/null || true
+          ls -la /tmp/monitoring.json 2>/dev/null || true
       - name: Descargar datos, recalcular features y exportar JSON
         run: |
           python -m src.data.download
           python -m src.data.load
           python -m src.features.build
           python -m src.serving.build_state
-          python -m src.export.site --out web/public/data --xg-ledger /tmp/xg_team_matches.csv
+          python -m src.export.site --out web/public/data
           if [ -f /tmp/monitoring.json ]; then cp /tmp/monitoring.json web/public/data/monitoring.json; echo "Reporte de monitoreo incluido."
           else rm -f web/public/data/monitoring.json; echo "Todavía no hay reporte de monitoreo."; fi
       - uses: actions/setup-node@v7

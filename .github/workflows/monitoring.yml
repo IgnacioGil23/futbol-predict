@@ -57,34 +57,18 @@ jobs:
           print("Integridad verificada: el registro anterior quedó intacto.")
           EOF
 
-      # Modelos en evaluación (docs/preregistro_tiros.md y docs/preregistro_xg.md). Cada paso es protegido: si
-      # falla, se descartan sus cambios del día y el monitoreo del modelo de producción sigue; esos partidos
-      # quedan fuera de la comparación.
+      # Modelo en evaluación (docs/preregistro_tiros.md). El paso es protegido: si falla, se descartan sus
+      # cambios del día y el monitoreo del modelo de producción sigue; esos partidos quedan fuera de la comparación.
       - name: Registrar predicciones del modelo en evaluación (tiros)
         run: |
           python -m src.monitoring.guarded --file monitoring-branch/ledger/shadow_predictions.csv \
             --label "el registro del modelo con tiros" -- \
             python -m src.monitoring.shadow_ledger --model tiros --ledger monitoring-branch/ledger/shadow_predictions.csv
 
-      - name: Capturar el xG de los partidos terminados
-        run: |
-          python -m src.monitoring.guarded --file monitoring-branch/ledger/xg_team_matches.csv \
-            --label "la captura del xG" -- \
-            python -m src.monitoring.xg_capture --ledger monitoring-branch/ledger/xg_team_matches.csv
-
-      - name: Registrar predicciones del modelo en evaluación (xG)
-        run: |
-          python -m src.monitoring.guarded --file monitoring-branch/ledger/shadow_xg_predictions.csv \
-            --label "el registro del modelo con xG" -- \
-            python -m src.monitoring.shadow_ledger --model xg \
-              --ledger monitoring-branch/ledger/shadow_xg_predictions.csv \
-              --xg-ledger monitoring-branch/ledger/xg_team_matches.csv
-
       - name: Evaluar contra los resultados
         run: |
           python -m src.monitoring.evaluate --ledger monitoring-branch/ledger/predictions.csv \
             --shadow-ledger monitoring-branch/ledger/shadow_predictions.csv \
-            --shadow-xg-ledger monitoring-branch/ledger/shadow_xg_predictions.csv \
             --out monitoring-branch/reports --issue-body /tmp/issue.md
 
       - name: Guardar en la rama monitoring

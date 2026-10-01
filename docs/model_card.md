@@ -174,42 +174,16 @@ entrenado con las anteriores:
 * **Lectura:** la correlación entre los goles existió pero no es estable; un modelo que la fije con la historia
   empeora. Reporte completo: `reports/bivariate/evaluacion_2026-09-30.json`.
 
-### xG y fuerza de la alineación con datos de Fantasy Premier League (30/09/2026) · **A en observación, B descartado**
+### Experimentos retirados por los términos de uso de sus fuentes (01/10/2026)
 
-* **Datos:** archivo histórico de Fantasy (`vaastav/Fantasy-Premier-League`, commit fijado), 2022-23 a 2025-26:
-  380/380 partidos por temporada vinculados a Football-Data con el mismo marcador; precio de cada jugador en cada fecha
-  del torneo, verificado contra el precio inicial (100%) y contra la API oficial (30/30). Controles y correcciones en
-  `src/data/fpl_archive.py` y `reports/fpl/calidad_archivo.json`.
-* **Preregistro** ([docs/preregistro_fpl.md](preregistro_fpl.md)), commiteado antes de construir las variables:
-  * **A:** xG a favor y en contra, media exponencial con vida media 4, información de días antes.
-  * **B:** precio de los 11 titulares respecto de los 5 partidos anteriores, información de una hora antes. B es además una
-    cota del valor de conocer las lesiones.
-  * Ambos como corrección sin intercepto sobre el modelo de producción; 2023-24 a 2025-26; la regla de siempre.
-
-| Candidato (diferencia contra producción) | Log loss | IC 95% | Por temporada |
-|---|---|---|---|
-| **A: xG móvil** | **−0,0059** | [−0,0115; −0,0002] | +0,0064 · −0,0191 · −0,0050 |
-| B: fuerza de la alineación | +0,0006 | [−0,0023; +0,0036] | +0,0021 · −0,0022 · +0,0020 |
-| Control: alineación del partido anterior | −0,0001 | [−0,0052; +0,0049] | — |
-
-* **B: no mejora.** Conocer los 11 titulares no aporta sobre el Elo; por el preregistro, **se descarta la recolección de
-  lesiones** (la alineación confirmada contiene más información que la lista de lesionados).
-* **A: cumple la regla, con fragilidad.** El IC queda apenas por debajo de 0 y, corrigiendo por los 2 candidatos
-  (IC 97,5%), incluye el 0 ([−0,0123; +0,0007]). Empeora en 2023-24, la temporada con menos datos para estimar la
-  corrección (234 partidos). La mejora no depende de pocos partidos: los 20 de mayor diferencia van, en conjunto, en
-  contra de A. Reduce la brecha con Bet365 de +0,022 a +0,016.
-* **Decisión, como fija el preregistro:** A no pasa directo a producción. Se registra en paralelo durante 2026-27 y se
-  decide en julio de 2027 junto con el candidato de tiros; como probablemente miden la misma señal, se elegirá uno.
-* Reporte: `reports/challengers/fpl_2026-09-30.json`; código: `src/features/fpl_features.py`, `src/models/fpl_eval.py`.
-* **Registro en paralelo durante 2026-27** ([preregistro](preregistro_xg.md), commiteado antes de congelar el
-  candidato): A quedó congelado (`models/shadow_xg/model.json`, versión `a12662418789`, corrección estimada con 1.369
-  partidos sobre el modelo de producción `ced0b252cafe`, cuyos parámetros se copian dentro del artefacto). El monitoreo
-  diario captura el xG por equipo de cada partido terminado desde la API de Fantasy (`ledger/xg_team_matches.csv`,
-  solo se agregan filas y el primer valor es el definitivo) y registra la predicción de A antes de cada partido
-  (`ledger/shadow_xg_predictions.csv`). Controles: el xG capturado en vivo coincide con el del archivo en la fecha 1
-  de 2026-27 (20/20 equipos-partido) y las variables calculadas con la historia guardada coinciden con las de la prueba
-  histórica. En julio de 2027 se decide con la regla de siempre y, si A y los tiros cumplen, con el desempate
-  preregistrado (ante una diferencia no concluyente, los tiros).
+* Se habían evaluado dos candidatos con datos de terceros: el **xG y la fuerza de la alineación** con datos de Fantasy
+  Premier League (archivo histórico y API) y el **valor de mercado del plantel** con datos de Transfermarkt.
+* Al revisar los términos de uso, los de Fantasy prohíben extraer información del juego con sistemas automatizados y
+  usar sus datos sin consentimiento escrito, y los de Transfermarkt prohíben el acceso automatizado y el uso de su
+  contenido para desarrollar modelos de machine learning. Por eso se retiraron del repositorio su código, sus
+  preregistros, sus resultados y el modelo con xG que se registraba en paralelo, y se detuvo la captura diaria del
+  xG. Ninguno estaba en producción: la decisión de julio de 2027 queda solo con el candidato de tiros, que usa datos
+  de Football-Data.
 
 ### Análisis de errores: dónde pierde el modelo contra el mercado (30/09/2026)
 
@@ -225,7 +199,7 @@ fijados antes de mirar (`src/analysis/error_analysis.py`, `reports/analysis/anal
 * **Desacuerdo.** Cuando modelo y mercado difieren en menos de 5 puntos en P(local) (53% de los partidos), la brecha es
   +0,001; cuando difieren 10 puntos o más (14%), +0,059: la mitad de la brecha total.
 * **Consecuencias:** candidatos preregistrados a partir de acá (ventaja de local reciente, información de pretemporada
-  y un modelo con las cinco ligas); ver las secciones siguientes.
+  —retirado, ver arriba— y un modelo con las cinco ligas); ver las secciones siguientes.
 
 ### Ventaja de local estimada con temporadas recientes (candidato L, 30/09/2026) · **sin señal**
 
@@ -250,30 +224,6 @@ fijados antes de mirar (`src/analysis/error_analysis.py`, `reports/analysis/anal
 * Por el preregistro, no se registra en paralelo; el sesgo queda como limitación conocida.
   Reporte: `reports/challengers/ventaja_local_2026-09-30.json`; código: `src/models/home_level.py`.
 
-### Valor de mercado del plantel (Transfermarkt, candidato V, 30/09/2026) · **señal mínima, sin fuente en vivo**
-
-* **Por qué Transfermarkt y no los precios de Fantasy:** en 302 jugadores de la Premier 2025-26, el precio inicial de
-  Fantasy correlaciona 0,57 (Spearman) con el valor de Transfermarkt, y sus **variaciones** apenas 0,25: el precio de
-  Fantasy sigue la demanda de los usuarios del juego, no el valor del jugador.
-* **Datos:** `dcaribou/transfermarkt-datasets` (valuaciones y transferencias; recolección detenida en julio de 2026).
-  Valor del plantel en la fecha de cada partido con eventos anteriores a esa fecha (`src/data/transfermarkt.py`);
-  clubes vinculados a Football-Data por fecha y marcador en el 99,9%-100% de los partidos.
-* **Preregistro** ([docs/preregistro_valor.md](preregistro_valor.md)): d = log(valor local) − log(valor visitante)
-  como corrección sin intercepto sobre el modelo base de cada liga; principal en las cuatro ligas, 2015-16 a 2025-26.
-
-| | Candidato − base | IC 95% |
-|---|---|---|
-| **Cuatro ligas (principal)** | **−0,0008** | **[−0,0016; −0,00001]** |
-| Cuatro ligas, fechas 1 a 5 | −0,0023 | [−0,0045; −0,0001] |
-| Italia / Francia / España / Alemania | −0,0030 / −0,0009 / +0,0004 / +0,0006 | — |
-| Premier (descriptivo) | −0,0013 (fechas 1 a 5: −0,0047) | [−0,0023; −0,0003] |
-
-* **Lectura:** cumple "señal" por el mínimo posible (el IC toca el 0) y queda lejos de la regla. El efecto es ~5% de la
-  brecha con el mercado y, como se esperaba, se concentra en las primeras fechas (−0,0023), pero ni ahí explica más que
-  una parte chica de la brecha de esas fechas (+0,031). Es heterogéneo: claro en Italia, nulo en España y Alemania.
-  Los coeficientes tienen el signo esperado en todas las ligas. Por el preregistro se documenta; no hay fuente en vivo
-  para producción. Reporte: `reports/challengers/valor_plantel_2026-09-30.json`.
-
 ### Modelos entrenados con las cinco ligas (P-GLM y P-XGB, 30/09/2026) · **no agregan sobre los tiros**
 
 * **Preregistro** ([docs/preregistro_combinado.md](preregistro_combinado.md)): Poisson (P-GLM) y XGBoost con
@@ -291,7 +241,7 @@ fijados antes de mirar (`src/analysis/error_analysis.py`, `reports/analysis/anal
   que el modelo lineal con tiros (IC por encima de 0): con 5 veces más datos tampoco encuentra patrones no lineales que
   valgan; en su importancia dominan la diferencia de Elo, los goles recientes y los tiros. Cumple "señal" y no la regla:
   se documenta. Reporte: `reports/challengers/combinado_2026-09-30.json`; código: `src/models/pooled.py`.
-* **Conclusión de esta ronda** (análisis de errores + tres candidatos): con datos de resultados y estadísticas de partido
+* **Conclusión de esta ronda** (análisis de errores y los candidatos de esta sección): con datos de resultados y estadísticas de partido
   no queda nada importante por exprimir más allá de los tiros; la brecha con el mercado está en información que esos
   datos no tienen.
 

@@ -26,7 +26,6 @@ from src.data.teams import display_name, slug
 from src.export.badges import badge
 from src.export.season import build_season
 from src.export.stadiums import stadium
-from src.export.xg import build_xg
 from src.features.build import FEATURES_PATH
 from src.metrics import OUTCOMES, reliability_table, summarize
 from src.models.experiments import predict_feature_model, prepare
@@ -302,8 +301,6 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=Path("web/public/data"))
     parser.add_argument("--today", type=str, default=None, help="Fecha de referencia (AAAA-MM-DD); por defecto, hoy")
-    parser.add_argument("--xg-ledger", type=Path, default=None,
-                        help="Registro de xG de la temporada en curso (rama monitoring: ledger/xg_team_matches.csv)")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     today = pd.Timestamp(args.today or date.today())
@@ -316,7 +313,6 @@ def main() -> None:
     export_teams(out, store)
     upcoming = export_upcoming(out, store, predictor, today)
     review = export_review(out, features, season_start_year(today.date()))
-    write(out / "xg.json", build_xg(store, args.xg_ledger))
     season_sim = build_season(store, predictor, today)
     if season_sim is not None:
         write(out / "season.json", season_sim)

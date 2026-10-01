@@ -15,10 +15,10 @@ datos, la experimentación, una API y una web interactiva.
 * **Comparación con la literatura:** RPS 0,1942 contra 0,1953 del mejor modelo de Ley et al. (2019), en los mismos
   3.300 partidos.
 * **Lo único que mejora:** los tiros (−0,004 a −0,005 de log loss en la Premier, replicado en España, Italia, Alemania y
-  Francia: −0,0049 en 15.583 partidos) y el xG de Fantasy (−0,0059, frágil). Los dos se registran en paralelo y se
-  deciden en julio de 2027.
-* **Descartado con evidencia:** Poisson bivariado, alineación del día (y con ella las lesiones), ventaja de local
-  reciente, valor de mercado del plantel y modelos combinados de 5 ligas, lineal y XGBoost.
+  Francia: −0,0049 en 15.583 partidos). Se registra en paralelo y se decide en julio de 2027.
+* **Descartado con evidencia:** Poisson bivariado, ventaja de local reciente y modelos combinados de 5 ligas, lineal y
+  XGBoost. Dos experimentos con datos de terceros (Fantasy Premier League y Transfermarkt) se retiraron por los términos
+  de uso de esas fuentes.
 * **Análisis de errores:** la brecha con el mercado está en la información de cada partido (la mitad sale del 14% de
   partidos con mayor desacuerdo) y se duplica en las fechas 1 a 5.
 
@@ -106,8 +106,6 @@ cd web && npm install && npm run dev
 | Resultados, estadísticas y cuotas | [Football-Data.co.uk](https://www.football-data.co.uk/) ([notes.txt](https://www.football-data.co.uk/notes.txt)) |
 | Elo de comparación (ClubElo) | [Club Football Match Data](https://github.com/xgabora/Club-Football-Match-Data) (A. Gábor), `EloRatings.csv` |
 | Calendario de las próximas jornadas | [openfootball/england](https://github.com/openfootball/england) (dominio público) |
-| xG de jugadores y alineaciones | API de [Fantasy Premier League](https://fantasy.premierleague.com/) y el archivo [vaastav/Fantasy-Premier-League](https://github.com/vaastav/Fantasy-Premier-League) |
-| Valor de mercado de los planteles | [dcaribou/transfermarkt-datasets](https://github.com/dcaribou/transfermarkt-datasets) |
 | Escudos (web) | Servidos por premierleague.com; marcas registradas de cada club, mostradas solo como referencia visual |
 | Fotos de estadios (web) | Imagen principal del artículo de cada estadio en Wikipedia, en [Wikimedia Commons](https://commons.wikimedia.org/) con licencia CC BY / CC BY-SA; autor y licencia junto a cada foto (`src/export/stadiums.py`) |
 

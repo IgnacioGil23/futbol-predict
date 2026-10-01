@@ -1,4 +1,4 @@
-"""Registros en paralelo de los modelos en evaluación (docs/preregistro_tiros.md, docs/preregistro_xg.md).
+"""Registro en paralelo del modelo en evaluación (docs/preregistro_tiros.md).
 
 Mismas reglas que src/monitoring/ledger.py (clave, solo partidos con fecha posterior al día de la corrida, la
 primera predicción es la definitiva, solo se agregan filas), un archivo por modelo para no tocar el formato del
@@ -14,8 +14,6 @@ jugados de la temporada en curso con source = "reconstruido".
 
 Uso (lo corre el workflow diario):
     python -m src.monitoring.shadow_ledger --model tiros --ledger monitoring/ledger/shadow_predictions.csv
-    python -m src.monitoring.shadow_ledger --model xg --ledger monitoring/ledger/shadow_xg_predictions.csv \\
-        --xg-ledger monitoring/ledger/xg_team_matches.csv
 """
 
 import argparse
@@ -30,7 +28,6 @@ import numpy as np
 import pandas as pd
 
 from src.config import PREMIER_LEAGUE, season_label, season_start_year
-from src.features.fpl_features import A_COLUMNS
 from src.monitoring.ledger import KEY, append_entries, read_ledger
 from src.serving.shadow import SHOT_COLUMNS
 from src.serving.store import MatchStore
@@ -38,7 +35,6 @@ from src.serving.store import MatchStore
 logger = logging.getLogger(__name__)
 
 DEFAULT_SHADOW_LEDGER = Path("monitoring/ledger/shadow_predictions.csv")
-DEFAULT_SHADOW_XG_LEDGER = Path("monitoring/ledger/shadow_xg_predictions.csv")
 
 
 def ledger_columns(feature_columns: list[str]) -> list[str]:
@@ -49,7 +45,6 @@ def ledger_columns(feature_columns: list[str]) -> list[str]:
 
 
 SHADOW_COLUMNS = ledger_columns(SHOT_COLUMNS)          # registro de tiros (formato fijo desde 2026-09-30)
-SHADOW_XG_COLUMNS = ledger_columns(A_COLUMNS)
 
 
 @dataclass
@@ -68,12 +63,6 @@ def shots_model(matches: pd.DataFrame, predictor=None) -> ShadowModel:
     from src.serving.shadow import ShadowPredictor, shot_features_for
     return ShadowModel("tiros", predictor or ShadowPredictor.load(), SHOT_COLUMNS,
                        lambda t: shot_features_for(matches, t))
-
-
-def xg_model(history: pd.DataFrame, predictor=None) -> ShadowModel:
-    from src.serving.shadow_xg import ShadowXgPredictor, xg_features_for
-    return ShadowModel("xg", predictor or ShadowXgPredictor.load(), A_COLUMNS,
-                       lambda t: xg_features_for(history, t))
 
 
 def _rows(targets: pd.DataFrame, model: ShadowModel, store: MatchStore, now: datetime, source: str,
@@ -136,15 +125,10 @@ def reconstructed_entries(matches: pd.DataFrame, model: ShadowModel, store: Matc
     return _rows(played[["date", "home_team", "away_team"]], model, store, now, "reconstruido", code_commit)
 
 
-def load_model(name: str, matches: pd.DataFrame, xg_ledger: Path | None) -> ShadowModel:
+def load_model(name: str, matches: pd.DataFrame) -> ShadowModel:
     if name == "tiros":
         return shots_model(matches)
-    from src.monitoring.xg_capture import XG_COLUMNS, history_rows
-    from src.serving.shadow_xg import XG_HISTORY_PATH
-    history = pd.read_csv(XG_HISTORY_PATH)
-    if xg_ledger is not None and xg_ledger.exists():
-        history = pd.concat([history, history_rows(read_ledger(xg_ledger, XG_COLUMNS))], ignore_index=True)
-    return xg_model(history)
+    raise ValueError(f"Modelo en evaluación desconocido: {name}")
 
 
 def main() -> None:
@@ -152,16 +136,15 @@ def main() -> None:
     from src.data.load import load_matches
 
     parser = argparse.ArgumentParser(description="Registra predicciones de un modelo en evaluación")
-    parser.add_argument("--model", choices=["tiros", "xg"], default="tiros")
-    parser.add_argument("--ledger", type=Path, default=None)
-    parser.add_argument("--xg-ledger", type=Path, default=None, help="Registro del xG en vivo (modelo xg)")
+    parser.add_argument("--model", choices=["tiros"], default="tiros")
+    parser.add_argument("--ledger", type=Path, default=DEFAULT_SHADOW_LEDGER)
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    ledger = args.ledger or (DEFAULT_SHADOW_LEDGER if args.model == "tiros" else DEFAULT_SHADOW_XG_LEDGER)
+    ledger = args.ledger
     now = datetime.now(UTC)
     commit = os.getenv("GITHUB_SHA", "local")[:12]
     matches, store = load_matches(), MatchStore.load()
-    model = load_model(args.model, matches, args.xg_ledger)
+    model = load_model(args.model, matches)
 
     if not ledger.exists():
         seeded = append_entries(ledger, reconstructed_entries(matches, model, store, now, commit),

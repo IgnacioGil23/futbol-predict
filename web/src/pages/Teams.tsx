@@ -5,119 +5,13 @@ import { EloChart } from '../components/EloChart'
 import { Icon } from '../components/Icon'
 import { FormStrip } from '../components/MatchContext'
 import { TeamBadge } from '../components/TeamBadge'
-import { TeamName } from '../components/TeamName'
 import { TeamPreviewPopover, type TeamSeasonSummary } from '../components/TeamPreview'
-import { XgChart } from '../components/XgChart'
 import { formatDate, num, pct, pct1, useData } from '../lib/data'
 import { useTeamIndex } from '../lib/teams'
-import type { SeasonFile, StateFile, TeamFile, TeamIndexItem, TeamSeason, XgFile, XgSeason } from '../lib/types'
+import type { SeasonFile, StateFile, TeamFile, TeamSeason } from '../lib/types'
 import './teams.css'
 
-const signed = (x: number, digits = 1) => `${x > 0 ? '+' : ''}${num(x, digits)}`
 const delay = (d: number) => ({ '--d': d }) as CSSProperties
-
-/** Aclaración que acompaña al xG en toda la web: no son los "goles esperados" del modelo. */
-function XgNote() {
-  return (
-    <p className="small muted" style={{ marginTop: 10 }}>
-      El <strong>xG</strong> (expected goals) mide la calidad de las ocasiones según los tiros de cada partido: un xG de 1,5
-      equivale a ocasiones que en promedio terminan en 1,5 goles. No es lo mismo que los "goles esperados" de cada
-      pronóstico, que el modelo calcula antes del partido con el Elo. Fuente: estadísticas de Fantasy Premier League,
-      sumadas por equipo.
-    </p>
-  )
-}
-
-function XgLeagueTable({ data, teams }: { data: XgFile; teams: Map<string, TeamIndexItem> }) {
-  const [season, setSeason] = useState(data.seasons[0]?.season)
-  const s: XgSeason | undefined = data.seasons.find((x) => x.season === season)
-  if (!s) return null
-  const maxDiff = Math.max(...s.teams.map((t) => Math.abs(t.xg_for - t.xg_against) / t.played))
-  return (
-    <section className="card xg-card">
-      <div className="xg-head">
-        <div>
-          <span className="eyebrow">Calidad de las ocasiones</span>
-          <h3 style={{ margin: '8px 0 0' }}>Tabla de xG</h3>
-        </div>
-        <div className="field" style={{ minWidth: 150 }}>
-          <label htmlFor="xg-season">Temporada</label>
-          <select id="xg-season" value={season} onChange={(e) => setSeason(e.target.value)}>
-            {data.seasons.map((x) => <option key={x.season} value={x.season}>{x.season}</option>)}
-          </select>
-        </div>
-      </div>
-      <p className="card-sub" style={{ marginTop: 12 }}>
-        {s.matches} partidos{s.partial_start ? ` (el xG se registró recién desde el ${formatDate(s.first_date)})` : ''} ·
-        promedio de la liga: {num(s.league.xg_per_team_game)} de xG y {num(s.league.goals_per_team_game)} goles por equipo y partido.
-        Ordenado por diferencia de xG por partido.
-      </p>
-      <div className="table-wrap">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>#</th><th>Equipo</th><th className="num">PJ</th><th className="num">xG a favor/PJ</th><th className="num">xG en contra/PJ</th>
-              <th className="num">Dif. xG/PJ</th><th className="num" title="Goles convertidos menos xG a favor">Goles − xG</th>
-              <th className="num" title="Goles recibidos menos xG en contra">Recibidos − xG</th>
-            </tr>
-          </thead>
-          <tbody>
-            {s.teams.map((t, i) => {
-              const diff = (t.xg_for - t.xg_against) / t.played
-              return (
-                <tr key={t.slug}>
-                  <td className="muted tabular">{i + 1}</td>
-                  <td><TeamName team={teams.get(t.team)} name={t.name} to={`/equipos/${t.slug}`} /></td>
-                  <td className="num">{t.played}</td>
-                  <td className="num">{num(t.xg_for / t.played)}</td>
-                  <td className="num">{num(t.xg_against / t.played)}</td>
-                  <td className="num">
-                    <span className="xg-diff">
-                      <span className="xg-diff-bar"><span style={{
-                        width: `${(Math.abs(diff) / maxDiff) * 50}%`, [diff >= 0 ? 'left' : 'right']: '50%',
-                        background: diff >= 0 ? 'var(--good)' : 'var(--bad)',
-                      }} /></span>
-                      <strong>{signed(diff, 2)}</strong>
-                    </span>
-                  </td>
-                  <td className="num">{signed(t.goals_for - t.xg_for)}</td>
-                  <td className="num">{signed(t.goals_against - t.xg_against)}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-      <p className="small muted" style={{ marginTop: 10 }}>
-        "Goles − xG" positivo: convirtió más de lo que sus ocasiones anticipaban. "Recibidos − xG" negativo: le hicieron
-        menos goles de lo esperado (arquero, defensa o suerte). Esas diferencias suelen achicarse con el tiempo.
-      </p>
-      <XgNote />
-    </section>
-  )
-}
-
-/** Tarjeta de la ficha de equipo: xG de la temporada más reciente frente a la liga y su evolución. */
-function TeamXg({ data, slug, name }: { data: XgFile; slug: string; name: string }) {
-  const matches = data.series[slug] ?? []
-  const s = data.seasons.find((x) => x.teams.some((t) => t.slug === slug))
-  const row = s?.teams.find((t) => t.slug === slug)
-  if (!s || !row) return null
-  const xf = row.xg_for / row.played
-  const xa = row.xg_against / row.played
-  const finishing = row.goals_for - row.xg_for
-  return (
-    <div className="card" style={{ marginBottom: 18 }}>
-      <h3>Calidad de las ocasiones (xG), {s.season}</h3>
-      <p className="card-sub">
-        {name} genera {num(xf)} de xG por partido y concede {num(xa)} (promedio de la liga: {num(s.league.xg_per_team_game)}).
-        Convirtió {row.goals_for} goles con {num(row.xg_for, 1)} de xG ({signed(finishing)}) en {row.played} partidos.
-      </p>
-      {matches.length > 0 && <XgChart matches={matches} />}
-      <XgNote />
-    </div>
-  )
-}
 
 /** Tarjeta de un club de la temporada en curso: abre la vista previa con hover, foco o el botón de información. */
 function ClubCard({ s, i, onOpen, onLeave, active }: {
@@ -158,7 +52,6 @@ export function Teams() {
   const { list, byTeam } = useTeamIndex()
   const state = useData<StateFile>('state.json')
   const season = useData<SeasonFile>('season.json')
-  const xg = useData<XgFile>('xg.json')
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState<{ s: TeamSeasonSummary; rect: DOMRect; modal: boolean } | null>(null)
   const timer = useRef<number | undefined>(undefined)
@@ -204,7 +97,7 @@ export function Teams() {
         <h1>Equipos</h1>
         <p className="lede">
           Pasá el mouse por un club para ver su temporada sobre la foto de su estadio; hacé clic para abrir la ficha
-          completa con la evolución del Elo, el rendimiento frente a la liga y la calidad de sus ocasiones (xG).
+          completa con la evolución del Elo y el rendimiento frente a la liga, temporada por temporada.
         </p>
         <div className="field search teams-search">
           <label htmlFor="q" className="sr-only">Buscar un equipo</label>
@@ -231,8 +124,6 @@ export function Teams() {
           </div>
         </section>
       )}
-
-      {!q && xg.data && xg.data.seasons.length > 0 && <XgLeagueTable data={xg.data} teams={byTeam} />}
 
       {others.length > 0 && (
         <section className="teams-block">
@@ -283,7 +174,6 @@ export function TeamDetail() {
   const team = useData<TeamFile>(slug ? `teams/${slug}.json` : null)
   const state = useData<StateFile>('state.json')
   const season = useData<SeasonFile>('season.json')
-  const xg = useData<XgFile>('xg.json')
   const [range, setRange] = useState<'3' | 'all'>('3')
   const [imgLoaded, setImgLoaded] = useState(false)
   const t = team.data
@@ -364,8 +254,6 @@ export function TeamDetail() {
             </div>
           </div>
         )}
-
-        {xg.data && slug && <TeamXg data={xg.data} slug={slug} name={t.name} />}
 
         <div className="card" style={{ marginBottom: 18 }}>
           <div className="card-head">

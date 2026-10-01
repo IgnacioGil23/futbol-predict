@@ -155,11 +155,11 @@ export function Monitoring() {
 
       {r.shadows && r.shadows.length > 0 && (
         <div className="card" style={{ marginTop: 16 }}>
-          <span className="eyebrow">Modelos en evaluación</span>
+          <span className="eyebrow">{r.shadows.length > 1 ? 'Modelos en evaluación' : 'Modelo en evaluación'}</span>
           <p className="small" style={{ margin: '6px 0 10px' }}>
-            Registran sus predicciones en paralelo, antes de cada partido. No reemplazan al modelo publicado ni se
-            muestran resultados parciales: se evalúan una sola vez, {r.shadows[0].evaluation}, con reglas fijadas de
-            antemano. Si los dos cumplen su regla, se elige uno (el desempate también está preregistrado).
+            {r.shadows.length > 1 ? 'Registran sus' : 'Registra sus'} predicciones en paralelo, antes de cada partido. No
+            reemplaza al modelo publicado ni se muestran resultados parciales: se evalúa una sola vez,{' '}
+            {r.shadows[0].evaluation}, con una regla fijada de antemano.
           </p>
           <div className="grid grid-2">
             {r.shadows.map((s) => (
