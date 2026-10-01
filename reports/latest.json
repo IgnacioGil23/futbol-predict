@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-30T11:37:16+00:00",
+  "generated_at": "2026-10-01T12:09:24+00:00",
   "window": 190,
   "counts": {
     "logged": 50,
@@ -21,16 +21,34 @@
       "method": "predicciones fuera de muestra del modelo de producción (reentrenamiento anual); mercado = Bet365 pre-cierre sin margen (Shin)"
     }
   },
-  "shadow": {
-    "candidate": "Elo + tiros y tiros al arco (vida media 4)",
-    "model_versions": [
-      "ec5a7a4752bc"
-    ],
-    "logged": 50,
-    "logged_live": 0,
-    "logged_reconstructed": 50,
-    "evaluation": "al terminar la temporada 2026-27 (julio de 2027)"
-  },
+  "shadows": [
+    {
+      "name": "tiros",
+      "candidate": "Elo + tiros y tiros al arco (vida media 4)",
+      "ledger": "shadow_predictions.csv",
+      "preregistration": "docs/preregistro_tiros.md",
+      "model_versions": [
+        "ec5a7a4752bc"
+      ],
+      "logged": 50,
+      "logged_live": 0,
+      "logged_reconstructed": 50,
+      "evaluation": "al terminar la temporada 2026-27 (julio de 2027)"
+    },
+    {
+      "name": "xg",
+      "candidate": "Producción + xG reciente de Fantasy (vida media 4)",
+      "ledger": "shadow_xg_predictions.csv",
+      "preregistration": "docs/preregistro_xg.md",
+      "model_versions": [
+        "a12662418789"
+      ],
+      "logged": 50,
+      "logged_live": 0,
+      "logged_reconstructed": 50,
+      "evaluation": "al terminar la temporada 2026-27 (julio de 2027)"
+    }
+  ],
   "status": "insuficiente",
   "status_label": "Datos insuficientes",
   "indicators": {
