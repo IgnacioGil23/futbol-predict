@@ -61,3 +61,12 @@ Mismo α = 1e-4 que el modelo de producción.
    definitivamente.
 3. **El registro falla** (partidos sin predicción del candidato): esos partidos quedan fuera de la
    comparación y se informa cuántos fueron. Los partidos no se reconstruyen después.
+
+## Enmienda (01/10/2026)
+
+Desde el 01/10/2026 el modelo de producción es el del rating basado en cuotas (`docs/preregistro_cuotas.md`). Para
+que la pregunta de este preregistro no cambie, la referencia sigue siendo el modelo de Elo de resultados
+(`ced0b252cafe`): en 2026-27 se toman sus predicciones del registro de producción mientras fue el modelo de
+producción y, desde el cambio, las de su registro en paralelo (`ledger/shadow_elo_predictions.csv`), con las mismas
+reglas (registradas antes de cada partido; ante un partido repetido, vale la primera). Las temporadas 2023-24 a
+2025-26 no cambian. Código: `src.models.confirm_shots.elo_baseline_ledger`.

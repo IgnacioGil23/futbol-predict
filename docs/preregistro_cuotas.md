@@ -64,3 +64,28 @@ cambio posterior queda en el historial de git y tiene que justificarse en el pro
 * **Señal sin cumplir la regla, o sin señal:** se documenta en la model card y no se registra en paralelo. El
   proyecto se da por terminado con el modelo de producción actual y el candidato de tiros en observación.
 * El test 2023-24 a 2025-26 ya se usó en confirmaciones anteriores: forma parte del período evaluado y no se reserva.
+
+## Enmienda (01/10/2026, después de ver el resultado)
+
+**Resultado** (`reports/challengers/cuotas_2026-10-01.json`): O1 y O2 cumplen la regla. O1, elegido por menor
+diferencia media: −0,0084 de log loss en las cinco ligas, IC 95% [−0,0100; −0,0067], IC 97,5% [−0,0102; −0,0065];
+mejora en 51 de 55 temporadas-liga.
+
+**Cambio respecto de lo fijado arriba:** en lugar de registrar O1 en paralelo y decidir en julio de 2027, **O1 pasa
+a producción ahora** y el modelo anterior (Poisson sobre el Elo de resultados, versión `ced0b252cafe`, congelado en
+`models/elo/model.json`) es el que se registra en paralelo durante el resto de 2026-27.
+
+**Por qué:**
+* La evidencia ya es mucho más fuerte de lo que puede agregar el registro: 19.763 partidos fuera de muestra, con el
+  intervalo lejos de 0. Los ~330 partidos de la Premier que quedan en 2026-27 darían un intervalo de alrededor de
+  ±0,012: no pueden confirmar ni refutar un efecto medido con 60 veces más partidos.
+* Esperar significaría publicar durante nueve meses un modelo que sabemos que es peor.
+
+**Lo que se mantiene, para que el cambio sea verificable:**
+* **Comparación en vivo en julio de 2027:** O1 (registro de producción) contra el modelo anterior (registro en paralelo,
+  `ledger/shadow_elo_predictions.csv`), en los partidos de 2026-27 registrados por los dos antes de jugarse. Es
+  descriptiva salvo un caso: **si O1 resulta peor con el IC 95% pareado completamente por encima de 0, se vuelve al
+  modelo anterior**.
+* El candidato de tiros conserva su pregunta (ver la enmienda de `preregistro_tiros.md`).
+* La simulación de la temporada sigue con el modelo anterior, que es el evaluado en `preregistro_temporada.md`: el
+  ELO-Odds no puede actualizarse con partidos simulados.
