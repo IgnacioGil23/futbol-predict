@@ -34,19 +34,6 @@
       "logged_live": 0,
       "logged_reconstructed": 50,
       "evaluation": "al terminar la temporada 2026-27 (julio de 2027)"
-    },
-    {
-      "name": "xg",
-      "candidate": "Producción + xG reciente de Fantasy (vida media 4)",
-      "ledger": "shadow_xg_predictions.csv",
-      "preregistration": "docs/preregistro_xg.md",
-      "model_versions": [
-        "a12662418789"
-      ],
-      "logged": 50,
-      "logged_live": 0,
-      "logged_reconstructed": 50,
-      "evaluation": "al terminar la temporada 2026-27 (julio de 2027)"
     }
   ],
   "status": "insuficiente",
