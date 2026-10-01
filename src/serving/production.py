@@ -1,12 +1,16 @@
 """Entrena y exporta el modelo de producción.
 
-Modelo: dos regresiones de Poisson sobre la diferencia de Elo (elegido en
-validación, evaluado una vez en test; ver notebooks/03_modelo.ipynb). Se
-reentrena con todas las temporadas COMPLETAS disponibles desde 2002-03, igual que
-en la evaluación (reentrenamiento anual con ventana expansiva).
+Modelo (desde el 01/10/2026): dos regresiones de Poisson sobre la diferencia del rating basado en cuotas
+(ELO-Odds; src/features/odds_elo.py). Cumplió la regla preregistrada en docs/preregistro_cuotas.md (cinco ligas,
+2015-16 a 2025-26: −0,0084 de log loss contra el modelo anterior) y pasó a producción por la enmienda de ese
+preregistro. El modelo anterior (Poisson sobre el Elo de resultados) queda congelado en models/elo/model.json: lo
+usan la simulación de la temporada y su registro en paralelo durante 2026-27.
+
+Se reentrena con todas las temporadas COMPLETAS desde 2004-05 (el ELO-Odds arranca con las cuotas de 2002-03; sus
+dos primeras temporadas son de arranque, como en la evaluación preregistrada).
 
 El artefacto es un JSON con los parámetros, no un pickle: como el modelo es
-    log E[goles] = b0 + b1 * (elo_diff - media) / desvío
+    log E[goles] = b0 + b1 * (diferencia de rating - media) / desvío
 alcanza con guardar esos números. Es portable, auditable y no depende de la
 versión de scikit-learn.
 
@@ -20,9 +24,11 @@ from datetime import date
 
 import pandas as pd
 
-from src.config import PROJECT_ROOT, TRAIN_SEASONS, season_start_year
+from src.config import PROJECT_ROOT, TEST_SEASONS, season_label, season_start_year
 from src.features.build import ELO_PARAMS_PATH, FEATURES_PATH
-from src.models.experiments import PREDICTIONS_DIR, prepare
+from src.features.odds_elo import ODDS_ELO_PARAMS_PATH
+from src.metrics import summarize
+from src.models.experiments import predict_feature_model, prepare
 from src.models.feature_models import PoissonGLMModel
 from src.serving.build_state import build_state
 from src.serving.store import SERVING_MATCHES_PATH
@@ -31,7 +37,10 @@ logger = logging.getLogger(__name__)
 
 PRODUCTION_DIR = PROJECT_ROOT / "models" / "production"
 MODEL_PATH = PRODUCTION_DIR / "model.json"
-FEATURES = ["elo_diff"]
+ELO_MODEL_PATH = PROJECT_ROOT / "models" / "elo" / "model.json"   # modelo anterior, congelado
+FEATURES = ["odds_elo_diff"]
+RATING = "odds_elo"
+FIRST_TRAIN_SEASON = 2004
 ALPHA = 1e-4
 PARAM_DECIMALS = 12
 
@@ -52,43 +61,43 @@ def export_params(model: PoissonGLMModel) -> dict:
     return out
 
 
-def test_metrics_from_experiments() -> dict | None:
-    """Métricas de la evaluación única en test (solo existen donde se corrieron los experimentos)."""
-    path = PREDICTIONS_DIR / "test_results.csv"
-    if not path.exists():
-        return None
-    test_results = pd.read_csv(path)
-    main = test_results[test_results.config.str.startswith("family=poisson_glm")].iloc[0]
-    market = test_results.set_index("config")
+def test_metrics(features: pd.DataFrame, previous_meta: dict | None) -> dict:
+    """Métricas en test (2023-24 a 2025-26) de esta configuración, cada temporada predicha con un modelo entrenado
+    con las anteriores. Las del mercado son de los mismos partidos y no cambian: se toman del artefacto anterior."""
+    markets = (previous_meta or {}).get("test_metrics")
+    if markets is None:
+        raise FileNotFoundError("Faltan las métricas del mercado en test: pasar el artefacto anterior")
+    pred = predict_feature_model(lambda: PoissonGLMModel(FEATURES, alpha=ALPHA), features, list(TEST_SEASONS),
+                                 first_train=FIRST_TRAIN_SEASON)
+    results = pred.merge(features[["match_id", "result"]], on="match_id")["result"].astype(str).to_numpy()
+    model = summarize(pred[["p_home", "p_draw", "p_away"]].to_numpy(), results)
     return {
-        "seasons": "2023-24 a 2025-26",
-        "model": {k: float(main[k]) for k in ("log_loss", "rps", "brier", "accuracy", "ece")} | {"n": int(main["n"])},
-        "bet365_pre_closing": {k: float(market.loc["mercado_bet365_precierre", k]) for k in ("log_loss", "rps", "brier", "accuracy")},
-        "pinnacle_closing": {k: float(market.loc["mercado_pinnacle_cierre", k]) for k in ("log_loss", "rps", "brier", "accuracy")}
-        | {"n": int(market.loc["mercado_pinnacle_cierre", "n"])},
+        "seasons": f"{season_label(min(TEST_SEASONS))} a {season_label(max(TEST_SEASONS))}",
+        "model": {k: float(model[k]) for k in ("log_loss", "rps", "brier", "accuracy", "ece")} | {"n": int(model["n"])},
+        "bet365_pre_closing": markets["bet365_pre_closing"],
+        "pinnacle_closing": markets["pinnacle_closing"],
     }
 
 
 def train_production(features: pd.DataFrame, today: date | None = None,
                      previous_meta: dict | None = None) -> tuple[PoissonGLMModel, dict]:
-    """Entrena con todas las temporadas completas. Las métricas de test describen la CONFIGURACIÓN
-    (evaluada una sola vez): si no están los resultados de los experimentos (p. ej. en GitHub
-    Actions), se conservan las del modelo anterior."""
+    """Entrena con todas las temporadas completas desde FIRST_TRAIN_SEASON."""
     current = season_start_year(today or date.today())
-    train = features[(features.season_start >= min(TRAIN_SEASONS)) & (features.season_start < current)
+    train = features[(features.season_start >= FIRST_TRAIN_SEASON) & (features.season_start < current)
                      & features.played]
     model = PoissonGLMModel(FEATURES, alpha=ALPHA).fit(train)
-    test_metrics = test_metrics_from_experiments() or (previous_meta or {}).get("test_metrics")
-    if test_metrics is None:
-        raise FileNotFoundError("No hay métricas de test: correr los experimentos o pasar el modelo anterior")
     meta = {
-        "model": "Poisson (goles del local y del visitante) sobre la diferencia de Elo",
+        "model": "Poisson (goles del local y del visitante) sobre la diferencia del rating basado en cuotas (ELO-Odds)",
         "features": FEATURES,
+        "rating": RATING,
         "alpha": ALPHA,
         "trained_on": {"seasons": f"{train.season.min()} a {train.season.max()}", "matches": int(len(train))},
         "trained_at": pd.Timestamp.now().isoformat(timespec="seconds"),
-        "elo_params": json.loads(ELO_PARAMS_PATH.read_text(encoding="utf-8"))["params"],
-        "test_metrics": test_metrics,
+        # Parámetros del rating que usa el modelo (entran en el hash de versión).
+        "elo_params": json.loads(ODDS_ELO_PARAMS_PATH.read_text(encoding="utf-8"))["params"],
+        "results_elo_params": json.loads(ELO_PARAMS_PATH.read_text(encoding="utf-8"))["params"],
+        "preregistration": "docs/preregistro_cuotas.md",
+        "test_metrics": test_metrics(features, previous_meta),
     }
     return model, {"params": export_params(model), "meta": meta}
 
@@ -96,7 +105,8 @@ def train_production(features: pd.DataFrame, today: date | None = None,
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     features = prepare(pd.read_parquet(FEATURES_PATH))
-    _, artifact = train_production(features)
+    previous = json.loads(MODEL_PATH.read_text(encoding="utf-8"))["meta"] if MODEL_PATH.exists() else None
+    _, artifact = train_production(features, previous_meta=previous)
     PRODUCTION_DIR.mkdir(parents=True, exist_ok=True)
     MODEL_PATH.write_text(json.dumps(artifact, indent=2, ensure_ascii=False), encoding="utf-8")
     logger.info("Modelo de producción -> %s (%s)", MODEL_PATH, artifact["meta"]["trained_on"])

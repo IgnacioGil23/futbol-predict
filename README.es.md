@@ -6,18 +6,19 @@ datos, la experimentación, una API y una web interactiva.
 
 [English version](README.md) · **[Web](https://ignaciogil23.github.io/futbol-predict/)** · **[Model card](docs/model_card.md)**
 
-> **Resultado en una línea:** en test (2023-26), el modelo queda a ~0,02 de log loss del mercado (Bet365 pre-cierre),
-> una brecha estadísticamente significativa: **no le gana al mercado**, pero está bien calibrado y un modelo de 4
-> parámetros empata con Dixon-Coles y XGBoost. Detalle en el [model card](docs/model_card.md).
+> **Resultado en una línea:** en test (2023-26), el modelo queda a 0,008 de log loss del mercado (Bet365 pre-cierre;
+> IC 95% 0,001 a 0,014): **no le gana al mercado**, pero desde que usa un Elo que aprende de las cuotas de partidos
+> anteriores la brecha bajó a un tercio (era 0,022). Está bien calibrado. Detalle en el [model card](docs/model_card.md).
 
 **Después del modelo base** (todo preregistrado; detalle en el model card):
 
 * **Comparación con la literatura:** RPS 0,1942 contra 0,1953 del mejor modelo de Ley et al. (2019), en los mismos
   3.300 partidos.
 * **Lo que mejora:** un rating basado en cuotas de partidos anteriores (ELO-Odds, Wunderlich y Memmert 2018): −0,0084
-  de log loss en 19.763 partidos de cinco ligas, IC 95% [−0,0100; −0,0067]; reduce a la mitad la brecha con Bet365 y
-  cumple la regla preregistrada. También los tiros (−0,004 a −0,005, replicado en otras cuatro ligas), que se registran
-  en paralelo y se deciden en julio de 2027.
+  de log loss en 19.763 partidos de cinco ligas, IC 95% [−0,0100; −0,0067]; reduce a la mitad la brecha con Bet365,
+  cumple la regla preregistrada y está en producción desde el 01/10/2026 (el modelo anterior se registra en
+  paralelo). También los tiros (−0,004 a −0,005, replicado en otras cuatro ligas), que se registran en paralelo y se
+  deciden en julio de 2027.
 * **Descartado con evidencia:** Poisson bivariado, ventaja de local reciente y modelos combinados de 5 ligas, lineal y
   XGBoost. Dos experimentos con datos de terceros (Fantasy Premier League y Transfermarkt) se retiraron por los términos
   de uso de esas fuentes.

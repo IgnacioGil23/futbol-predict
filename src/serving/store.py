@@ -3,7 +3,10 @@
 Todo se responde con partidos jugados ESTRICTAMENTE antes de la fecha pedida
 (misma regla anti-fuga que las features de entrenamiento).
 
-Elo a la fecha D de un equipo:
+Ratings: el Elo de resultados ("elo") y el basado en cuotas ("odds_elo", el del modelo de producción desde el
+01/10/2026). Los dos siguen la misma lógica.
+
+Rating a la fecha D de un equipo:
 * El rating solo cambia cuando el equipo juega o al inicio de una temporada
   (regresión a la media / rating de arranque de un recién llegado). El ajuste de
   inicio se calcula con el primer partido de la temporada, usando solo partidos
@@ -28,8 +31,9 @@ from src.config import PROCESSED_DIR
 SERVING_MATCHES_PATH = PROCESSED_DIR / "serving_matches.csv.gz"
 
 
-def build_serving_matches(matches: pd.DataFrame, elo_per_match: pd.DataFrame, elo_history: pd.DataFrame) -> pd.DataFrame:
-    """Une partidos (E0+E1) con Elo previo y posterior de ambos equipos."""
+def build_serving_matches(matches: pd.DataFrame, elo_per_match: pd.DataFrame, elo_history: pd.DataFrame,
+                          odds_per_match: pd.DataFrame, odds_history: pd.DataFrame) -> pd.DataFrame:
+    """Une partidos (E0+E1) con los dos ratings, previo y posterior, de ambos equipos."""
     cols = ["match_id", "division", "season", "season_start", "date", "home_team", "away_team",
             "home_goals", "away_goals", "result"]
     df = matches[cols].merge(elo_per_match[["match_id", "elo_home", "elo_away"]], on="match_id", how="left")
@@ -37,6 +41,14 @@ def build_serving_matches(matches: pd.DataFrame, elo_per_match: pd.DataFrame, el
     for side in ("home", "away"):
         df = df.merge(post.rename(columns={"team": f"{side}_team", "elo_after": f"elo_{side}_after"}),
                       on=["match_id", f"{side}_team"], how="left")
+    df = df.merge(odds_per_match[["match_id", "odds_elo_home", "odds_elo_away"]], on="match_id", how="left")
+    for side in ("home", "away"):
+        df = df.merge(odds_history.rename(columns={"team": f"{side}_team", "odds_elo_after": f"odds_elo_{side}_after"}),
+                      on=["match_id", f"{side}_team"], how="left")
+        # Un partido jugado sin cuotas no movió el rating de cuotas: el posterior es el previo.
+        played = df["home_goals"].notna()
+        df.loc[played, f"odds_elo_{side}_after"] = df.loc[played, f"odds_elo_{side}_after"].fillna(
+            df.loc[played, f"odds_elo_{side}"])
     df["home_goals"] = df["home_goals"].astype("float64")
     df["away_goals"] = df["away_goals"].astype("float64")
     df["result"] = df["result"].astype("string")
@@ -72,6 +84,12 @@ class TeamMatch:
     elo_before: float
     elo_after: float
     match_id: str
+    odds_elo_before: float = float("nan")
+    odds_elo_after: float = float("nan")
+
+    def rating(self, kind: str, when: str) -> float:
+        """Rating "elo" u "odds_elo", "before" o "after" del partido."""
+        return getattr(self, f"{kind}_{when}")
 
     @property
     def played(self) -> bool:
@@ -95,7 +113,9 @@ class MatchStore:
                     gf=r.home_goals if is_home else r.away_goals, ga=r.away_goals if is_home else r.home_goals,
                     elo_before=r.elo_home if is_home else r.elo_away,
                     elo_after=(r.elo_home_after if is_home else r.elo_away_after),
-                    match_id=r.match_id))
+                    match_id=r.match_id,
+                    odds_elo_before=r.odds_elo_home if is_home else r.odds_elo_away,
+                    odds_elo_after=r.odds_elo_home_after if is_home else r.odds_elo_away_after))
         self._dates = {t: [m.date for m in ms] for t, ms in self.by_team.items()}
         # Fecha en que se aplica el ajuste de inicio de cada temporada (primer partido, cualquier división).
         self._season_start_date = self.matches.groupby("season_start").date.min().to_dict()
@@ -120,6 +140,10 @@ class MatchStore:
         return [m for m in self.by_team[team][:i] if m.played]
 
     def elo_as_of(self, team: str, day: pd.Timestamp) -> float | None:
+        return self.rating_as_of(team, day, "elo")
+
+    def rating_as_of(self, team: str, day: pd.Timestamp, kind: str = "elo") -> float | None:
+        """Rating `kind` ("elo" u "odds_elo") del equipo en la fecha `day`, con partidos anteriores a esa fecha."""
         day = pd.Timestamp(day)
         ms = self.by_team.get(team)
         if not ms:
@@ -128,17 +152,17 @@ class MatchStore:
         prev = next((m for m in reversed(ms[:i]) if m.played), None)
         nxt = ms[i] if i < len(ms) else None
         if nxt is not None and self._season_start_date[nxt.season_start] <= day:
-            return float(nxt.elo_before)
-        return float(prev.elo_after) if prev is not None else None
+            return float(nxt.rating(kind, "before"))
+        return float(prev.rating(kind, "after")) if prev is not None else None
 
     # --------------------------------------------------------------- contexto
-    def elo_series(self, team: str, day: pd.Timestamp, seasons_back: int = 2) -> list[dict]:
-        """Rating después de cada partido, desde `seasons_back` temporadas antes de `day`."""
+    def elo_series(self, team: str, day: pd.Timestamp, seasons_back: int = 2, kind: str = "elo") -> list[dict]:
+        """Rating `kind` después de cada partido, desde `seasons_back` temporadas antes de `day`."""
         past = self._before(team, pd.Timestamp(day))
         if not past:
             return []
         first_season = past[-1].season_start - seasons_back
-        return [{"date": m.date.date().isoformat(), "elo": round(m.elo_after, 1), "opponent": m.opponent,
+        return [{"date": m.date.date().isoformat(), "elo": round(m.rating(kind, "after"), 1), "opponent": m.opponent,
                  "home": m.is_home, "score": f"{int(m.gf)}-{int(m.ga)}", "division": m.division}
                 for m in past if m.season_start >= first_season]
 

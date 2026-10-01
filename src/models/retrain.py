@@ -40,7 +40,7 @@ from src.models.experiments import predict_feature_model, prepare
 from src.models.feature_models import PoissonGLMModel
 from src.odds import shin_probabilities
 from src.serving.predictor import model_version
-from src.serving.production import ALPHA, MODEL_PATH, train_production
+from src.serving.production import ALPHA, FIRST_TRAIN_SEASON, MODEL_PATH, train_production
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +48,8 @@ MAX_ECE = 0.05   # sanidad: el backtest histórico ronda 0,02
 
 
 def validation_block(features: pd.DataFrame, seasons: list[int]) -> dict:
-    pred = predict_feature_model(lambda: PoissonGLMModel(CHAMPION_FEATURES, alpha=ALPHA), features, seasons)
+    pred = predict_feature_model(lambda: PoissonGLMModel(CHAMPION_FEATURES, alpha=ALPHA), features, seasons,
+                                 first_train=FIRST_TRAIN_SEASON)
     d = pred.merge(features[["match_id", "season", "result", "b365_home", "b365_draw", "b365_away"]], on="match_id")
     odds = d[["b365_home", "b365_draw", "b365_away"]].to_numpy(float)
     ok = ~np.isnan(odds).any(axis=1)

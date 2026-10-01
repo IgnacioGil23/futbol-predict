@@ -61,3 +61,55 @@ def test_rating_before_a_day_ignores_that_day_and_later_odds():
 def test_calibrated_home_advantage_matches_the_mean_market_score():
     h = calibrated_home_advantage(np.array([0.6, 0.6, np.nan]))
     assert np.isclose(1 / (1 + 10 ** (-h / 400)), 0.6, atol=1e-3)
+
+
+def test_store_serves_both_ratings_and_the_model_declares_which_it_uses():
+    from test_serving_api import store_from
+
+    from src.serving.predictor import EloPoissonPredictor
+
+    df = with_odds(make_league(seasons=(2004, 2005)))
+    df["season"] = df["season"].astype(str)
+    store = store_from(df)
+    day = pd.Timestamp("2005-12-31")
+    team = df.home_team.iloc[0]
+    elo, odds = store.rating_as_of(team, day, "elo"), store.rating_as_of(team, day, "odds_elo")
+    assert elo == store.elo_as_of(team, day) and np.isfinite(odds) and elo != odds
+    assert all(np.isfinite(p["elo"]) for p in store.elo_series(team, day, kind="odds_elo"))
+    params = {"home_goals": {"intercept": 0.3, "coef": 0.2, "feature_mean": 0, "feature_scale": 100},
+              "away_goals": {"intercept": 0.1, "coef": -0.2, "feature_mean": 0, "feature_scale": 100}}
+    assert EloPoissonPredictor({"params": params, "meta": {}}).rating == "elo"
+    assert EloPoissonPredictor({"params": params, "meta": {"rating": "odds_elo"}}).rating == "odds_elo"
+
+
+def test_frozen_elo_shadow_predicts_like_the_previous_production_model():
+    from src.monitoring.shadow_ledger import FrozenEloModel
+    from src.serving.predictor import EloPoissonPredictor
+
+    params = {"home_goals": {"intercept": 0.3, "coef": 0.2, "feature_mean": 0, "feature_scale": 100},
+              "away_goals": {"intercept": 0.1, "coef": -0.2, "feature_mean": 0, "feature_scale": 100}}
+    predictor = EloPoissonPredictor({"params": params, "meta": {}})
+    fc = FrozenEloModel(predictor).predict(pd.DataFrame({"elo_diff": [120.0, -40.0]}))
+    single = predictor.predict(1860.0, 1740.0)
+    assert np.isclose(fc.lam[0], single.lam) and np.allclose(fc.probs[0], single.probs)
+
+
+def test_shots_candidate_keeps_its_preregistered_baseline():
+    # docs/preregistro_tiros.md compara contra el modelo de Elo de resultados, aunque producción haya cambiado.
+    from src.models import confirm_shots
+    from src.serving.production import FEATURES
+
+    assert confirm_shots.CHAMPION_FEATURES == ["elo_diff"]
+    assert confirm_shots.CANDIDATE[0] == "elo_diff" and FEATURES == ["odds_elo_diff"]
+
+
+def test_shots_baseline_ledger_joins_old_production_rows_and_the_elo_shadow():
+    from src.models.confirm_shots import elo_baseline_ledger
+
+    def rows(teams, version, p):
+        return pd.DataFrame({"season": "2026-27", "season_start": 2026, "home_team": teams, "away_team": "Z",
+                             "source": "vivo", "model_version": version, "p_home": p, "p_draw": 0.3, "p_away": 0.7 - p})
+    main = pd.concat([rows(["A", "B"], "old", 0.4), rows(["C"], "new", 0.5)])     # C ya es del modelo nuevo
+    shadow = pd.concat([rows(["B"], "old", 0.9), rows(["C"], "old", 0.45)])       # B repetido: vale el primero
+    out = elo_baseline_ledger(main, shadow, "old").set_index("home_team")
+    assert sorted(out.index) == ["A", "B", "C"] and out.loc["B", "p_home"] == 0.4 and out.loc["C", "p_home"] == 0.45

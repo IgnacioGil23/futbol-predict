@@ -1,5 +1,5 @@
 import { CalibrationChart } from '../components/CalibrationChart'
-import { formatDate, num, pct, useData } from '../lib/data'
+import { formatDate, num, pct, REPO, useData } from '../lib/data'
 import { useTeamIndex } from '../lib/teams'
 import type { CalibrationFile, MetaFile, ReviewSeasonSummary } from '../lib/types'
 
@@ -27,7 +27,8 @@ export function Method() {
           <h3>El modelo en una frase</h3>
           <p style={{ color: 'var(--ink-2)' }}>
             Dos regresiones de Poisson (una para los goles del local y otra para los del visitante, en la línea de
-            Maher 1982) cuya única variable es la <strong>diferencia de Elo</strong> entre los equipos. Con los goles
+            Maher 1982) cuya única variable es la <strong>diferencia de rating</strong> entre los equipos, con un Elo que
+            aprende de las cuotas de los partidos anteriores. Con los goles
             esperados de cada uno se calcula la probabilidad de cada marcador exacto, y sumando celdas, la de victoria
             local, empate y victoria visitante.
           </p>
@@ -35,12 +36,16 @@ export function Method() {
         </div>
 
         <div className="card">
-          <h3>El Elo, calculado desde cero</h3>
+          <h3>El rating: un Elo que aprende del mercado</h3>
           <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-2)' }}>
             <li>Partido a partido sobre Premier League <strong>y Championship</strong>, para que los ascendidos lleguen con historia.</li>
-            <li>Cuanto más amplia la victoria, más se mueve el rating: k = k0·(1 + |diferencia de gol|)^λ (Hvattum y Arntzen, 2010).</li>
-            <li>Parámetros ajustados solo con temporadas de entrenamiento{m && `: k0 = ${m.elo_params.k0}, λ = ${m.elo_params.lam}, ventaja de local = ${m.elo_params.home_advantage} puntos`}.</li>
-            <li>Mejoró tanto a los parámetros originales del paper como al Elo de ClubElo en la misma muestra.</li>
+            <li>Después de cada partido ya jugado, el rating de cada equipo se acerca a lo que el mercado esperaba de él
+              <strong> antes</strong> de jugarlo (probabilidad de ganar más la mitad de la de empatar, Bet365 sin margen):
+              así absorbe fichajes, lesiones largas y cambios de entrenador (Wunderlich y Memmert, 2018).</li>
+            <li><strong>Nunca usa las cuotas del partido que predice</strong>, solo las de partidos anteriores.</li>
+            <li>Parámetros ajustados solo con 2004-05 a 2014-15{m && `: k = ${m.elo_params.k0}, ventaja de local = ${m.elo_params.home_advantage} puntos`}.</li>
+            <li>Preregistrado y evaluado en 19.763 partidos de cinco ligas: mejoró el log loss en 0,0084 frente al Elo de
+              resultados que usaba antes (<a href={`${REPO}/blob/main/docs/preregistro_cuotas.md`} target="_blank" rel="noreferrer">preregistro</a>).</li>
           </ul>
         </div>
 
@@ -69,9 +74,10 @@ export function Method() {
               </table>
             </div>
             <p className="callout" style={{ marginTop: 12 }}>
-              <strong>El modelo no le gana al mercado.</strong> Queda unas 0,02 de log loss por detrás de Bet365 y la
-              diferencia es estadísticamente significativa. Es lo esperable: las cuotas incorporan lesiones, alineaciones y
-              noticias que el modelo no ve. Sus probabilidades, en cambio, están bien calibradas (abajo).
+              <strong>El modelo no le gana al mercado.</strong> Queda {num(t.model.log_loss - t.bet365_pre_closing.log_loss, 3)} de
+              log loss por detrás de Bet365 (con el Elo de resultados eran 0,022). Es lo esperable: las cuotas de cada
+              partido incorporan lesiones, alineaciones y noticias de esa semana que el modelo no ve. Sus probabilidades,
+              en cambio, están bien calibradas (abajo).
             </p>
             <p className="small muted" style={{ marginTop: 8 }}>
               * Pinnacle solo tiene cuotas para {t.pinnacle_closing.n} de los {t.model.n} partidos de test. Probabilidades de

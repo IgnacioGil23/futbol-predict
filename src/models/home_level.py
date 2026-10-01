@@ -22,11 +22,11 @@ import pandas as pd
 
 from src.config import season_label
 from src.data.leagues import LEAGUES
+from src.models.experiments import ELO
 from src.models.feature_models import Forecast, PoissonGLMModel
 from src.models.replication import EVAL_SEASONS, TRAIN_START, log_loss_per_match, stratified_ci
 from src.models.scoreline import outcome_probabilities, score_matrix
 from src.serving.production import ALPHA
-from src.serving.production import FEATURES as ELO
 
 logger = logging.getLogger(__name__)
 

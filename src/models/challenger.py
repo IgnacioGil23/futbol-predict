@@ -27,10 +27,11 @@ import pandas as pd
 from src.features.build import FEATURES_PATH
 from src.features.team_state import SHOTS_HALFLIVES
 from src.metrics import OUTCOMES, summarize
-from src.models.experiments import predict_feature_model, prepare
+from src.models.experiments import FIRST_TRAIN_SEASON, predict_feature_model, prepare
 from src.models.feature_models import PoissonGLMModel
 from src.serving.production import ALPHA
 from src.serving.production import FEATURES as CHAMPION_FEATURES
+from src.serving.production import FIRST_TRAIN_SEASON as CHAMPION_FIRST_TRAIN
 
 logger = logging.getLogger(__name__)
 
@@ -52,8 +53,9 @@ def candidates() -> dict[str, list[str]]:
     return out
 
 
-def walk_forward(features: pd.DataFrame, feats: list[str], seasons: list[int]) -> pd.DataFrame:
-    return predict_feature_model(lambda: PoissonGLMModel(feats, alpha=ALPHA), features, seasons)
+def walk_forward(features: pd.DataFrame, feats: list[str], seasons: list[int],
+                 first_train: int = FIRST_TRAIN_SEASON) -> pd.DataFrame:
+    return predict_feature_model(lambda: PoissonGLMModel(feats, alpha=ALPHA), features, seasons, first_train=first_train)
 
 
 def per_match_log_loss(pred: pd.DataFrame, features: pd.DataFrame) -> pd.Series:
@@ -77,13 +79,13 @@ def compare(champion: pd.Series, challenger: pd.Series, n_boot: int = N_BOOT, se
 
 def run(seasons: list[int], features: pd.DataFrame | None = None) -> dict:
     features = features if features is not None else prepare(pd.read_parquet(FEATURES_PATH))
-    champ_pred = walk_forward(features, CHAMPION_FEATURES, seasons)
+    champ_pred = walk_forward(features, CHAMPION_FEATURES, seasons, CHAMPION_FIRST_TRAIN)
     champ_ll = per_match_log_loss(champ_pred, features)
     champ_summary = summarize(champ_pred[["p_home", "p_draw", "p_away"]].to_numpy(),
                               champ_pred.merge(features[["match_id", "result"]], on="match_id")["result"].to_numpy())
     results = []
     for name, feats in candidates().items():
-        pred = walk_forward(features, feats, seasons)
+        pred = walk_forward(features, feats, seasons, CHAMPION_FIRST_TRAIN)
         res = compare(champ_ll, per_match_log_loss(pred, features))
         # Diferencia por temporada: ¿la mejora es estable o viene de una sola temporada?
         by_season = {}

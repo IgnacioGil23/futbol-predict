@@ -1,4 +1,9 @@
-"""Registro en paralelo del modelo en evaluación (docs/preregistro_tiros.md).
+"""Registros en paralelo de los modelos en evaluación.
+
+* "tiros": el candidato de tiros (docs/preregistro_tiros.md).
+* "elo": el modelo de producción anterior (Poisson sobre el Elo de resultados, congelado en models/elo/model.json),
+  desde que el rating basado en cuotas pasó a producción (enmienda de docs/preregistro_cuotas.md): permite comparar
+  los dos en vivo durante 2026-27.
 
 Mismas reglas que src/monitoring/ledger.py (clave, solo partidos con fecha posterior al día de la corrida, la
 primera predicción es la definitiva, solo se agregan filas), un archivo por modelo para no tocar el formato del
@@ -14,6 +19,7 @@ jugados de la temporada en curso con source = "reconstruido".
 
 Uso (lo corre el workflow diario):
     python -m src.monitoring.shadow_ledger --model tiros --ledger monitoring/ledger/shadow_predictions.csv
+    python -m src.monitoring.shadow_ledger --model elo --ledger monitoring/ledger/shadow_elo_predictions.csv
 """
 
 import argparse
@@ -35,6 +41,7 @@ from src.serving.store import MatchStore
 logger = logging.getLogger(__name__)
 
 DEFAULT_SHADOW_LEDGER = Path("monitoring/ledger/shadow_predictions.csv")
+DEFAULT_LEDGERS = {"tiros": DEFAULT_SHADOW_LEDGER, "elo": Path("monitoring/ledger/shadow_elo_predictions.csv")}
 
 
 def ledger_columns(feature_columns: list[str]) -> list[str]:
@@ -45,6 +52,7 @@ def ledger_columns(feature_columns: list[str]) -> list[str]:
 
 
 SHADOW_COLUMNS = ledger_columns(SHOT_COLUMNS)          # registro de tiros (formato fijo desde 2026-09-30)
+SHADOW_ELO_COLUMNS = ledger_columns([])                 # registro del modelo anterior (formato fijo desde 2026-10-01)
 
 
 @dataclass
@@ -63,6 +71,28 @@ def shots_model(matches: pd.DataFrame, predictor=None) -> ShadowModel:
     from src.serving.shadow import ShadowPredictor, shot_features_for
     return ShadowModel("tiros", predictor or ShadowPredictor.load(), SHOT_COLUMNS,
                        lambda t: shot_features_for(matches, t))
+
+
+class FrozenEloModel:
+    """Adapta el predictor del modelo de Elo (artefacto JSON) a la interfaz de los modelos en evaluación."""
+
+    def __init__(self, predictor):
+        self.predictor = predictor
+        self.version = predictor.version
+
+    def predict(self, rows: pd.DataFrame):
+        from src.models.scoreline import outcome_probabilities, score_matrix
+        from src.serving.shadow import ShadowForecast
+        lam, mu = self.predictor.rates(rows["elo_diff"].to_numpy(float))
+        return ShadowForecast(lam=lam, mu=mu, probs=outcome_probabilities(score_matrix(lam, mu)))
+
+
+def elo_model(predictor=None) -> ShadowModel:
+    if predictor is None:
+        from src.serving.predictor import EloPoissonPredictor
+        from src.serving.production import ELO_MODEL_PATH
+        predictor = FrozenEloModel(EloPoissonPredictor.load(ELO_MODEL_PATH))
+    return ShadowModel("elo", predictor, [], lambda t: t.copy())
 
 
 def _rows(targets: pd.DataFrame, model: ShadowModel, store: MatchStore, now: datetime, source: str,
@@ -128,6 +158,8 @@ def reconstructed_entries(matches: pd.DataFrame, model: ShadowModel, store: Matc
 def load_model(name: str, matches: pd.DataFrame) -> ShadowModel:
     if name == "tiros":
         return shots_model(matches)
+    if name == "elo":
+        return elo_model()
     raise ValueError(f"Modelo en evaluación desconocido: {name}")
 
 
@@ -136,11 +168,11 @@ def main() -> None:
     from src.data.load import load_matches
 
     parser = argparse.ArgumentParser(description="Registra predicciones de un modelo en evaluación")
-    parser.add_argument("--model", choices=["tiros"], default="tiros")
-    parser.add_argument("--ledger", type=Path, default=DEFAULT_SHADOW_LEDGER)
+    parser.add_argument("--model", choices=sorted(DEFAULT_LEDGERS), default="tiros")
+    parser.add_argument("--ledger", type=Path, default=None)
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    ledger = args.ledger
+    ledger = args.ledger or DEFAULT_LEDGERS[args.model]
     now = datetime.now(UTC)
     commit = os.getenv("GITHUB_SHA", "local")[:12]
     matches, store = load_matches(), MatchStore.load()

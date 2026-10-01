@@ -28,10 +28,11 @@ import pandas as pd
 
 from src.config import season_label
 from src.features.build import FEATURES_PATH
+from src.models.experiments import ELO as FEATURES
 from src.models.experiments import predict_feature_model, prepare
 from src.models.feature_models import PoissonGLMModel
 from src.models.scoreline import score_matrix
-from src.serving.production import ALPHA, FEATURES
+from src.serving.production import ALPHA
 
 logger = logging.getLogger(__name__)
 

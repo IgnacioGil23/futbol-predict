@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from test_features import PARAMS, make_league
 
 from src.features.elo import compute_elo
+from src.features.odds_elo import compute_odds_elo_with_history
 from src.models.feature_models import PoissonGLMModel
 from src.serving.predictor import EloPoissonPredictor
 from src.serving.production import export_params
@@ -14,8 +15,15 @@ from src.serving.store import MatchStore, build_serving_matches
 
 
 def store_from(matches: pd.DataFrame) -> MatchStore:
+    """Estado con los dos ratings; sin cuotas en `matches`, se sortean (el rating de cuotas necesita alguna)."""
+    if "b365_home" not in matches:
+        rng = np.random.default_rng(11)
+        p = rng.dirichlet([4, 2.5, 3], size=len(matches))
+        matches = matches.assign(b365_home=1 / p[:, 0], b365_draw=1 / p[:, 1], b365_away=1 / p[:, 2])
     elo, history = compute_elo(matches, PARAMS)
-    return MatchStore(build_serving_matches(matches.assign(result=matches["result"].astype(str)), elo, history))
+    odds_elo, odds_history = compute_odds_elo_with_history(matches, PARAMS)
+    return MatchStore(build_serving_matches(matches.assign(result=matches["result"].astype(str)), elo, history,
+                                            odds_elo, odds_history))
 
 
 @pytest.fixture(scope="module")

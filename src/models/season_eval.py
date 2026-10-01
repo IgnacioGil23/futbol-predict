@@ -18,12 +18,11 @@ import pandas as pd
 
 from src.config import season_label
 from src.features.build import FEATURES_PATH, load_elo_params
-from src.models.experiments import prepare
+from src.models.experiments import ELO, prepare
 from src.models.feature_models import PoissonGLMModel
 from src.models.season_sim import N_SIMS, RELEGATED, TOP4, final_table, simulate, state_from_matches
 from src.serving.predictor import EloPoissonPredictor
 from src.serving.production import ALPHA, export_params
-from src.serving.production import FEATURES as ELO
 
 logger = logging.getLogger(__name__)
 

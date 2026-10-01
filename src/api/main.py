@@ -113,7 +113,7 @@ def _predict_cached(home: str, away: str, day: Date) -> PredictionOut:
         if division is None:
             raise HTTPException(422, f"{team} no jugaba en Premier League ni Championship en {season}-{(season + 1) % 100:02d}: "
                                      "no hay un Elo actualizado para esa fecha")
-        elo = store.elo_as_of(team, ts)
+        elo = store.rating_as_of(team, ts, predictor.rating)
         if elo is None:
             raise HTTPException(422, f"{team} no tiene partidos antes de {day.isoformat()}")
         elos[team] = elo
@@ -137,7 +137,8 @@ def _predict_cached(home: str, away: str, day: Date) -> PredictionOut:
             form_home=store.recent_form(home, ts), form_away=store.recent_form(away, ts),
             rest_home=store.rest(home, ts), rest_away=store.rest(away, ts),
             head_to_head=store.head_to_head(home, away, ts),
-            elo_history_home=store.elo_series(home, ts), elo_history_away=store.elo_series(away, ts),
+            elo_history_home=store.elo_series(home, ts, kind=predictor.rating),
+            elo_history_away=store.elo_series(away, ts, kind=predictor.rating),
         ),
         warnings=warnings,
     )

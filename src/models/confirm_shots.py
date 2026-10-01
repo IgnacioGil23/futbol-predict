@@ -31,12 +31,15 @@ import pandas as pd
 from src.config import season_label
 from src.features.build import FEATURES_PATH
 from src.metrics import OUTCOMES
-from src.models.challenger import CHAMPION_FEATURES, MIN_IMPROVEMENT, compare, per_match_log_loss, shot_features, walk_forward
-from src.models.experiments import prepare
+from src.models.challenger import MIN_IMPROVEMENT, compare, per_match_log_loss, shot_features, walk_forward
+from src.models.experiments import ELO, prepare
 
 logger = logging.getLogger(__name__)
 
 CONFIRM_SEASONS = [2023, 2024, 2025]
+# La referencia preregistrada es el modelo de Elo de resultados (producción cuando se preregistró), aunque la
+# producción haya pasado al rating de cuotas: así la pregunta del preregistro no cambia.
+CHAMPION_FEATURES = ELO
 CANDIDATE = CHAMPION_FEATURES + shot_features(4, with_shots=True)
 
 
@@ -59,6 +62,20 @@ def run(features: pd.DataFrame, seasons: list[int]) -> dict:
                 res["ci_high"], {k: round(v, 4) for k, v in by_season.items()},
                 "CONFIRMA" if res["promote"] else "no confirma")
     return report
+
+
+def elo_baseline_ledger(main_ledger: pd.DataFrame, elo_ledger: pd.DataFrame | None, elo_version: str) -> pd.DataFrame:
+    """Predicciones del modelo de Elo de resultados en la temporada del registro: las del registro de producción
+    mientras fue el modelo de producción (versión `elo_version`) y, desde que el rating de cuotas pasó a producción
+    (01/10/2026), las de su registro en paralelo. Ante un partido repetido, vale la primera."""
+    from src.monitoring.ledger import KEY
+
+    cols = ["season", "season_start", "home_team", "away_team", "source", "model_version", "p_home", "p_draw", "p_away"]
+    parts = [main_ledger.loc[main_ledger["model_version"].astype(str) == elo_version, cols]]
+    if elo_ledger is not None and len(elo_ledger):
+        parts.append(elo_ledger[cols])
+    out = pd.concat(parts, ignore_index=True)
+    return out.drop_duplicates(subset=KEY, keep="first").reset_index(drop=True)
 
 
 def ledger_log_loss(ledger: pd.DataFrame, store) -> pd.DataFrame:
@@ -116,12 +133,16 @@ def main() -> None:
     parser.add_argument("--final", action="store_true", help="Evaluación preregistrada con el registro en paralelo")
     parser.add_argument("--ledger", type=Path, default=Path("monitoring/ledger/predictions.csv"))
     parser.add_argument("--shadow-ledger", type=Path, default=Path("monitoring/ledger/shadow_predictions.csv"))
+    parser.add_argument("--elo-ledger", type=Path, default=Path("monitoring/ledger/shadow_elo_predictions.csv"),
+                        help="Registro en paralelo del modelo de Elo (referencia desde el 01/10/2026)")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     features = prepare(pd.read_parquet(FEATURES_PATH))
     if args.final:
         from src.monitoring.ledger import read_ledger
-        from src.monitoring.shadow_ledger import SHADOW_COLUMNS
+        from src.monitoring.shadow_ledger import SHADOW_COLUMNS, SHADOW_ELO_COLUMNS
+        from src.serving.predictor import EloPoissonPredictor
+        from src.serving.production import ELO_MODEL_PATH
         from src.serving.store import MatchStore
 
         shadow = read_ledger(args.shadow_ledger, SHADOW_COLUMNS)
@@ -130,7 +151,9 @@ def main() -> None:
         if played < 380:
             raise SystemExit(f"La temporada {season_label(season)} no terminó ({played}/380): el preregistro "
                              "fija la evaluación al final de la temporada")
-        report = final(features, read_ledger(args.ledger), shadow, MatchStore.load(), season)
+        elo_ledger = read_ledger(args.elo_ledger, SHADOW_ELO_COLUMNS) if args.elo_ledger.exists() else None
+        baseline = elo_baseline_ledger(read_ledger(args.ledger), elo_ledger, EloPoissonPredictor.load(ELO_MODEL_PATH).version)
+        report = final(features, baseline, shadow, MatchStore.load(), season)
         args.out.mkdir(parents=True, exist_ok=True)
         path = args.out / f"evaluacion_final_tiros_{report['date']}.json"
         path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")

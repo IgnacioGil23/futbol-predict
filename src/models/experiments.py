@@ -70,10 +70,10 @@ def prepare(features: pd.DataFrame) -> pd.DataFrame:
 
 # ---------------------------------------------------------------- predicciones
 
-def predict_feature_model(make_model, df: pd.DataFrame, seasons) -> pd.DataFrame:
+def predict_feature_model(make_model, df: pd.DataFrame, seasons, first_train: int = FIRST_TRAIN_SEASON) -> pd.DataFrame:
     rows = []
     for season in seasons:
-        train = df[(df.season_start >= FIRST_TRAIN_SEASON) & (df.season_start < season) & df.played]
+        train = df[(df.season_start >= first_train) & (df.season_start < season) & df.played]
         target = df[(df.season_start == season) & df.played]
         model = make_model().fit(train)
         fc = model.predict(target)

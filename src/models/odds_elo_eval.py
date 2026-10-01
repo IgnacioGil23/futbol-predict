@@ -23,20 +23,20 @@ import numpy as np
 import pandas as pd
 
 from src.analysis.error_analysis import promoted_teams
-from src.config import PREMIER_LEAGUE, PROJECT_ROOT, season_label
+from src.config import PREMIER_LEAGUE, season_label
 from src.data.leagues import LEAGUES, LEAGUES_DIR, matches_path
 from src.data.load import load_matches
 from src.features.build import load_elo_params
-from src.features.odds_elo import TUNE_SEASONS, compute_odds_elo, tune
+from src.features.odds_elo import ODDS_ELO_PARAMS_PATH, TUNE_SEASONS, compute_odds_elo, tune
 from src.models.challenger import MIN_IMPROVEMENT
 from src.models.confirm_shots import CANDIDATE as SHOTS
+from src.models.experiments import ELO
 from src.models.replication import EVAL_SEASONS, TRAIN_START, league_features, log_loss_per_match, stratified_ci, walk_forward
 from src.odds import shin_probabilities
-from src.serving.production import FEATURES as ELO
 
 logger = logging.getLogger(__name__)
 
-PARAMS_PATH = PROJECT_ROOT / "configs" / "odds_elo_params.json"
+PARAMS_PATH = ODDS_ELO_PARAMS_PATH
 ODDS = ["odds_elo_diff"]
 MODELS = {"B0": ELO, "O1": ODDS, "O2": [*ELO, *ODDS], "S": SHOTS, "S+O": [*SHOTS, *ODDS]}
 CANDIDATES = ("O1", "O2")
@@ -57,6 +57,7 @@ def league_frames(params) -> dict[str, tuple[pd.DataFrame, pd.DataFrame]]:
                 league_features(code).to_parquet(cached, index=False)
             feats = pd.read_parquet(cached)
         ratings = compute_odds_elo(matches, params, top_division=top)
+        feats = feats.drop(columns=["odds_elo_home", "odds_elo_away", "odds_elo_diff"], errors="ignore")
         feats = feats.merge(ratings, on="match_id", how="left")
         feats["odds_elo_diff"] = feats["odds_elo_home"] - feats["odds_elo_away"]
         out[code] = (feats, matches)

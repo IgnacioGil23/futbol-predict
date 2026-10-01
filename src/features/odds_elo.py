@@ -15,24 +15,33 @@ sobre la diferencia de rating, en partidos de Premier de TUNE_SEASONS. La ventaj
 el puntaje medio del mercado para el local en esas temporadas.
 """
 
+import json
 from dataclasses import replace
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from src.config import PREMIER_LEAGUE
+from src.config import PREMIER_LEAGUE, PROJECT_ROOT
 from src.features.elo import EloParams, compute_elo
-from src.features.tune_elo import GRID as ELO_GRID
-from src.features.tune_elo import rating_logloss
 from src.odds import shin_probabilities
 
+ODDS_ELO_PARAMS_PATH = PROJECT_ROOT / "configs" / "odds_elo_params.json"
 ODDS_COLUMNS = ["b365_home", "b365_draw", "b365_away"]
 SCORE_COLUMN = "market_score_home"
 TUNE_SEASONS = list(range(2004, 2015))          # 2004-05 .. 2014-15 (2002-03 y 2003-04: arranque del rating)
+# Las grillas de src/features/tune_elo.py, con k ampliado (sin diferencia de gol, k no se multiplica).
 GRID = {
     "k0": [10, 15, 20, 30, 40, 50, 60, 80, 100, 125, 150],
-    **{name: values for name, values in ELO_GRID.items() if name not in ("k0", "lam")},
+    "season_regression": [0.0, 0.05, 0.1, 0.15, 0.2, 0.3],
+    "initial_gap": [100, 150, 200, 250, 300, 400],
+    "newcomer_offset": [-150, -100, -75, -50, -25, 0],
 }
+
+
+def load_odds_elo_params(path: Path = ODDS_ELO_PARAMS_PATH) -> EloParams:
+    """Parámetros preregistrados del ELO-Odds (configs/odds_elo_params.json)."""
+    return EloParams(**json.loads(path.read_text(encoding="utf-8"))["params"])
 
 
 def market_score(matches: pd.DataFrame) -> np.ndarray:
@@ -46,12 +55,20 @@ def market_score(matches: pd.DataFrame) -> np.ndarray:
     return out
 
 
+def compute_odds_elo_with_history(matches: pd.DataFrame, params: EloParams,
+                                  top_division: str = PREMIER_LEAGUE) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """ELO-Odds previo a cada partido (match_id, odds_elo_home, odds_elo_away) y rating posterior de cada equipo en
+    los partidos que lo actualizaron (match_id, team, odds_elo_after; los partidos sin cuotas no aparecen)."""
+    df = matches.assign(**{SCORE_COLUMN: market_score(matches)})
+    per_match, history = compute_elo(df, replace(params, lam=0.0), top_division=top_division, score_column=SCORE_COLUMN)
+    per_match = per_match.rename(columns={"elo_home": "odds_elo_home", "elo_away": "odds_elo_away"})[
+        ["match_id", "odds_elo_home", "odds_elo_away"]]
+    return per_match, history.rename(columns={"elo_after": "odds_elo_after"})[["match_id", "team", "odds_elo_after"]]
+
+
 def compute_odds_elo(matches: pd.DataFrame, params: EloParams, top_division: str = PREMIER_LEAGUE) -> pd.DataFrame:
     """ELO-Odds previo a cada partido: match_id, odds_elo_home, odds_elo_away."""
-    df = matches.assign(**{SCORE_COLUMN: market_score(matches)})
-    per_match, _ = compute_elo(df, replace(params, lam=0.0), top_division=top_division, score_column=SCORE_COLUMN)
-    return per_match.rename(columns={"elo_home": "odds_elo_home", "elo_away": "odds_elo_away"})[
-        ["match_id", "odds_elo_home", "odds_elo_away"]]
+    return compute_odds_elo_with_history(matches, params, top_division)[0]
 
 
 def calibrated_home_advantage(scores: np.ndarray) -> float:
@@ -62,6 +79,7 @@ def calibrated_home_advantage(scores: np.ndarray) -> float:
 
 def tune(matches: pd.DataFrame, start: EloParams, max_passes: int = 4) -> tuple[EloParams, float, list]:
     """Descenso por coordenadas sobre GRID, como src/features/tune_elo.tune, en partidos de Premier de TUNE_SEASONS."""
+    from src.features.tune_elo import rating_logloss  # import diferido: tune_elo importa build, que importa este módulo
     matches = matches.sort_values(["date", "match_id"]).reset_index(drop=True)
     mask = ((matches["division"] == PREMIER_LEAGUE) & matches["season_start"].isin(TUNE_SEASONS)
             & matches["home_goals"].notna()).to_numpy()

@@ -56,10 +56,18 @@ def load_elo_params(path: Path = ELO_PARAMS_PATH) -> EloParams:
 
 
 def build_features(matches: pd.DataFrame, elo_params: EloParams | None = None,
-                   division: str = PREMIER_LEAGUE) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Features de todos los partidos de `division`, usando la historia de todas las divisiones."""
+                   division: str = PREMIER_LEAGUE, odds_elo_params: EloParams | None = None
+                   ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Features de todos los partidos de `division`, usando la historia de todas las divisiones.
+
+    Incluye el rating basado en cuotas (odds_elo_*; src/features/odds_elo.py, docs/preregistro_cuotas.md), que es la
+    variable del modelo de producción desde el 01/10/2026.
+    """
+    from src.features.odds_elo import compute_odds_elo, load_odds_elo_params
+
     elo_params = elo_params or load_elo_params()
     elo, history = compute_elo(matches, elo_params, top_division=division)
+    odds_elo = compute_odds_elo(matches, odds_elo_params or load_odds_elo_params(), top_division=division)
     form = form_rest_features(matches, FORM_WINDOW, GOALS_HALFLIFE)
     table = table_features(matches)
     shots = shot_features(matches)
@@ -73,6 +81,8 @@ def build_features(matches: pd.DataFrame, elo_params: EloParams | None = None,
     out = matches.loc[matches["division"] == division, keep].copy()
     out = out.merge(elo, on="match_id", how="left")
     out["elo_diff"] = out["elo_home"] - out["elo_away"]
+    out = out.merge(odds_elo, on="match_id", how="left")
+    out["odds_elo_diff"] = out["odds_elo_home"] - out["odds_elo_away"]
     out["clubelo_diff"] = out["clubelo_home"] - out["clubelo_away"]
     for side in ("home", "away"):
         side_feats = team.rename(columns={c: f"{c}_{side}" for c in TEAM_FEATURES})

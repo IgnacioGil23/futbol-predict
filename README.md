@@ -13,9 +13,9 @@ prediction before kick-off in a tamper-evident ledger, and tests every improveme
 
 | Question | Answer |
 |---|---|
-| **Does it beat the betting market?** | **No.** On the untouched test seasons (2023-24 to 2025-26, 1,140 matches) log loss is **0.988** vs **0.966** for Bet365 pre-closing odds and **0.944** for Pinnacle closing; the gap to Bet365 is +0.022 (95% CI 0.013 to 0.031). It is well calibrated (ECE 0.022). |
+| **Does it beat the betting market?** | **No, but it got much closer.** On the test seasons (2023-24 to 2025-26, 1,140 matches) log loss is **0.974** vs **0.966** for Bet365 pre-closing odds and **0.944** for Pinnacle closing; the gap to Bet365 is +0.008 (95% CI 0.001 to 0.014), down from +0.022 before the odds-based rating. It never uses the odds of the match it predicts. |
 | **Is it competitive with published work?** | **Yes.** On the exact 3,300 matches of Ley, Van de Wiele & Van Eetvelde (2019, *Statistical Modelling*), RPS **0.1942** vs **0.1953** for the best of their 10 models (difference within our CI; protocol differences documented). |
-| **What actually improves it?** | **Shots.** Adding recent shots and shots on target helps in the Premier League in 11 of 11 seasons (−0.004 to −0.005 log loss) and **replicates in Spain, Italy, Germany and France** (15,583 matches, −0.0049, CI [−0.0063, −0.0035]). It sits right at the pre-registered promotion margin, so it is being logged in parallel for a final decision in July 2027. |
+| **What actually improves it?** | **Information the market already priced in.** An Elo rating updated with the market's pre-match expectation of *past* matches (Wunderlich & Memmert 2018) beat the results-based Elo by −0.0084 log loss on 19,763 matches across five leagues (CI [−0.0100, −0.0067], 51 of 55 league-seasons) and went to production on 2026-10-01 under a documented amendment; the old model is logged in parallel for a live comparison in July 2027. Shots also help (−0.004 to −0.005, replicated in four leagues) and are logged in parallel. |
 | **What does not?** | Form, table, rest, head-to-head, Dixon-Coles, a bivariate Poisson, XGBoost (even trained on 5 leagues) and a recent home-advantage fix: each was tested and documented. Two experiments built on third-party data (Fantasy Premier League, Transfermarkt) were withdrawn because of those sources' terms of use. |
 | **What can a fan ask it?** | **How the season ends.** 10,000 simulations of the remaining fixtures (Elo updated inside each run) give title, top-4 and relegation odds. Backtested on 2015-26 against a simulator that ignores team strength: 45% lower Brier for the top 4 before matchday 1, and well calibrated. It still gave Leicester 0% in 2015-16. |
 | **Where is the gap to the market?** | Not in the averages but in match-level information: half of the gap comes from the 14% of matches where model and market disagree by 10+ points, and matchdays 1-5 double it (transfers the ratings have not absorbed yet). |
@@ -69,7 +69,7 @@ flowchart LR
 
 | Candidate | Where tested | Log loss vs baseline | Outcome |
 |---|---|---|---|
-| **Betting-odds rating (ELO-Odds, Wunderlich & Memmert 2018)** | **5 leagues 2015-26 (19,763 matches)** | **−0.0084, CI [−0.0100, −0.0067]; halves the gap to Bet365** | **Meets the pre-registered rule** |
+| **Betting-odds rating (ELO-Odds, Wunderlich & Memmert 2018)** | **5 leagues 2015-26 (19,763 matches)** | **−0.0084, CI [−0.0100, −0.0067]; halves the gap to Bet365** | **In production since 2026-10-01; old model logged in parallel** |
 | Shots + shots on target | Premier League 2015-26; 4 other leagues | −0.004 / −0.005; replicated: −0.0049 | In parallel logging until July 2027 |
 | Bivariate Poisson (Karlis & Ntzoufras 2003) | Premier League 2015-23 | exact-score log loss **worse** | Discarded (the draw excess did not persist after 2015) |
 | Recent home advantage | 4 leagues | −0.0001 | Fixes the home bias, no log-loss gain |

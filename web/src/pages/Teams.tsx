@@ -264,7 +264,7 @@ export function TeamDetail() {
             </div>
           </div>
           <EloChart series={[{ name: t.name, color: 'var(--home)', points: series }]} height={300} />
-          {range === 'all' && <p className="small muted">2000-2002: período de arranque del Elo (todos los equipos empiezan igual), no se usa para evaluar.</p>}
+          {range === 'all' && <p className="small muted">2000-01 a 2003-04: arranque del Elo (no hay cuotas antes de 2002-03 y todos los equipos de cada división empiezan igual); no se usa para evaluar.</p>}
         </div>
 
         <div className="grid grid-main">

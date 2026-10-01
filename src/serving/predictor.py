@@ -41,6 +41,8 @@ class EloPoissonPredictor:
         self.params = artifact["params"]
         self.meta = artifact["meta"]
         self.version = model_version(self.params, self.meta.get("elo_params"))
+        # Rating de cada equipo que el modelo recibe: "odds_elo" (producción desde el 01/10/2026) o "elo" (resultados).
+        self.rating = self.meta.get("rating", "elo")
 
     @classmethod
     def load(cls, path: Path = DEFAULT_MODEL_PATH) -> "EloPoissonPredictor":

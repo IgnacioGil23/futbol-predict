@@ -27,7 +27,7 @@ from src.features.build import FEATURES_PATH
 from src.models.experiments import predict_feature_model, prepare
 from src.models.feature_models import PoissonGLMModel
 from src.odds import shin_probabilities
-from src.serving.production import ALPHA, FEATURES
+from src.serving.production import ALPHA, FEATURES, FIRST_TRAIN_SEASON
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +89,8 @@ def rolling_indicators(d: pd.DataFrame, window: int = WINDOW) -> pd.DataFrame:
 
 def compute_thresholds() -> dict:
     features = prepare(pd.read_parquet(FEATURES_PATH))
-    pred = predict_feature_model(lambda: PoissonGLMModel(FEATURES, alpha=ALPHA), features, list(BACKTEST_SEASONS))
+    pred = predict_feature_model(lambda: PoissonGLMModel(FEATURES, alpha=ALPHA), features, list(BACKTEST_SEASONS),
+                                 first_train=FIRST_TRAIN_SEASON)
     info = features[["match_id", "date", "result", "home_goals", "away_goals"]].copy()
     info[["home_goals", "away_goals"]] = info[["home_goals", "away_goals"]].astype(float)
     odds = features[["b365_home", "b365_draw", "b365_away"]].to_numpy(float)

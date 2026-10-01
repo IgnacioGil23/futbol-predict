@@ -31,11 +31,10 @@ from src.features.build import FEATURES_PATH, build_features, load_elo_params
 from src.metrics import OUTCOMES
 from src.models.challenger import MIN_IMPROVEMENT
 from src.models.confirm_shots import CANDIDATE
-from src.models.experiments import prepare
+from src.models.experiments import ELO, prepare
 from src.models.feature_models import PoissonGLMModel
 from src.odds import shin_probabilities
 from src.serving.production import ALPHA
-from src.serving.production import FEATURES as ELO
 
 logger = logging.getLogger(__name__)
 

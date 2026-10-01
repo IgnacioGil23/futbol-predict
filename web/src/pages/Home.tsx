@@ -194,7 +194,8 @@ export function Home() {
             </span>
             <h1 className="reveal" style={delay(1)}>Cada marcador,<br /><span className="grad-text">con su probabilidad.</span></h1>
             <p className="lede reveal" style={delay(2)}>
-              Un modelo de Machine Learning estima los goles esperados de cada equipo a partir de su Elo y los convierte
+              Un modelo de Machine Learning estima los goles esperados de cada equipo a partir de un Elo que aprende de las
+              cuotas de partidos anteriores, y los convierte
               en la probabilidad de cada resultado exacto de la Premier League. Evaluado con honestidad contra el
               mercado de apuestas.
             </p>
@@ -276,7 +277,7 @@ export function Home() {
           {teams.length ? (
             <Race eyebrow="Ranking Elo" title="Los más fuertes hoy" color="var(--home)" teams={byTeam} to="/equipos"
                   rows={teams.slice(0, 5).map((t) => ({ team: t.team, name: t.name, value: t.elo, label: num(t.elo, 0), width: (t.elo - eloMin) / (eloMax - eloMin || 1) }))}
-                  foot="El Elo mide la fuerza según todos los resultados" />
+                  foot="El Elo se ajusta a lo que el mercado esperaba de cada equipo" />
           ) : <div className="skeleton" style={{ minHeight: 320 }} />}
         </div>
       </section>
@@ -291,7 +292,7 @@ export function Home() {
         </div>
         <div className="steps">
           {[
-            { n: '01', t: 'Elo desde cero', d: 'Cada partido de Premier y Championship desde 2000-01 mueve la fuerza de los dos equipos: más cuanto más amplia la victoria.' },
+            { n: '01', t: 'Un Elo que aprende', d: 'Después de cada partido de Premier y Championship, el rating de cada equipo se acerca a lo que el mercado esperaba de él antes de jugarlo.' },
             { n: '02', t: 'Goles esperados', d: 'Dos regresiones de Poisson convierten la diferencia de Elo en los goles esperados del local y del visitante.' },
             { n: '03', t: 'Cada marcador', d: 'Con esos goles se calcula la probabilidad de cada resultado exacto; sumando celdas, la de victoria, empate o derrota.' },
           ].map((s) => (
@@ -321,7 +322,8 @@ export function Home() {
                 </div>
               </div>
               <p className="small muted">
-                Log loss en test {tm.seasons} (menor es mejor). Las cuotas saben de lesiones y alineaciones; el modelo no.
+                Log loss en test {tm.seasons} (menor es mejor). Las cuotas de cada partido saben de sus lesiones y alineaciones;
+                el modelo solo aprende de las cuotas de partidos anteriores.
                 Sus probabilidades, en cambio, están bien calibradas.
               </p>
             </div>

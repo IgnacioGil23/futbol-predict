@@ -78,7 +78,7 @@ export function MatchAnalysis({ view, home, homeName, awayName, homeSlug, awaySl
 
       <div className="card" style={{ marginTop: 16 }}>
         <h3>Evolución del Elo (dos temporadas)</h3>
-        <p className="card-sub">La fuerza de cada equipo según sus resultados: sube al ganar, más cuanto más fuerte el rival y más amplia la victoria.</p>
+        <p className="card-sub">El rating de cada equipo: después de cada partido se acerca a lo que el mercado esperaba de él antes de jugarlo.</p>
         {view.eloHistory ? (
           <EloChart series={[
             { name: homeName, color: 'var(--home)', points: view.eloHistory.home },
@@ -118,7 +118,7 @@ export function MatchAnalysis({ view, home, homeName, awayName, homeSlug, awaySl
           <ul className="small" style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-2)' }}>
             <li>Lesiones, suspensiones y alineaciones confirmadas.</li>
             <li>Rotaciones por copas o competiciones europeas.</li>
-            <li>Fichajes y cambios de entrenador (salvo cuando ya se reflejan en resultados).</li>
+            <li>Lo que pasó en la semana del partido (las cuotas del propio partido nunca se usan).</li>
             <li>Noticias de la semana: el mercado de apuestas sí las incorpora, y por eso predice mejor.</li>
           </ul>
           <p className="small" style={{ marginTop: 10 }}><Link to="/metodologia">¿Qué tan bien predice? →</Link></p>

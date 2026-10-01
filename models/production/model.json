@@ -1,30 +1,39 @@
 {
   "params": {
     "home_goals": {
-      "intercept": 0.3868468408041948,
-      "coef": 0.29514766199531345,
-      "feature_mean": -0.4607881986646318,
-      "feature_scale": 180.25720200429183
+      "intercept": 0.384028107223,
+      "coef": 0.311342686078,
+      "feature_mean": -0.041252548899,
+      "feature_scale": 145.092872318037
     },
     "away_goals": {
-      "intercept": 0.1272234713925053,
-      "coef": -0.3056532114060523,
-      "feature_mean": -0.4607881986646318,
-      "feature_scale": 180.25720200429183
+      "intercept": 0.126004871392,
+      "coef": -0.32042599459,
+      "feature_mean": -0.041252548899,
+      "feature_scale": 145.092872318037
     }
   },
   "meta": {
-    "model": "Poisson (goles del local y del visitante) sobre la diferencia de Elo",
+    "model": "Poisson (goles del local y del visitante) sobre la diferencia del rating basado en cuotas (ELO-Odds)",
     "features": [
-      "elo_diff"
+      "odds_elo_diff"
     ],
+    "rating": "odds_elo",
     "alpha": 0.0001,
     "trained_on": {
-      "seasons": "2002-03 a 2025-26",
-      "matches": 9120
+      "seasons": "2004-05 a 2025-26",
+      "matches": 8360
     },
-    "trained_at": "2026-09-29T22:59:38",
+    "trained_at": "2026-10-01T12:52:15",
     "elo_params": {
+      "k0": 150,
+      "lam": 0.0,
+      "home_advantage": 57.7,
+      "season_regression": 0.1,
+      "initial_gap": 400,
+      "newcomer_offset": -50
+    },
+    "results_elo_params": {
       "k0": 7.5,
       "lam": 1.0,
       "home_advantage": 59.4,
@@ -32,14 +41,15 @@
       "initial_gap": 250,
       "newcomer_offset": -50
     },
+    "preregistration": "docs/preregistro_cuotas.md",
     "test_metrics": {
       "seasons": "2023-24 a 2025-26",
       "model": {
-        "log_loss": 0.9879455486173382,
-        "rps": 0.2030210740945716,
-        "brier": 0.5896379556770238,
-        "accuracy": 0.5157894736842106,
-        "ece": 0.0215140231916926,
+        "log_loss": 0.9735291897331221,
+        "rps": 0.19843969941427728,
+        "brier": 0.579952186028402,
+        "accuracy": 0.5307017543859649,
+        "ece": 0.023568361466444476,
         "n": 1140
       },
       "bet365_pre_closing": {

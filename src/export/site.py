@@ -32,13 +32,15 @@ from src.models.experiments import predict_feature_model, prepare
 from src.models.feature_models import PoissonGLMModel
 from src.odds import shin_probabilities
 from src.serving.predictor import EloPoissonPredictor
-from src.serving.production import ALPHA, FEATURES
+from src.serving.production import ALPHA, ELO_MODEL_PATH, FEATURES, FIRST_TRAIN_SEASON
 from src.serving.store import MatchStore
 
 logger = logging.getLogger(__name__)
 
 FIRST_REVIEW_SEASON = 2005   # después del burn-in del Elo y con 3 temporadas de entrenamiento
 GRID = 7
+# Columnas de la tabla de variables con el rating de cada tipo.
+RATING_COLUMNS = {"elo": ("elo_home", "elo_away"), "odds_elo": ("odds_elo_home", "odds_elo_away")}
 
 
 def write(path: Path, payload) -> None:
@@ -102,8 +104,9 @@ def export_model(out: Path, predictor: EloPoissonPredictor) -> None:
                                "meta": predictor.meta})
 
 
-def export_state(out: Path, store: MatchStore, today: pd.Timestamp) -> list[str]:
-    """Estado actual de los equipos de la Premier de la temporada en curso + head-to-head de todos los pares."""
+def export_state(out: Path, store: MatchStore, today: pd.Timestamp, rating: str) -> list[str]:
+    """Estado actual de los equipos de la Premier de la temporada en curso + head-to-head de todos los pares.
+    "elo" es el rating que usa el modelo de producción (`rating`)."""
     season = season_start_year(today.date())
     teams = store.teams(PREMIER_LEAGUE, season) or store.teams(PREMIER_LEAGUE, season - 1)
     table = store.standings(PREMIER_LEAGUE, season, today).set_index("team")
@@ -111,7 +114,7 @@ def export_state(out: Path, store: MatchStore, today: pd.Timestamp) -> list[str]
     for team in teams:
         state.append({
             "team": team, "name": display_name(team), "slug": slug(team),
-            "elo": round(store.elo_as_of(team, today), 1),
+            "elo": round(store.rating_as_of(team, today, rating), 1),
             "form": store.recent_form(team, today),
             "rest": store.rest(team, today),
             "table": table.loc[team].to_dict() if team in table.index else None,
@@ -123,8 +126,9 @@ def export_state(out: Path, store: MatchStore, today: pd.Timestamp) -> list[str]
     return teams
 
 
-def export_teams(out: Path, store: MatchStore) -> None:
-    """Ficha por equipo: evolución del Elo y rendimiento por temporada frente a la media de la liga."""
+def export_teams(out: Path, store: MatchStore, rating: str) -> None:
+    """Ficha por equipo: evolución del rating del modelo (`rating`) y rendimiento por temporada frente a la media de la
+    liga."""
     pl = store.matches[(store.matches.division == PREMIER_LEAGUE) & store.matches.home_goals.notna()]
     league = pl.groupby("season_start").apply(
         lambda g: pd.Series({"goals_per_team_game": (g.home_goals.sum() + g.away_goals.sum()) / (2 * len(g))}))
@@ -144,7 +148,7 @@ def export_teams(out: Path, store: MatchStore) -> None:
                 "league_goals_per_team_game": r4(avg),
                 "attack_vs_league_pct": r4(gf.mean() / avg - 1), "defence_vs_league_pct": r4(ga.mean() / avg - 1),
             })
-        history = [{"date": m.date.date(), "elo": round(m.elo_after, 1), "division": m.division,
+        history = [{"date": m.date.date(), "elo": round(m.rating(rating, "after"), 1), "division": m.division,
                     "opponent": m.opponent, "home": m.is_home, "score": f"{int(m.gf)}-{int(m.ga)}"}
                    for m in store.by_team[team] if m.played]
         write(out / "teams" / f"{slug(team)}.json",
@@ -199,7 +203,8 @@ def export_upcoming(out: Path, store: MatchStore, predictor: EloPoissonPredictor
                 logger.warning("Equipo del calendario sin datos: %s vs %s", g.home_team, g.away_team)
                 continue
             day = pd.Timestamp(g.date)
-            elo_h, elo_a = store.elo_as_of(g.home_team, day), store.elo_as_of(g.away_team, day)
+            elo_h = store.rating_as_of(g.home_team, day, predictor.rating)
+            elo_a = store.rating_as_of(g.away_team, day, predictor.rating)
             items.append({
                 "date": day.date(), "kickoff_ar": g.kickoff_ar,
                 "home_team": g.home_team, "away_team": g.away_team,
@@ -224,11 +229,12 @@ def export_upcoming(out: Path, store: MatchStore, predictor: EloPoissonPredictor
     return {"matchdays": len(matchdays), "matches": sum(len(m["matches"]) for m in matchdays)}
 
 
-def export_review(out: Path, features: pd.DataFrame, current_season: int) -> dict:
+def export_review(out: Path, features: pd.DataFrame, current_season: int, rating: str) -> dict:
     """Predicciones fuera de muestra de cada partido desde 2005-06 (reentrenamiento anual)."""
     seasons = list(range(FIRST_REVIEW_SEASON, current_season + 1))
     make = lambda: PoissonGLMModel(FEATURES, alpha=ALPHA)  # noqa: E731 - misma config que producción
-    preds = predict_feature_model(make, features, seasons)
+    preds = predict_feature_model(make, features, seasons, first_train=FIRST_TRAIN_SEASON)
+    rating_home, rating_away = RATING_COLUMNS[rating]
     df = features.merge(preds, on="match_id")
     odds = df[["b365_home", "b365_draw", "b365_away"]].to_numpy(float)
     ok = ~np.isnan(odds).any(axis=1)
@@ -252,7 +258,7 @@ def export_review(out: Path, features: pd.DataFrame, current_season: int) -> dic
                 "id": r.match_id, "date": r.date, "home_team": r.home_team, "away_team": r.away_team,
                 "home_name": display_name(r.home_team), "away_name": display_name(r.away_team),
                 "score": [int(r.home_goals), int(r.away_goals)], "result": r.result,
-                "elo": [round(r.elo_home, 1), round(r.elo_away, 1)],
+                "elo": [round(getattr(r, rating_home), 1), round(getattr(r, rating_away), 1)],
                 "expected_goals": [r4(r.lam), r4(r.mu)],
                 "p": [r4(r.p_home), r4(r.p_draw), r4(r.p_away)],
                 "market": None if np.isnan(r.m_home) else [r4(r.m_home), r4(r.m_draw), r4(r.m_away)],
@@ -309,11 +315,13 @@ def main() -> None:
     features = prepare(pd.read_parquet(FEATURES_PATH))
 
     export_model(out, predictor)
-    teams = export_state(out, store, today)
-    export_teams(out, store)
+    teams = export_state(out, store, today, predictor.rating)
+    export_teams(out, store, predictor.rating)
     upcoming = export_upcoming(out, store, predictor, today)
-    review = export_review(out, features, season_start_year(today.date()))
-    season_sim = build_season(store, predictor, today)
+    review = export_review(out, features, season_start_year(today.date()), predictor.rating)
+    # La simulación de la temporada sigue con el modelo de Elo de resultados (docs/preregistro_temporada.md): actualiza
+    # el rating con los resultados simulados, algo que el rating basado en cuotas no puede hacer.
+    season_sim = build_season(store, EloPoissonPredictor.load(ELO_MODEL_PATH), today)
     if season_sim is not None:
         write(out / "season.json", season_sim)
     export_meta(out, store, predictor, today, upcoming["matches"], review)

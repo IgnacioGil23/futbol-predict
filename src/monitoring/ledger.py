@@ -13,6 +13,8 @@ Reglas:
   reemplazan.
 * Solo se agrega texto al final del archivo; `verify_append_only` comprueba que el
   contenido anterior siga intacto byte por byte.
+* `elo_home` / `elo_away` guardan el rating que recibió el modelo: el Elo de resultados hasta el 01/10/2026 y el
+  basado en cuotas desde entonces (`model_version` identifica cada modelo).
 * `source` distingue "vivo" (registrado antes del partido) de "reconstruido"
   (predicción fuera de muestra calculada después, usada solo para arrancar el
   historial y marcada como tal).
@@ -115,7 +117,8 @@ def new_live_entries(fixtures: pd.DataFrame, store: MatchStore, predictor: EloPo
         if key in logged:
             continue
         try:
-            elo_h, elo_a = store.elo_as_of(f.HomeTeam, day), store.elo_as_of(f.AwayTeam, day)
+            elo_h = store.rating_as_of(f.HomeTeam, day, predictor.rating)
+            elo_a = store.rating_as_of(f.AwayTeam, day, predictor.rating)
         except KeyError:
             logger.warning("Equipo desconocido en fixtures, no se registra: %s vs %s", f.HomeTeam, f.AwayTeam)
             continue

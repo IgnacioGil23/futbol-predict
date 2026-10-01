@@ -189,7 +189,9 @@ export function Season() {
         <p className="lede" style={{ maxWidth: 820 }}>
           Jugamos los {s.remaining_matches} partidos que faltan {num(s.n_sims, 0)} veces con el modelo. En cada
           simulación, el Elo de los equipos se actualiza con los resultados simulados, así una racha cambia las chances de
-          lo que viene, como en la realidad. Desempates: puntos, diferencia de gol y goles a favor.
+          lo que viene, como en la realidad. Desempates: puntos, diferencia de gol y goles a favor. La simulación usa el
+          modelo con el Elo de resultados (el evaluado en su preregistro): el Elo de cuotas del resto del sitio no puede
+          actualizarse con partidos simulados, porque no tienen cuotas.
         </p>
       </div>
       <div className="card">
@@ -197,7 +199,7 @@ export function Season() {
           <table className="table season-table">
             <thead>
               <tr>
-                <th>Equipo</th><th className="num">Pts (PJ)</th><th className="num">Elo</th><th className="num">Pts esperados</th>
+                <th>Equipo</th><th className="num">Pts (PJ)</th><th className="num" title="Elo de resultados">Elo (res.)</th><th className="num">Pts esperados</th>
                 <th className="num">Campeón</th><th className="num">Top 4</th><th className="num">Top 6</th><th className="num">Descenso</th>
               </tr>
             </thead>

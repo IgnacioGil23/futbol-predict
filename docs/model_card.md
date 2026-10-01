@@ -9,9 +9,9 @@ datos hasta el **20/09/2026**.
 | | |
 |---|---|
 | **Tarea** | Estimar, antes de un partido de Premier League, la distribución de probabilidad del marcador exacto y, a partir de ella, de local / empate / visitante. |
-| **Modelo** | Dos regresiones de Poisson (goles del local y goles del visitante, en la línea de Maher 1982) con una sola variable: la diferencia de Elo previa al partido. Marcador = producto de las dos distribuciones de Poisson, recortado en 10 goles y renormalizado. |
-| **Parámetros** | 4 (intercepto y pendiente de cada regresión) + 6 del Elo. Artefacto en JSON, sin pickle. |
-| **Entrenamiento** | 9.120 partidos de Premier League, temporadas 2002-03 a 2025-26 (se reentrena una vez por temporada). |
+| **Modelo** | Dos regresiones de Poisson (goles del local y goles del visitante, en la línea de Maher 1982) con una sola variable: la diferencia previa al partido de un **rating Elo basado en cuotas** (ELO-Odds, sección 5 bis), en producción desde el 01/10/2026. Hasta entonces, la variable era el Elo de resultados (sección 3). Marcador = producto de las dos distribuciones de Poisson, recortado en 10 goles y renormalizado. |
+| **Parámetros** | 4 (intercepto y pendiente de cada regresión) + 5 del rating (`configs/odds_elo_params.json`). Artefacto en JSON, sin pickle. |
+| **Entrenamiento** | 8.360 partidos de Premier League, temporadas 2004-05 a 2025-26 (2002-03 y 2003-04 son el arranque del rating; se reentrena una vez por temporada). |
 | **Uso previsto** | Divulgación y portfolio: mostrar cómo se construye, valida y comunica un modelo probabilístico. |
 | **Fuera de alcance** | Apuestas o decisiones con dinero. El modelo **no** le gana al mercado (sección 5). |
 
@@ -35,7 +35,8 @@ datos hasta el **20/09/2026**.
 * **Regla:** toda variable de un partido del día *D* se calcula con partidos jugados en días anteriores a *D*.
   Lo verifican tests de "invariancia al futuro": se borran todos los resultados desde *D* y las variables del día *D*
   deben quedar idénticas, tanto en una liga sintética como sobre los datos reales.
-* **Elo propio**, partido a partido sobre Premier + Championship, con el factor por diferencia de goles de Hvattum y
+* **Elo propio de resultados** (la variable del modelo hasta el 01/10/2026; lo siguen usando la simulación de la
+  temporada y el candidato de tiros), partido a partido sobre Premier + Championship, con el factor por diferencia de goles de Hvattum y
   Arntzen (2010): k = k0 · (1 + |dif. de gol|)^λ. Ajustado solo con temporadas de entrenamiento:
   k0 = 7,5; λ = 1,0; ventaja de local = 59,4 puntos (fijada por calibración); regresión a la media entre temporadas = 0,05;
   ventaja inicial de la Premier = 250; ascendidos desde League One = −50 respecto de la media de la Championship.
@@ -76,14 +77,17 @@ Las familias no se distinguen entre sí (IC pareados de ±0,004 a ±0,009 que in
 | Mercado: Pinnacle cierre (n = 970) | 0,9443 | 0,1906 | 0,5591 | 56,2% | 0,019 |
 | Mercado: Bet365 pre-cierre | 0,9657 | 0,1956 | 0,5744 | 54,2% | 0,023 |
 | Dixon-Coles clásico | 0,9877 | 0,2027 | 0,5891 | 52,3% | 0,023 |
-| **Poisson + diferencia de Elo (producción)** | **0,9879** | 0,2030 | 0,5896 | 51,6% | 0,022 |
+| **Poisson + ELO-Odds (producción desde el 01/10/2026)** | **0,9735** | 0,1984 | 0,5800 | 53,1% | 0,024 |
+| Poisson + diferencia de Elo (producción hasta el 01/10/2026) | 0,9879 | 0,2030 | 0,5896 | 51,6% | 0,022 |
 | XGBoost Poisson | 0,9895 | 0,2035 | 0,5905 | 51,7% | 0,028 |
 | Logit multinomial sobre Elo | 0,9901 | 0,2036 | 0,5907 | 51,6% | 0,024 |
 | Frecuencias históricas | 1,0746 | 0,2329 | 0,6507 | 43,2% | 0,019 |
 
 **Diferencia del modelo de producción contra el mercado** (log loss del modelo − del mercado, mismos partidos):
-+0,022 frente a Bet365 pre-cierre (IC 95% 0,013 a 0,031) y +0,028 frente a Pinnacle cierre (IC 95% 0,017 a 0,038).
-**El modelo no supera al mercado**; la brecha es estable temporada a temporada. Está bien calibrado (ECE 0,022).
++0,008 frente a Bet365 pre-cierre (IC 95% 0,001 a 0,014) y +0,015 frente a Pinnacle cierre (IC 95% 0,007 a 0,023).
+Con el Elo de resultados eran +0,022 (IC 0,013 a 0,031) y +0,028 (IC 0,017 a 0,038). **El modelo no supera al
+mercado**, pero la brecha bajó a un tercio frente a Bet365. Las filas del ELO-Odds no son una evaluación única en
+test: esas temporadas ya formaban parte del período de su evaluación preregistrada (2015-16 a 2025-26).
 
 ### Comparación con un resultado publicado
 
@@ -318,8 +322,11 @@ fijados antes de mirar (`src/analysis/error_analysis.py`, `reports/analysis/anal
   400); no se amplió para no ajustar después de ver resultados, así que el efecto es, si acaso, conservador. Empeora
   en 2015-16 (+0,013, la temporada del Leicester campeón). El modelo pasa a depender de datos del mercado: compararlo
   "contra el mercado" ya no enfrenta dos fuentes independientes, aunque nunca usa las cuotas del propio partido.
-* **Decisión, según el preregistro:** O1 cumple la regla y es el elegido. Corresponde congelarlo, registrarlo en paralelo
-  en la Premier durante el resto de 2026-27 y decidir en julio de 2027 junto con el candidato de tiros.
+* **Decisión:** O1 cumple la regla y es el elegido. Por una enmienda documentada en el preregistro, **pasó a producción
+  el 01/10/2026** en lugar de registrarse en paralelo: la evidencia (19.763 partidos) supera por mucho lo que podían
+  aportar los ~330 partidos restantes de 2026-27. El modelo anterior se registra en paralelo y en julio de 2027 se
+  comparan en vivo; si O1 resultara peor con el IC 95% por encima de 0, se vuelve atrás. El candidato de tiros mantiene
+  como referencia el modelo de Elo de resultados, y la simulación de la temporada sigue con ese modelo.
 * Reporte: `reports/challengers/cuotas_2026-10-01.json`; parámetros: `configs/odds_elo_params.json`; código:
   `src/features/odds_elo.py`, `src/models/odds_elo_eval.py`.
 
@@ -350,12 +357,14 @@ fijados antes de mirar (`src/analysis/error_analysis.py`, `reports/analysis/anal
 
 ## 6. Limitaciones
 
-* No conoce lesiones, suspensiones, alineaciones, fichajes ni cambios de entrenador: el mercado sí, y por eso predice mejor.
+* No conoce las lesiones, suspensiones ni alineaciones de cada partido: el mercado sí, y por eso predice mejor. Lo que
+  el mercado supo en partidos anteriores (fichajes, lesiones largas, cambios de entrenador) le llega a través del rating.
 * Solo partidos de liga: no ve FA Cup, League Cup ni competiciones europeas. Descanso y congestión son "de liga".
 * La ventaja de local cambió con el tiempo (+0,39 goles antes de 2020, +0,08 sin público, +0,27 desde 2021); el modelo
   la estima con todos los datos hasta cada temporada.
 * El marcador exacto es intrínsecamente incierto: en las 8.030 predicciones históricas, el marcador más probable nunca
-  superó el 15%.
+  superó el 15% (14,95% con el ELO-Odds).
+* Depende de las cuotas de Bet365 de partidos anteriores (Football-Data): sin ellas, el rating no se actualiza.
 * Datos semanales; los próximos partidos se publican pocos días antes.
 * Predicciones para fechas históricas: solo si ambos equipos jugaban Premier o Championship esa temporada.
 
