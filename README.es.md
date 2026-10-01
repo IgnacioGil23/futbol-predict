@@ -14,8 +14,10 @@ datos, la experimentación, una API y una web interactiva.
 
 * **Comparación con la literatura:** RPS 0,1942 contra 0,1953 del mejor modelo de Ley et al. (2019), en los mismos
   3.300 partidos.
-* **Lo único que mejora:** los tiros (−0,004 a −0,005 de log loss en la Premier, replicado en España, Italia, Alemania y
-  Francia: −0,0049 en 15.583 partidos). Se registra en paralelo y se decide en julio de 2027.
+* **Lo que mejora:** un rating basado en cuotas de partidos anteriores (ELO-Odds, Wunderlich y Memmert 2018): −0,0084
+  de log loss en 19.763 partidos de cinco ligas, IC 95% [−0,0100; −0,0067]; reduce a la mitad la brecha con Bet365 y
+  cumple la regla preregistrada. También los tiros (−0,004 a −0,005, replicado en otras cuatro ligas), que se registran
+  en paralelo y se deciden en julio de 2027.
 * **Descartado con evidencia:** Poisson bivariado, ventaja de local reciente y modelos combinados de 5 ligas, lineal y
   XGBoost. Dos experimentos con datos de terceros (Fantasy Premier League y Transfermarkt) se retiraron por los términos
   de uso de esas fuentes.

@@ -76,8 +76,9 @@ def log_loss_per_match(pred: pd.DataFrame) -> pd.Series:
     return pd.Series(-np.log(p), index=pred["match_id"].to_numpy())
 
 
-def stratified_ci(deltas: dict[str, np.ndarray], n_boot: int = N_BOOT, seed: int = 0) -> tuple[float, list[float]]:
-    """Media de todas las diferencias y su IC 95% remuestreando partidos dentro de cada liga."""
+def stratified_ci(deltas: dict[str, np.ndarray], n_boot: int = N_BOOT, seed: int = 0,
+                  level: float = 0.95) -> tuple[float, list[float]]:
+    """Media de todas las diferencias y su IC (95% por defecto) remuestreando partidos dentro de cada liga."""
     rng = np.random.default_rng(seed)
     total = sum(len(d) for d in deltas.values())
     boots = np.zeros(n_boot)
@@ -85,7 +86,8 @@ def stratified_ci(deltas: dict[str, np.ndarray], n_boot: int = N_BOOT, seed: int
         boots += d[rng.integers(0, len(d), size=(n_boot, len(d)))].sum(axis=1)
     boots /= total
     mean = float(np.concatenate(list(deltas.values())).mean())
-    return mean, [float(v) for v in np.percentile(boots, [2.5, 97.5])]
+    tail = 100 * (1 - level) / 2
+    return mean, [float(v) for v in np.percentile(boots, [tail, 100 - tail])]
 
 
 def replication(frames: dict[str, pd.DataFrame]) -> dict:

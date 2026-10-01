@@ -289,6 +289,40 @@ fijados antes de mirar (`src/analysis/error_analysis.py`, `reports/analysis/anal
   es propio de cada liga), pero sí sirve para validar que una señal no es una casualidad de una liga.
 * Reporte: `reports/replication/replicacion_2026-09-30.json`; código: `src/data/leagues.py`, `src/models/replication.py`.
 
+### Rating basado en cuotas (ELO-Odds, candidatos O1 y O2, 01/10/2026) · **cumple la regla**
+
+* **Hipótesis** (Wunderlich y Memmert 2018, *PLoS ONE*): un Elo que, en lugar del resultado, se actualiza con lo que el
+  mercado esperaba **antes** de cada partido ya jugado (puntaje = p_local + 0,5 · p_empate, Bet365 sin margen por
+  Shin) absorbe información que los resultados no tienen: fichajes, lesiones largas, cambios de entrenador. Las cuotas
+  del partido que se predice nunca se usan.
+* **Preregistro** ([docs/preregistro_cuotas.md](preregistro_cuotas.md), commiteado antes del código). Parámetros
+  ajustados solo con la Premier 2004-05 a 2014-15 (k = 150, regresión entre temporadas 0,1, ventaja inicial de la
+  primera división 400, ascendidos −50, h = 57,7 por calibración); en las otras ligas, los mismos. O1 reemplaza la
+  diferencia de Elo por la de ELO-Odds; O2 usa las dos. Principal: las cinco ligas, 2015-16 a 2025-26.
+
+| | Partidos | O1 − producción | IC 95% | IC 97,5% (regla) | Temporadas que mejora |
+|---|---|---|---|---|---|
+| **Cinco ligas (principal)** | **19.763** | **−0,0084** | **[−0,0100; −0,0067]** | **[−0,0102; −0,0065]** | — |
+| Inglaterra (Premier) | 4.180 | −0,0079 | [−0,0117; −0,0039] | — | 10 de 11 |
+| España / Italia / Alemania / Francia | — | −0,0072 / −0,0111 / −0,0086 / −0,0070 | — | — | 11, 11, 10 y 9 de 11 |
+
+* **O2** (Elo + ELO-Odds) da lo mismo (−0,0083): con el rating de cuotas, el Elo de resultados ya no agrega nada.
+* **Brecha con Bet365** (log loss del modelo − del mercado): en la Premier baja de **+0,0163 a +0,0084**, y a la mitad
+  o menos en las cinco ligas (por ejemplo, Italia de +0,0221 a +0,0111). El modelo sigue sin superar al mercado.
+* **Dónde mejora** (Premier, cortes del análisis de errores): con un equipo ascendido −0,012; cuando producción y
+  mercado difieren 10 puntos o más −0,037 (la brecha con el mercado en esos partidos baja de +0,058 a +0,021); en las
+  fechas 1 a 5, −0,006. Cuando producción y mercado ya coincidían (menos de 5 puntos), empeora un poco (+0,0025).
+* **Sobre los tiros** (descriptivo): el candidato de tiros más ELO-Odds mejora al de tiros solo en −0,0045
+  [−0,0057; −0,0033]: las cuotas agregan información que los tiros no tienen.
+* **Salvedades:** dos parámetros quedaron en el borde de la grilla preregistrada (k = 150 y la ventaja inicial de
+  400); no se amplió para no ajustar después de ver resultados, así que el efecto es, si acaso, conservador. Empeora
+  en 2015-16 (+0,013, la temporada del Leicester campeón). El modelo pasa a depender de datos del mercado: compararlo
+  "contra el mercado" ya no enfrenta dos fuentes independientes, aunque nunca usa las cuotas del propio partido.
+* **Decisión, según el preregistro:** O1 cumple la regla y es el elegido. Corresponde congelarlo, registrarlo en paralelo
+  en la Premier durante el resto de 2026-27 y decidir en julio de 2027 junto con el candidato de tiros.
+* Reporte: `reports/challengers/cuotas_2026-10-01.json`; parámetros: `configs/odds_elo_params.json`; código:
+  `src/features/odds_elo.py`, `src/models/odds_elo_eval.py`.
+
 ### Simulación de la temporada (30/09/2026)
 
 * **Producto** (sección "Temporada" de la web; [preregistro](preregistro_temporada.md) commiteado antes del código):
@@ -331,6 +365,7 @@ fijados antes de mirar (`src/analysis/error_analysis.py`, `reports/analysis/anal
 * Dixon, M. J., y Coles, S. G. (1997). Modelling association football scores and inefficiencies in the football betting market. *JRSS C*, 46(2).
 * Ley, C., Van de Wiele, T., y Van Eetvelde, H. (2019). Ranking soccer teams on the basis of their current strength: A comparison of maximum likelihood approaches. *Statistical Modelling*, 19(1).
 * Karlis, D., y Ntzoufras, I. (2003). Analysis of sports data by using bivariate Poisson models. *The Statistician*, 52(3).
+* Wunderlich, F., y Memmert, D. (2018). The Betting Odds Rating System: Using soccer forecasts to forecast soccer. *PLoS ONE*, 13(6): e0198668.
 * Hvattum, L. M., y Arntzen, H. (2010). Using ELO ratings for match result prediction in association football. *International Journal of Forecasting*, 26(3).
 * Štrumbelj, E. (2014). On determining probability forecasts from betting odds. *International Journal of Forecasting*, 30(4).
 * Constantinou, A. C., y Fenton, N. E. (2012). Solving the problem of inadequate scoring rules for assessing probabilistic football forecast models. *JQAS*, 8(1).

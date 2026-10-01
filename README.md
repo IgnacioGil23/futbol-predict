@@ -69,6 +69,7 @@ flowchart LR
 
 | Candidate | Where tested | Log loss vs baseline | Outcome |
 |---|---|---|---|
+| **Betting-odds rating (ELO-Odds, Wunderlich & Memmert 2018)** | **5 leagues 2015-26 (19,763 matches)** | **−0.0084, CI [−0.0100, −0.0067]; halves the gap to Bet365** | **Meets the pre-registered rule** |
 | Shots + shots on target | Premier League 2015-26; 4 other leagues | −0.004 / −0.005; replicated: −0.0049 | In parallel logging until July 2027 |
 | Bivariate Poisson (Karlis & Ntzoufras 2003) | Premier League 2015-23 | exact-score log loss **worse** | Discarded (the draw excess did not persist after 2015) |
 | Recent home advantage | 4 leagues | −0.0001 | Fixes the home bias, no log-loss gain |

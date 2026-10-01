@@ -1,0 +1,105 @@
+{
+  "params": {
+    "k0": 150,
+    "lam": 0.0,
+    "home_advantage": 57.7,
+    "season_regression": 0.1,
+    "initial_gap": 400,
+    "newcomer_offset": -50
+  },
+  "tune_log_loss": 0.960431806669031,
+  "trace": [
+    {
+      "pass": 0,
+      "k0": 7.5,
+      "lam": 0.0,
+      "home_advantage": 57.7,
+      "season_regression": 0.05,
+      "initial_gap": 250,
+      "newcomer_offset": -50,
+      "log_loss": 0.9731424608814234
+    },
+    {
+      "pass": 1,
+      "k0": 150,
+      "lam": 0.0,
+      "home_advantage": 57.7,
+      "season_regression": 0.05,
+      "initial_gap": 250,
+      "newcomer_offset": -50,
+      "log_loss": 0.960498145266344
+    },
+    {
+      "pass": 1,
+      "k0": 150,
+      "lam": 0.0,
+      "home_advantage": 57.7,
+      "season_regression": 0.1,
+      "initial_gap": 250,
+      "newcomer_offset": -50,
+      "log_loss": 0.9604935550782391
+    },
+    {
+      "pass": 1,
+      "k0": 150,
+      "lam": 0.0,
+      "home_advantage": 57.7,
+      "season_regression": 0.1,
+      "initial_gap": 400,
+      "newcomer_offset": -50,
+      "log_loss": 0.960431806669031
+    },
+    {
+      "pass": 1,
+      "k0": 150,
+      "lam": 0.0,
+      "home_advantage": 57.7,
+      "season_regression": 0.1,
+      "initial_gap": 400,
+      "newcomer_offset": -50,
+      "log_loss": 0.960431806669031
+    },
+    {
+      "pass": 2,
+      "k0": 150,
+      "lam": 0.0,
+      "home_advantage": 57.7,
+      "season_regression": 0.1,
+      "initial_gap": 400,
+      "newcomer_offset": -50,
+      "log_loss": 0.960431806669031
+    },
+    {
+      "pass": 2,
+      "k0": 150,
+      "lam": 0.0,
+      "home_advantage": 57.7,
+      "season_regression": 0.1,
+      "initial_gap": 400,
+      "newcomer_offset": -50,
+      "log_loss": 0.960431806669031
+    },
+    {
+      "pass": 2,
+      "k0": 150,
+      "lam": 0.0,
+      "home_advantage": 57.7,
+      "season_regression": 0.1,
+      "initial_gap": 400,
+      "newcomer_offset": -50,
+      "log_loss": 0.960431806669031
+    },
+    {
+      "pass": 2,
+      "k0": 150,
+      "lam": 0.0,
+      "home_advantage": 57.7,
+      "season_regression": 0.1,
+      "initial_gap": 400,
+      "newcomer_offset": -50,
+      "log_loss": 0.960431806669031
+    }
+  ],
+  "criterion": "log loss de logit multinomial resultado ~ diferencia de ELO-Odds, Premier 2004-05 a 2014-15",
+  "preregistration": "docs/preregistro_cuotas.md"
+}

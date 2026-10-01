@@ -54,13 +54,17 @@ def expected_home(rating_home, rating_away, home_advantage: float):
 
 
 def compute_elo(matches: pd.DataFrame, params: EloParams = EloParams(),
-                top_division: str = "E0") -> tuple[pd.DataFrame, pd.DataFrame]:
+                top_division: str = "E0", score_column: str | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Calcula el Elo previo a cada partido.
 
     `matches` necesita: match_id, date, season_start, division, home_team,
     away_team, home_goals, away_goals (NaN = partido todavía no jugado).
     `top_division`: la división que arranca `initial_gap` puntos arriba (E0 en Inglaterra; en la
     replicación en otras ligas, su primera división).
+    `score_column`: si se indica, el puntaje del local que actualiza el rating sale de esa columna en lugar del
+    resultado, con k = k0 constante (sin diferencia de gol). Un partido jugado con el puntaje vacío no actualiza
+    los ratings, pero cuenta como jugado (para los equipos nuevos de la temporada siguiente). Lo usa el rating
+    basado en cuotas (src/features/odds_elo.py).
 
     Devuelve:
       per_match: match_id, elo_home, elo_away, elo_expected_home (con ventaja de local).
@@ -115,6 +119,7 @@ def compute_elo(matches: pd.DataFrame, params: EloParams = EloParams(),
     ag = df["away_goals"].to_numpy(dtype=float, na_value=np.nan)
     dates = df["date"].to_numpy()
     ids = df["match_id"].to_numpy()
+    scores = None if score_column is None else df[score_column].to_numpy(dtype=float, na_value=np.nan)
 
     for i in range(n):
         season = int(seasons[i])
@@ -128,13 +133,18 @@ def compute_elo(matches: pd.DataFrame, params: EloParams = EloParams(),
         elo_home[i], elo_away[i] = r_h, r_a
         if not played[i]:
             continue
+        last_season_played[home] = last_season_played[away] = season
+        if scores is not None and np.isnan(scores[i]):
+            continue
         gamma = 1.0 / (1.0 + 10.0 ** ((r_a - r_h - params.home_advantage) / 400.0))
-        alpha = 1.0 if hg[i] > ag[i] else (0.5 if hg[i] == ag[i] else 0.0)
-        k = params.k0 * (1.0 + abs(hg[i] - ag[i])) ** params.lam
+        if scores is None:
+            alpha = 1.0 if hg[i] > ag[i] else (0.5 if hg[i] == ag[i] else 0.0)
+            k = params.k0 * (1.0 + abs(hg[i] - ag[i])) ** params.lam
+        else:
+            alpha, k = scores[i], params.k0
         delta = k * (alpha - gamma)
         ratings[home] = r_h + delta
         ratings[away] = r_a - delta
-        last_season_played[home] = last_season_played[away] = season
         history.append((ids[i], dates[i], season, team_division[(season, home)], home, ratings[home]))
         history.append((ids[i], dates[i], season, team_division[(season, away)], away, ratings[away]))
 
