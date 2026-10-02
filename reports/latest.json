@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-01T12:09:24+00:00",
+  "generated_at": "2026-10-02T11:37:34+00:00",
   "window": 190,
   "counts": {
     "logged": 50,
@@ -13,7 +13,7 @@
     "ced0b252cafe"
   ],
   "thresholds": {
-    "computed_on": "2026-09-30",
+    "computed_on": "2026-10-01",
     "backtest": {
       "seasons": "2016-17 a 2025-26",
       "matches": 3800,
@@ -34,6 +34,19 @@
       "logged_live": 0,
       "logged_reconstructed": 50,
       "evaluation": "al terminar la temporada 2026-27 (julio de 2027)"
+    },
+    {
+      "name": "elo",
+      "candidate": "Modelo anterior: Poisson sobre el Elo de resultados (comparación en vivo)",
+      "ledger": "shadow_elo_predictions.csv",
+      "preregistration": "docs/preregistro_cuotas.md",
+      "model_versions": [
+        "ced0b252cafe"
+      ],
+      "logged": 50,
+      "logged_live": 0,
+      "logged_reconstructed": 50,
+      "evaluation": "al terminar la temporada 2026-27 (julio de 2027)"
     }
   ],
   "status": "insuficiente",
@@ -46,14 +59,14 @@
       "status": "insuficiente",
       "status_label": "Datos insuficientes",
       "normal_range": [
-        -0.008557056460032401,
-        0.035850057322023926
+        -0.01370302633580567,
+        0.02324199194465454
       ],
       "alert_range": [
-        -0.015998836995907047,
-        0.038543749553622095
+        -0.020683314514815556,
+        0.026035191044867585
       ],
-      "backtest_median": 0.018755160681422946,
+      "backtest_median": 0.00796664669140531,
       "one_sided": true
     },
     "goals_ratio": {
@@ -63,14 +76,14 @@
       "status": "insuficiente",
       "status_label": "Datos insuficientes",
       "normal_range": [
-        0.9368253548086063,
-        1.2363637057924954
+        0.9246610005835191,
+        1.2266626354015708
       ],
       "alert_range": [
-        0.9071453403760511,
-        1.272253871517736
+        0.8956702042790677,
+        1.2630605070832475
       ],
-      "backtest_median": 1.0435262197237398,
+      "backtest_median": 1.0349022710717797,
       "one_sided": false
     },
     "draws_diff_pp": {
@@ -80,14 +93,14 @@
       "status": "insuficiente",
       "status_label": "Datos insuficientes",
       "normal_range": [
-        -4.8576734158859765,
-        6.544590155614532
+        -4.198440561676289,
+        7.308633073388227
       ],
       "alert_range": [
-        -7.799850853997485,
-        8.441502691961066
+        -7.21063767541249,
+        8.486058609214542
       ],
-      "backtest_median": -0.732278437251886,
+      "backtest_median": -0.09960358842129186,
       "one_sided": false
     },
     "home_residual": {
@@ -97,14 +110,14 @@
       "status": "insuficiente",
       "status_label": "Datos insuficientes",
       "normal_range": [
-        -0.39189989589194835,
-        0.10043032595787042
+        -0.4090307354412885,
+        0.08277360271735572
       ],
       "alert_range": [
-        -0.42766945192498695,
-        0.1787338675671875
+        -0.43868597898354783,
+        0.15675409980756774
       ],
-      "backtest_median": -0.09130338714597616,
+      "backtest_median": -0.10581481288844105,
       "one_sided": false
     }
   },
