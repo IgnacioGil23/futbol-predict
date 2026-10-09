@@ -1,15 +1,16 @@
 {
-  "generated_at": "2026-10-02T11:37:34+00:00",
+  "generated_at": "2026-10-09T12:19:35+00:00",
   "window": 190,
   "counts": {
-    "logged": 50,
-    "logged_live": 0,
+    "logged": 60,
+    "logged_live": 10,
     "logged_reconstructed": 50,
     "evaluated": 50,
     "evaluated_live": 0,
-    "pending": 0
+    "pending": 10
   },
   "model_versions": [
+    "02dfa76b769d",
     "ced0b252cafe"
   ],
   "thresholds": {
@@ -30,8 +31,8 @@
       "model_versions": [
         "ec5a7a4752bc"
       ],
-      "logged": 50,
-      "logged_live": 0,
+      "logged": 60,
+      "logged_live": 10,
       "logged_reconstructed": 50,
       "evaluation": "al terminar la temporada 2026-27 (julio de 2027)"
     },
@@ -43,8 +44,8 @@
       "model_versions": [
         "ced0b252cafe"
       ],
-      "logged": 50,
-      "logged_live": 0,
+      "logged": 60,
+      "logged_live": 10,
       "logged_reconstructed": 50,
       "evaluation": "al terminar la temporada 2026-27 (julio de 2027)"
     }
