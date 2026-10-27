@@ -65,7 +65,10 @@ function binLabel(bin: string) {
 }
 
 const EVENT_LABEL = { campeon: 'Campeón', top4: 'Top 4', descenso: 'Descenso' } as const
-const CUTOFF_LABEL = (c: number) => (c === 0 ? 'Antes de la fecha 1' : `Tras ${c} partidos`)
+// Fuera de la Premier los cortes equivalen a la misma proporción de la temporada (100, 200 y 300 de 380 partidos).
+const SHARE: Record<number, string> = { 100: '26%', 200: '53%', 300: '79%' }
+const CUTOFF_LABEL = (c: number, proportional = false) => (c === 0 ? 'Antes de la fecha 1'
+  : proportional ? `Tras el ${SHARE[c] ?? `${c} partidos`} de los partidos` : `Tras ${c} partidos`)
 
 /** Explicación de una tabla de calibración, con un ejemplo tomado de sus propios datos. */
 function CalibrationHelp({ rows, event }: { rows: SeasonEvaluation['calibration']['top4']; event: string }) {
@@ -95,7 +98,8 @@ export function Evaluation({ ev, id, title, intro }: { ev: SeasonEvaluation; id?
         Simulamos las temporadas {ev.seasons[0]} a {ev.seasons[ev.seasons.length - 1]} desde cuatro momentos, cada una
         con el modelo entrenado solo con temporadas anteriores, y comparamos con lo que pasó. La regla se fijó antes de
         mirar los resultados, en el{' '}
-        <a href={`${REPO}/blob/main/docs/preregistro_temporada.md`} target="_blank" rel="noreferrer">preregistro</a>.
+        <a href={`${REPO}/blob/main/docs/${ev.cutoffs_label ? 'preregistro_ligas' : 'preregistro_temporada'}.md`}
+           target="_blank" rel="noreferrer">preregistro</a>.
       </p>
       <div className="card">
         <h3>Error de la simulación y mejora contra una que no conoce la fuerza de los equipos</h3>
@@ -113,7 +117,7 @@ export function Evaluation({ ev, id, title, intro }: { ev: SeasonEvaluation; id?
             <tbody>
               {cutoffs.map((c) => (
                 <tr key={c}>
-                  <td>{CUTOFF_LABEL(c)}</td>
+                  <td>{CUTOFF_LABEL(c, Boolean(ev.cutoffs_label))}</td>
                   {events.map((e) => {
                     const r = ev.table.find((x) => x.event === e && x.cutoff === c)!
                     return (

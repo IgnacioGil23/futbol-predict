@@ -117,9 +117,9 @@ export function Method() {
               <table className="table">
                 <thead><tr><th>Temporada</th><th className="num">Modelo</th><th className="num">Mercado</th><th className="num">Diferencia</th></tr></thead>
                 <tbody>
-                  {[...review.data].reverse().map((s) => (
+                  {[...review.data].reverse().map((s, _, all) => (
                     <tr key={s.season}>
-                      <td>{s.season}{s.matches < 380 ? <span className="muted"> ({s.matches} partidos)</span> : ''}</td>
+                      <td>{s.season}{s.matches < Math.max(...all.map((x) => x.matches)) * 0.95 ? <span className="muted"> ({s.matches} partidos)</span> : ''}</td>
                       <td className="num">{num(s.model.log_loss, 3)}</td>
                       <td className="num">{num(s.market.log_loss, 3)}</td>
                       <td className="num" style={{ color: s.model.log_loss <= s.market.log_loss ? 'var(--good)' : 'var(--ink-2)' }}>

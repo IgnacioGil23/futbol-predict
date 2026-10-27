@@ -67,6 +67,8 @@ export interface SeasonEvaluation {
   table: { event: 'campeon' | 'top4' | 'descenso'; cutoff: number; producto: SeasonVariantScore; elo_fijo: SeasonVariantScore; base_iguales: SeasonVariantScore }[]
   calibration: Record<'top4' | 'descenso', { bin: string; n: number; predicted: number; observed: number }[]>
   champion_probability: { season: string; cutoff: number; p_real_champion: number }[]
+  /** Otras ligas: los cortes son proporcionales a la temporada (26%, 53% y 79% de los partidos). */
+  cutoffs_label?: string | null
 }
 export interface SeasonFile {
   as_of: string; season: string; n_sims: number; remaining_matches: number; model_version: string

@@ -16,3 +16,9 @@ def test_top_score_probability_matches_the_full_grid_maximum():
 def test_top_score_probability_is_vectorized():
     out = top_score_probability([1.2, 2.0], [0.8, 1.5])
     assert out.shape == (2,) and np.all((out > 0) & (out < 1))
+
+
+def test_write_turns_every_nan_into_null(tmp_path):
+    from src.export.site import write
+    write(tmp_path / "x.json", {"kickoff_ar": float("nan"), "p": np.float64("nan"), "v": [1.5, float("nan")]})
+    assert (tmp_path / "x.json").read_text(encoding="utf-8") == '{"kickoff_ar":null,"p":null,"v":[1.5,null]}'

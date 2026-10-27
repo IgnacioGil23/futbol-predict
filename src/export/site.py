@@ -44,9 +44,22 @@ GRID = 7
 RATING_COLUMNS = {"elo": ("elo_home", "elo_away"), "odds_elo": ("odds_elo_home", "odds_elo_away")}
 
 
+def _without_nan(o):
+    """NaN -> None en todo el payload: json no pasa los float (ni np.float64, que hereda de float) por `default`, y
+    escribiría NaN, que no es JSON válido."""
+    if isinstance(o, float) and o != o:
+        return None
+    if isinstance(o, dict):
+        return {k: _without_nan(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [_without_nan(v) for v in o]
+    return o
+
+
 def write(path: Path, payload) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":"), default=_default), encoding="utf-8")
+    path.write_text(json.dumps(_without_nan(payload), ensure_ascii=False, separators=(",", ":"), default=_default,
+                               allow_nan=False), encoding="utf-8")
 
 
 def _default(o):

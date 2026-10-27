@@ -122,3 +122,12 @@ def test_matches_without_kickoff_time_have_no_argentina_time():
 
 def test_to_argentina_treats_missing_kickoff_as_none():
     assert to_argentina(pd.Timestamp("2026-10-31"), float("nan")) is None
+
+
+def test_missing_kickoff_stays_none_in_a_full_schedule():
+    from src.data.schedule import parse_schedule
+    lines = ["▪ Matchday 1", "  Sat Aug 15 2026"]
+    lines += [f"    {18 + i % 4}:00  Equipo {i}  v  Rival {i}" for i in range(60)]
+    lines += ["  Sun Aug 16", "    Equipo X  v  Rival X"]
+    df = parse_schedule("\n".join(lines), 2026, names={})
+    assert df.kickoff_ar.iloc[-1] is None and df.time_uk.iloc[-1] is None

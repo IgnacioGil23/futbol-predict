@@ -101,7 +101,11 @@ def parse_schedule(text: str, season_start: int, names: dict | None = None, tz: 
         logger.warning("Línea del calendario no reconocida: %r", line)
     df = pd.DataFrame(rows, columns=["matchday", "date", "time_uk", "home_team", "away_team", "home_raw", "away_raw",
                                      "home_goals", "away_goals"])
-    df["kickoff_ar"] = [to_argentina(d, t, tz) for d, t in zip(df["date"], df["time_uk"])]
+    # Columnas de texto como object: así un horario faltante queda None (con el tipo str de pandas sería NaN, que no
+    # es JSON válido).
+    df["time_uk"] = pd.Series([r["time_uk"] for r in rows], dtype=object, index=df.index)
+    df["kickoff_ar"] = pd.Series([to_argentina(d, t, tz) for d, t in zip(df["date"], df["time_uk"])], dtype=object,
+                                 index=df.index)
     df["played"] = df["home_goals"].notna()
     return df
 
