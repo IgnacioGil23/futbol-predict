@@ -22,3 +22,10 @@ def test_every_product_league_has_what_the_site_needs():
     for lg in PRODUCT_LEAGUES.values():
         assert {"competition", "slug", "top", "second", "timezone", "schedule_url", "relegation"} <= set(lg)
         assert "{season}" in lg["schedule_url"]
+
+
+def test_merge_names_keeps_saved_translations():
+    from src.data.team_names import merge_names
+    assert merge_names({"Sevilla FC": "Sevilla"}, {"Getafe CF": "Getafe"}) == {"Getafe CF": "Getafe",
+                                                                               "Sevilla FC": "Sevilla"}
+    assert merge_names({"X": "A"}, {"X": "B"}) == {"X": "B"}
