@@ -90,13 +90,16 @@ def client(league, monkeypatch):
     train["away_goals"] = rng.poisson(np.exp(0.1 - 0.0017 * train.elo_diff))
     predictor = EloPoissonPredictor({"params": export_params(PoissonGLMModel(["elo_diff"]).fit(train)),
                                      "meta": {"trained_at": "test"}})
+    # Otra liga: la misma liga sintética con divisiones de España.
+    spain = league.assign(home_team=league.home_team + "-es", away_team=league.away_team + "-es")
+    stores = {"ENG": store, "ESP": store_from(spain.replace({"division": {"E0": "SP1", "E1": "SP2"}}))}
     app = api.app
     # Los endpoints resuelven get_store/get_predictor por Depends (override) y el cálculo
     # cacheado los llama directo (monkeypatch). Primero el override, con las funciones originales.
-    app.dependency_overrides[api.get_store] = lambda: store
-    app.dependency_overrides[api.get_predictor] = lambda: predictor
-    monkeypatch.setattr(api, "get_store", lambda: store)
-    monkeypatch.setattr(api, "get_predictor", lambda: predictor)
+    app.dependency_overrides[api.get_store] = lambda league="ENG": stores[api.check_league(league)]
+    app.dependency_overrides[api.get_predictor] = lambda league="ENG": predictor
+    monkeypatch.setattr(api, "get_store", lambda league="ENG": stores[league])
+    monkeypatch.setattr(api, "get_predictor", lambda league="ENG": predictor)
     monkeypatch.setattr(api, "MIN_DATE", date(2004, 1, 1))
     api._predict_cached.cache_clear()
     yield TestClient(app)
@@ -137,6 +140,35 @@ def test_predict_rejects_team_outside_e0_e1_that_season(client):
     # En la liga sintética, "N2004" entra a E1 recién en 2005: no hay Elo vigente en 2004-05.
     r = client.get("/predict", params={"home": "A", "away": "N2004", "date": "2004-10-01"})
     assert r.status_code == 422 and "no jugaba" in r.json()["detail"]
+
+
+def test_other_league_uses_its_own_teams_and_divisions(client):
+    teams = client.get("/teams", params={"season": 2004, "league": "ESP"}).json()
+    assert set(teams["teams"]) == {"A-es", "B-es", "C-es", "D-es"}
+    r = client.get("/predict", params={"home": "A-es", "away": "B-es", "date": "2005-09-01", "league": "ESP"})
+    assert r.status_code == 200, r.text
+    # un equipo de la Premier no existe en LaLiga
+    assert client.get("/predict", params={"home": "A", "away": "B-es", "date": "2005-09-01",
+                                          "league": "ESP"}).status_code == 404
+
+
+def test_second_division_warning_names_the_league(client):
+    # E (de E1) sube en 2001; en 2004 los de la segunda división de la liga sintética son otros: se busca uno.
+    store_es = api_store(client, "ESP")
+    second = next(t for t in store_es.teams("SP2", 2005))
+    first = next(t for t in store_es.teams("SP1", 2005))
+    r = client.get("/predict", params={"home": first, "away": second, "date": "2005-10-01", "league": "ESP"})
+    assert r.status_code == 200, r.text
+    assert any("Segunda División" in w for w in r.json()["warnings"])
+
+
+def test_unknown_league_is_404(client):
+    assert client.get("/teams", params={"league": "XXX"}).status_code == 404
+
+
+def api_store(client, league):
+    import src.api.main as api
+    return api.get_store(league)
 
 
 def test_serving_csv_roundtrip_gives_same_answers(league, tmp_path):

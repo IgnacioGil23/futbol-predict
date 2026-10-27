@@ -15,7 +15,7 @@ class Health(BaseModel):
 class TeamsOut(BaseModel):
     season: int
     teams: list[str]
-    all_teams: list[str] = Field(description="Todos los equipos con partidos de Premier desde 2000-01")
+    all_teams: list[str] = Field(description="Todos los equipos con partidos de primera división de la liga desde 2000-01")
 
 
 class EloBlock(BaseModel):
