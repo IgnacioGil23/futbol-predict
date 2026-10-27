@@ -3,7 +3,8 @@
 Estado a hoy: tabla real (Football-Data), Elo actual de cada equipo y partidos que faltan según el calendario de
 openfootball (todo cruce local-visitante que todavía no tiene resultado, en orden cronológico; incluye partidos
 postergados). Se simulan con src.models.season_sim, tal como fija docs/preregistro_temporada.md, y se adjunta el
-resumen de la evaluación histórica (reports/season/).
+resumen de la evaluación histórica (reports/season/). Cada liga con su calendario, su modelo y sus puestos de
+descenso (src/data/leagues.py; docs/preregistro_ligas.md).
 """
 
 import json
@@ -14,11 +15,8 @@ import pandas as pd
 import requests
 
 from src.config import PREMIER_LEAGUE, PROJECT_ROOT, season_label, season_start_year
-from src.data.schedule import fetch_schedule
-from src.data.teams import display_name, slug
-from src.features.build import load_elo_params
+from src.data.teams import slug
 from src.models.season_sim import N_SIMS, SeasonState, simulate, summarize
-from src.serving.predictor import EloPoissonPredictor
 from src.serving.store import MatchStore
 
 logger = logging.getLogger(__name__)
@@ -26,12 +24,13 @@ logger = logging.getLogger(__name__)
 EVAL_DIR = PROJECT_ROOT / "reports" / "season"
 
 
-def current_state(store: MatchStore, schedule: pd.DataFrame, today: pd.Timestamp) -> SeasonState:
+def current_state(store: MatchStore, schedule: pd.DataFrame, today: pd.Timestamp,
+                  division: str = PREMIER_LEAGUE) -> SeasonState:
     season = season_start_year(today.date())
     teams = sorted(set(schedule.home_team) | set(schedule.away_team))
-    table = store.standings(PREMIER_LEAGUE, season, today + pd.Timedelta(days=1)).set_index("team")
+    table = store.standings(division, season, today + pd.Timedelta(days=1)).set_index("team")
     table = table.reindex(teams).fillna(0)
-    results = store.matches[(store.matches.division == PREMIER_LEAGUE) & (store.matches.season_start == season)
+    results = store.matches[(store.matches.division == division) & (store.matches.season_start == season)
                             & store.matches.home_goals.notna()]
     played = set(zip(results.home_team, results.away_team))
     rest = schedule[[(h, a) not in played for h, a in zip(schedule.home_team, schedule.away_team)]]
@@ -43,8 +42,8 @@ def current_state(store: MatchStore, schedule: pd.DataFrame, today: pd.Timestamp
                        fixtures=list(zip(rest["home_team"], rest["away_team"])))
 
 
-def evaluation_summary() -> dict | None:
-    reports = sorted(EVAL_DIR.glob("evaluacion_*.json"))
+def evaluation_summary(reports: list) -> dict | None:
+    """Resumen de la última evaluación histórica de la simulación (`reports`: los JSON de esa liga, ordenados)."""
     if not reports:
         return None
     r = json.loads(reports[-1].read_text(encoding="utf-8"))
@@ -52,23 +51,33 @@ def evaluation_summary() -> dict | None:
               **{v: {"brier": e["brier"], "skill": e["skill_vs_base"], "skill_ci": e["skill_ci"]}
                  for v, e in entry.items()}} for key, entry in r["summary"].items()]
     return {"seasons": r["seasons"], "n_sims": r["n_sims"], "table": table, "calibration": r["calibration"],
-            "champion_probability": r["champion_probability"], "report": reports[-1].name}
+            "champion_probability": r["champion_probability"], "report": reports[-1].name,
+            "cutoffs_label": r.get("cutoffs_label")}
 
 
-def build_season(store: MatchStore, predictor: EloPoissonPredictor, today: pd.Timestamp) -> dict | None:
+def build_season(ctx, today: pd.Timestamp) -> dict | None:
+    """Simulación de la temporada en curso de la liga de `ctx` (src.export.league_context.LeagueContext)."""
     season = season_start_year(today.date())
     try:
-        schedule = fetch_schedule(season)
+        schedule = ctx.schedule(season)
     except requests.RequestException as err:
-        logger.warning("Sin calendario, no se simula la temporada: %s", err)
+        logger.warning("%s: sin calendario, no se simula la temporada: %s", ctx.code, err)
         return None
-    state = current_state(store, schedule, today)
-    summary = summarize(state, simulate(state, predictor.rates, load_elo_params()))
-    teams = [{"team": r.team, "name": display_name(r.team), "slug": slug(r.team), "elo": round(float(r.elo), 1),
+    known = set(ctx.store.teams(ctx.top, season))
+    unknown = (set(schedule.home_team) | set(schedule.away_team)) - known
+    if unknown:
+        logger.warning("%s: equipos del calendario sin datos %s; no se simula la temporada", ctx.code, sorted(unknown))
+        return None
+    state = current_state(ctx.store, schedule, today, division=ctx.top)
+    relegated = ctx.league["relegation"]
+    summary = summarize(state, simulate(state, ctx.sim_predictor.rates, ctx.sim_elo_params), relegated=relegated)
+    teams = [{"team": r.team, "name": ctx.name_of(r.team), "slug": slug(r.team), "elo": round(float(r.elo), 1),
               "points": int(r.points_now), "played": int(r.played), "expected_points": round(float(r.expected_points), 1),
               "p_champion": round(float(r.p_champion), 4), "p_top4": round(float(r.p_top4), 4),
               "p_top6": round(float(r.p_top6), 4), "p_relegation": round(float(r.p_relegation), 4),
               "positions": [round(float(x), 4) for x in r.positions]} for r in summary.itertuples()]
     return {"as_of": today.date().isoformat(), "season": season_label(season), "n_sims": N_SIMS,
-            "remaining_matches": len(state.fixtures), "model_version": predictor.version, "teams": teams,
-            "evaluation": evaluation_summary()}
+            "remaining_matches": len(state.fixtures), "model_version": ctx.sim_predictor.version, "teams": teams,
+            "zones": {"relegation": relegated, "playoff": ctx.league["playoff"],
+                      "head_to_head": ctx.league["head_to_head"]},
+            "evaluation": evaluation_summary(ctx.season_reports())}

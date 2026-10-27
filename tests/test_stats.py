@@ -6,8 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.export.stats import (build_stats, league_summary, referee_stats, remaining_difficulty, team_match_rows,
-                              team_stats)
+from src.export.stats import build_stats, league_summary, referee_stats, remaining_difficulty, team_match_rows, team_stats
 
 
 def make_matches() -> pd.DataFrame:
@@ -130,17 +129,23 @@ import requests  # noqa: E402
 from src.export import site  # noqa: E402
 
 
-def _export(tmp_path, monkeypatch, today: str, schedule):
-    path = tmp_path / "matches.parquet"
-    make_matches().to_parquet(path)
-    monkeypatch.setattr(site, "MATCHES_PATH", path)
-    monkeypatch.setattr(site, "fetch_schedule", schedule)
+class FakeContext:
+    """Lo mínimo de un LeagueContext para export_stats: partidos, calendario y fixtures sin red."""
+    code, top, store = "ENG", "E0", None
 
-    def no_fixtures(*_a, **_k):
+    def __init__(self, schedule):
+        self.matches, self._schedule = make_matches(), schedule
+
+    def schedule(self, season):
+        return self._schedule(season)
+
+    def fixtures(self):
         raise requests.RequestException("fixtures caído")
-    monkeypatch.setattr(site, "fetch_fixtures", no_fixtures)
+
+
+def _export(tmp_path, monkeypatch, today: str, schedule):
     out = tmp_path / "out"
-    seasons = site.export_stats(out, store=None, today=pd.Timestamp(today), rating="odds_elo")
+    seasons = site.export_stats(out, FakeContext(schedule), today=pd.Timestamp(today))
     index = json.loads((out / "stats" / "index.json").read_text(encoding="utf-8"))
     return seasons, index, out
 

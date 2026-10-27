@@ -5,14 +5,13 @@ publica en la raíz de web/public/data; las otras ligas usan los suyos (src/serv
 web/public/data/leagues/<liga>/.
 """
 
-import json
 from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
 
 import pandas as pd
 
-from src.config import PREMIER_LEAGUE, PROJECT_ROOT
+from src.config import PROJECT_ROOT
 from src.data.fixtures import fetch_fixtures
 from src.data.leagues import PRODUCT_LEAGUES, matches_path
 from src.data.load import MATCHES_PATH
@@ -122,9 +121,3 @@ def leagues_index(contexts: list[LeagueContext]) -> list[dict]:
              "head_to_head": c.league["head_to_head"], "model_version": c.predictor.version}
             for c in contexts]
 
-
-def read_json(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-__all__ = ["LeagueContext", "PREMIER_LEAGUE", "league_context", "leagues_index", "premier_context"]

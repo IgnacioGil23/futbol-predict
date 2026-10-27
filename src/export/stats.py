@@ -171,9 +171,9 @@ def remaining_difficulty(fixtures: list[tuple[str, str]], ratings: dict[str, flo
 
 
 def build_stats(matches: pd.DataFrame, season_start: int, difficulty: dict | None,
-                referees_next: dict | None) -> dict:
-    """Todo lo que muestra la página para una temporada de Premier League."""
-    pl = matches[(matches["division"] == PREMIER_LEAGUE) & matches["home_goals"].notna()]
+                referees_next: dict | None, division: str = PREMIER_LEAGUE) -> dict:
+    """Todo lo que muestra la página para una temporada de la primera división `division`."""
+    pl = matches[(matches["division"] == division) & matches["home_goals"].notna()]
     season = pl[pl["season_start"] == season_start]
     reference = pl[pl["season_start"].between(season_start - REFERENCE_SEASONS, season_start - 1)]
     rows = team_match_rows(season)
