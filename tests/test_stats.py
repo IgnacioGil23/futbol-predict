@@ -122,3 +122,44 @@ def test_build_stats_reference_uses_previous_ten_seasons_only():
     s = build_stats(pd.concat([matches, *old]), 2026, difficulty=None, referees_next=None)
     assert s["league_reference"]["matches"] == 30     # 2016-17 a 2025-26
     assert s["matches_played"] == 3
+
+
+# ------------------------------------------------------------ export_stats (src/export/site.py)
+import requests  # noqa: E402
+
+from src.export import site  # noqa: E402
+
+
+def _export(tmp_path, monkeypatch, today: str, schedule):
+    path = tmp_path / "matches.parquet"
+    make_matches().to_parquet(path)
+    monkeypatch.setattr(site, "MATCHES_PATH", path)
+    monkeypatch.setattr(site, "fetch_schedule", schedule)
+
+    def no_fixtures(*_a, **_k):
+        raise requests.RequestException("fixtures caído")
+    monkeypatch.setattr(site, "fetch_fixtures", no_fixtures)
+    out = tmp_path / "out"
+    seasons = site.export_stats(out, store=None, today=pd.Timestamp(today), rating="odds_elo")
+    index = json.loads((out / "stats" / "index.json").read_text(encoding="utf-8"))
+    return seasons, index, out
+
+
+def test_export_stats_survives_schedule_download_failure(tmp_path, monkeypatch):
+    def down(_season):
+        raise requests.RequestException("openfootball caído")
+    seasons, index, out = _export(tmp_path, monkeypatch, "2026-09-01", down)
+    assert seasons == ["2026-27", "2025-26"] and index[0] == {"season": "2026-27", "current": True}
+    current = json.loads((out / "stats" / "2026-27.json").read_text(encoding="utf-8"))
+    assert current["difficulty"] is None and current["referees_next"] is None and current["matches_played"] == 3
+
+
+def test_export_stats_in_summer_break_has_no_remaining_schedule(tmp_path, monkeypatch):
+    """Agosto de 2027 sin partidos de la temporada nueva: se muestra 2026-27, que ya terminó (sin calendario restante)."""
+    def schedule(_season):
+        raise AssertionError("no hay calendario restante para una temporada terminada")
+    seasons, index, out = _export(tmp_path, monkeypatch, "2027-08-05", schedule)
+    assert seasons == ["2026-27", "2025-26"]
+    assert all(not i["current"] for i in index)          # la temporada nueva todavía no empezó
+    finished = json.loads((out / "stats" / "2026-27.json").read_text(encoding="utf-8"))
+    assert finished["difficulty"] is None and finished["referees_next"] is None

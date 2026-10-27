@@ -240,11 +240,28 @@ def export_stats(out: Path, store: MatchStore, today: pd.Timestamp, rating: str)
     matches = pd.read_parquet(MATCHES_PATH)
     played = matches[matches.home_goals.notna()]
     current = season_start_year(today.date())
-    if not ((played.division == PREMIER_LEAGUE) & (played.season_start == current)).any():
-        current -= 1                                     # receso: la temporada nueva todavía no empezó
+    in_progress = bool(((played.division == PREMIER_LEAGUE) & (played.season_start == current)).any())
+    if not in_progress:
+        current -= 1                     # receso: se muestra la temporada que terminó (sin calendario restante)
+    difficulty = referees_next = None
+    if in_progress:
+        difficulty, referees_next = _upcoming_context(store, current, today, rating)
+
+    index = []
+    for season in (current, current - 1):
+        is_current = in_progress and season == current
+        payload = build_stats(played, season, difficulty if is_current else None, referees_next if is_current else None)
+        write(out / "stats" / f"{payload['season']}.json", payload)
+        index.append({"season": payload["season"], "current": is_current})
+    write(out / "stats" / "index.json", index)
+    return [i["season"] for i in index]
+
+
+def _upcoming_context(store: MatchStore, season: int, today: pd.Timestamp, rating: str) -> tuple[dict | None, dict | None]:
+    """Dificultad del calendario restante y árbitros designados; None en lo que no se pueda descargar."""
     difficulty = referees_next = None
     try:
-        state = current_state(store, fetch_schedule(current), today)
+        state = current_state(store, fetch_schedule(season), today)
         if state.fixtures:
             ratings = {t: store.rating_as_of(t, today, rating) for t in state.teams}
             if None in ratings.values():
@@ -262,15 +279,7 @@ def export_stats(out: Path, store: MatchStore, today: pd.Timestamp, rating: str)
             referees_next = refs or None
     except requests.RequestException as err:
         logger.warning("Estadísticas sin árbitros de la próxima fecha: %s", err)
-
-    index = []
-    for season in (current, current - 1):
-        is_current = season == current
-        payload = build_stats(played, season, difficulty if is_current else None, referees_next if is_current else None)
-        write(out / "stats" / f"{payload['season']}.json", payload)
-        index.append({"season": payload["season"], "current": is_current})
-    write(out / "stats" / "index.json", index)
-    return [i["season"] for i in index]
+    return difficulty, referees_next
 
 
 def export_review(out: Path, features: pd.DataFrame, current_season: int, rating: str) -> dict:
