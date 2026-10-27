@@ -127,7 +127,8 @@ export function Teams() {
 
       {others.length > 0 && (
         <section className="teams-block">
-          <details className="archive">
+          {/* Con una búsqueda activa se abre: si no, un club histórico que coincide quedaría escondido. */}
+          <details className="archive" open={query.trim() !== '' || undefined}>
           <summary>Otros clubes en la Premier desde 2000-01 ({others.length})</summary>
           <div className="club-grid club-grid-sm">
             {others.map((t) => (

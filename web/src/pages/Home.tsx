@@ -160,6 +160,7 @@ function SeasonData({ teams }: { teams: Map<string, TeamIndexItem> }) {
   }
   const gpm = s.league.goals_per_match
   const ref = s.league_reference.goals_per_match
+  const avgPlayed = s.teams.length ? s.teams.reduce((a, t) => a + t.played, 0) / s.teams.length : 0
   return (
     <section className="container home-section">
       <div className="section-title">
@@ -192,6 +193,11 @@ function SeasonData({ teams }: { teams: Map<string, TeamIndexItem> }) {
           </div>
         )}
       </div>
+      {avgPlayed < 10 && (
+        <p className="small muted" style={{ marginTop: 10 }}>
+          Con {num(avgPlayed, 0)} partidos por equipo, estas diferencias todavía pueden ser casualidad.
+        </p>
+      )}
     </section>
   )
 }

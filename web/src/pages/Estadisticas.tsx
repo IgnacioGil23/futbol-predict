@@ -92,8 +92,8 @@ export function Estadisticas() {
         <h1>Estadísticas</h1>
         <p className="lede">
           Los números que se miran antes de un partido: cómo rinde cada equipo de local y de visitante, en cada tiempo,
-          cuando va ganando o perdiendo, y cuánto de su campaña es rendimiento y cuánto racha. Tocá el encabezado de una
-          columna para ordenar.
+          cuando va ganando o perdiendo, y señales de si su campaña se sostiene con su juego o con una racha. Tocá el
+          encabezado de una columna para ordenar.
         </p>
       </div>
 
