@@ -26,3 +26,17 @@ def test_odds_elo_tune_uses_the_given_division_and_seasons():
     sp1 = league[(league.division == "SP1") & league.season_start.isin([2001, 2002])]
     assert score > 0
     assert params.home_advantage == odds_elo.calibrated_home_advantage(odds_elo.market_score(sp1))
+
+
+def test_decision_rule_needs_size_and_a_clear_interval():
+    import numpy as np
+
+    from src.models.league_params import decide
+    rng = np.random.default_rng(0)
+    clear = rng.normal(-0.01, 0.05, size=4000)          # mejora grande y estable
+    small = rng.normal(-0.001, 0.001, size=4000)        # estable pero menor que 0,002
+    noisy = rng.normal(-0.003, 0.5, size=4000)          # tamaño suficiente pero el IC cruza 0
+    assert decide(clear)["adopt"] is True
+    assert decide(small)["adopt"] is False
+    assert decide(noisy)["adopt"] is False
+    assert decide(clear)["level"] == 1 - 0.05 / 8
