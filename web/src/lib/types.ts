@@ -157,3 +157,40 @@ export interface MonitoringReport {
     p: [number, number, number]; market: [number, number, number] | null; p_actual: number; source: string; model_version: string
   }[]
 }
+
+// ------------------------------------------------- Estadísticas (src/export/stats.py)
+/** Los cocientes son null cuando no hay denominador (equipo sin partidos, columna vacía). */
+type Ratio = number | null
+
+export interface LeagueSummary {
+  matches: number; home_win_pct: Ratio; draw_pct: Ratio; away_win_pct: Ratio; goals_per_match: Ratio
+  first_half_goals_share: Ratio; btts_pct: Ratio; over25_pct: Ratio
+  ht_leader_win_pct: Ratio; ht_trailer_comeback_pct: Ratio
+}
+export interface VenueRecord { played: number; won: number; drawn: number; lost: number; points_per_game: Ratio; gf: number; ga: number }
+export interface HtRecord { n: number; won: number; drawn: number; lost: number }
+export interface TeamStats {
+  team: string; played: number
+  home: VenueRecord; away: VenueRecord
+  halves: { gf_1h: number; ga_1h: number; gf_2h: number; ga_2h: number; points_1h: number; points_2h: number }
+  ht: { leading: HtRecord; level: HtRecord; trailing: HtRecord; points_dropped_leading: number; points_won_trailing: number }
+  goals: { gf_per_game: Ratio; ga_per_game: Ratio; clean_sheet_pct: Ratio; failed_to_score_pct: Ratio; btts_pct: Ratio; over25_pct: Ratio }
+  shots: {
+    shots_per_game: Ratio; shots_against_per_game: Ratio; sot_per_game: Ratio; sot_against_per_game: Ratio
+    shot_share: Ratio; sot_share: Ratio; accuracy: Ratio; conversion: Ratio; save_pct: Ratio; pdo: Ratio
+  }
+  discipline: { yellow_per_game: Ratio; red_total: number }
+  market: { market_matches: number; points: number; expected_points: Ratio; difference: Ratio }
+  streaks: { unbeaten: number; winless: number; scoring: number }
+}
+export interface RefereeStats { referee: string; matches: number; yellow_per_game: number; red_total: number }
+export interface Difficulty { remaining: number; avg_opponent_rating: number; rank: number }
+export interface StatsFile {
+  season: string; matches_played: number
+  league: LeagueSummary; league_reference: LeagueSummary; reference_seasons: string
+  teams: TeamStats[]; referees: RefereeStats[]
+  difficulty: Record<string, Difficulty> | null
+  /** "Local|Visitante" → árbitro designado (cuando Football-Data lo publica). */
+  referees_next: Record<string, string> | null
+}
+export type StatsIndex = { season: string; current: boolean }[]

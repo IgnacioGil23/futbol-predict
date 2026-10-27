@@ -1,6 +1,7 @@
 import { HashRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Icon } from './components/Icon'
 import { Layout } from './components/Layout'
+import { Estadisticas } from './pages/Estadisticas'
 import { Home } from './pages/Home'
 import { Method } from './pages/Method'
 import { Monitoring } from './pages/Monitoring'
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="proximos" element={<RedirectTo to="/partidos" />} />
           <Route path="previa" element={<RedirectTo to="/partidos/previa" />} />
           <Route path="temporada" element={<Season />} />
+          <Route path="estadisticas" element={<Estadisticas />} />
           <Route path="equipos" element={<Teams />} />
           <Route path="equipos/:slug" element={<TeamDetail />} />
           <Route path="revision" element={<Review />} />
