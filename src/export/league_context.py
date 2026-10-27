@@ -23,7 +23,7 @@ from src.export.stadiums import stadium
 from src.features.build import FEATURES_PATH, load_elo_params
 from src.features.elo import EloParams
 from src.models.experiments import prepare
-from src.models.league_params import load_league_params
+from src.serving.league_state import load_league_params, model_path, serving_path
 from src.serving.predictor import EloPoissonPredictor
 from src.serving.production import ELO_MODEL_PATH, FIRST_TRAIN_SEASON
 from src.serving.store import MatchStore
@@ -107,7 +107,6 @@ def premier_context() -> LeagueContext:
 
 def league_context(code: str) -> LeagueContext:
     from src.models.odds_elo_eval import FIRST_TRAIN
-    from src.serving.league_models import model_path, serving_path
     return LeagueContext(code, MatchStore.load(serving_path(code)), EloPoissonPredictor.load(model_path(code)),
                          EloPoissonPredictor.load(model_path(code, "elo")), FIRST_TRAIN[code])
 
@@ -116,6 +115,7 @@ def leagues_index(contexts: list[LeagueContext]) -> list[dict]:
     """leagues.json: las ligas publicadas y dónde están sus datos."""
     return [{"code": c.code, "slug": c.league["slug"], "competition": c.league["competition"],
              "country": c.league["name"], "second": c.league["second_name"],
+             "top_division": c.top, "second_division": c.league["second"],
              "path": "" if c.is_premier else f"leagues/{c.code}/",
              "relegation": c.league["relegation"], "playoff": c.league["playoff"],
              "head_to_head": c.league["head_to_head"], "model_version": c.predictor.version}

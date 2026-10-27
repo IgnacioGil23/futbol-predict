@@ -28,13 +28,13 @@ from src.features.elo import EloParams, compute_elo
 from src.features.odds_elo import compute_odds_elo, load_odds_elo_params
 from src.models.odds_elo_eval import FIRST_TRAIN, market
 from src.models.replication import EVAL_SEASONS, league_features, log_loss_per_match, stratified_ci, walk_forward
+from src.serving.league_state import LEAGUE_CONFIG_DIR, league_config_path, load_league_params  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
 TUNE_SEASONS = list(range(2004, 2015))      # 2004-05 a 2014-15 (2002-03 y 2003-04: arranque del rating)
 N_COMPARISONS = 8                           # 4 ligas x 2 ratings (Bonferroni)
 MIN_IMPROVEMENT = 0.002
-LEAGUE_CONFIG_DIR = PROJECT_ROOT / "configs" / "leagues"
 RATINGS = {"odds_elo": "Elo de cuotas (modelo publicado)", "elo": "Elo de resultados (simulación de la temporada)"}
 
 
@@ -45,18 +45,6 @@ def decide(delta: np.ndarray, n_comparisons: int = N_COMPARISONS) -> dict:
     _, ci95 = stratified_ci({"liga": np.asarray(delta, dtype=float)})
     return {"n": int(len(delta)), "diff": mean, "ci95": ci95, "ci_rule": ci, "level": level,
             "adopt": bool(mean <= -MIN_IMPROVEMENT and ci[1] < 0)}
-
-
-def league_config_path(code: str) -> Path:
-    return LEAGUE_CONFIG_DIR / f"{code}.json"
-
-
-def load_league_params(code: str) -> tuple[EloParams, EloParams]:
-    """(Elo de cuotas, Elo de resultados) de la liga; Inglaterra usa los de configs/."""
-    if code == "ENG":
-        return load_odds_elo_params(), load_elo_params()
-    cfg = json.loads(league_config_path(code).read_text(encoding="utf-8"))
-    return EloParams(**cfg["odds_elo"]["params"]), EloParams(**cfg["elo"]["params"])
 
 
 def _features(code: str) -> pd.DataFrame:

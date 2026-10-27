@@ -22,40 +22,28 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.config import PROJECT_ROOT, TEST_SEASONS, season_label, season_start_year
+from src.config import TEST_SEASONS, season_label, season_start_year
 from src.data.leagues import LEAGUES, LEAGUES_DIR, matches_path
 from src.features.build import build_features
-from src.features.elo import compute_elo
-from src.features.odds_elo import compute_odds_elo_with_history
 from src.metrics import summarize
 from src.models.experiments import predict_feature_model, prepare
 from src.models.feature_models import PoissonGLMModel
-from src.models.league_params import load_league_params
 from src.models.odds_elo_eval import FIRST_TRAIN
 from src.odds import shin_probabilities
+from src.serving.league_state import build_league_state, load_league_params, model_path, serving_path
 from src.serving.production import ALPHA, export_params
-from src.serving.store import build_serving_matches, write_serving_matches
 
 logger = logging.getLogger(__name__)
 
-LEAGUE_MODELS_DIR = PROJECT_ROOT / "models" / "leagues"
 MODELS = {
-    "odds_elo": {"file": "model.json", "features": ["odds_elo_diff"],
+    "odds_elo": {"features": ["odds_elo_diff"],
                  "model": "Poisson (goles del local y del visitante) sobre la diferencia del rating basado en cuotas "
                           "(ELO-Odds)"},
-    "elo": {"file": "elo_model.json", "features": ["elo_diff"],
+    "elo": {"features": ["elo_diff"],
             "model": "Poisson (goles del local y del visitante) sobre la diferencia del Elo de resultados "
                      "(simulación de la temporada)"},
 }
 METRIC_KEYS = ("log_loss", "rps", "brier", "accuracy", "ece")
-
-
-def model_path(code: str, kind: str = "odds_elo") -> Path:
-    return LEAGUE_MODELS_DIR / code / MODELS[kind]["file"]
-
-
-def serving_path(code: str) -> Path:
-    return LEAGUES_DIR / f"{code}_serving_matches.csv.gz"
 
 
 def features_path(code: str) -> Path:
@@ -116,18 +104,6 @@ def train_league(code: str, features: pd.DataFrame, kind: str, today: date | Non
         "test_metrics": test_metrics(features, kind, first),
     }
     return {"params": export_params(model), "meta": meta}
-
-
-def build_league_state(code: str, matches: pd.DataFrame | None = None) -> pd.DataFrame:
-    """Partidos de las dos divisiones con los dos ratings (data/processed/leagues/<liga>_serving_matches.csv.gz)."""
-    matches = pd.read_parquet(matches_path(code)) if matches is None else matches
-    odds_params, elo_params = load_league_params(code)
-    top = LEAGUES[code]["top"]
-    elo, history = compute_elo(matches, elo_params, top_division=top)
-    odds, odds_history = compute_odds_elo_with_history(matches, odds_params, top_division=top)
-    serving = build_serving_matches(matches, elo, history, odds, odds_history)
-    write_serving_matches(serving, serving_path(code))
-    return serving
 
 
 def main() -> None:
