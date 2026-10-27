@@ -23,19 +23,37 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.config import FIRST_SEASON_START_YEAR, FOOTBALL_DATA_URL, PROCESSED_DIR, PROJECT_ROOT, season_code, season_label
-from src.data.download import _fetch, _session, football_data_path
+from src.config import FIRST_SEASON_START_YEAR, PROCESSED_DIR, PROJECT_ROOT, season_label, season_start_year
+from src.data.download import download_football_data, football_data_path
 from src.data.football_data import clean_odds, read_season, validate_rows
 
 logger = logging.getLogger(__name__)
 
+OPENFOOTBALL = "https://raw.githubusercontent.com/openfootball"
+# Ligas publicadas en la web además de la Premier. "relegation": puestos de descenso directo en la temporada en curso;
+# "playoff": puesto que juega la promoción (no cuenta como descenso). Los horarios de openfootball son locales.
 LEAGUES: dict[str, dict] = {
-    "ESP": {"name": "España", "top": "SP1", "second": "SP2"},
-    "ITA": {"name": "Italia", "top": "I1", "second": "I2"},
-    "GER": {"name": "Alemania", "top": "D1", "second": "D2"},
-    "FRA": {"name": "Francia", "top": "F1", "second": "F2"},
+    "ESP": {"name": "España", "top": "SP1", "second": "SP2", "competition": "LaLiga", "second_name": "Segunda División",
+            "slug": "laliga", "timezone": "Europe/Madrid", "relegation": 3, "playoff": None, "head_to_head": True,
+            "schedule_url": OPENFOOTBALL + "/espana/master/{season}/1-liga.txt"},
+    "ITA": {"name": "Italia", "top": "I1", "second": "I2", "competition": "Serie A", "second_name": "Serie B",
+            "slug": "serie-a", "timezone": "Europe/Rome", "relegation": 3, "playoff": None, "head_to_head": True,
+            "schedule_url": OPENFOOTBALL + "/italy/master/{season}/1-seriea.txt"},
+    "GER": {"name": "Alemania", "top": "D1", "second": "D2", "competition": "Bundesliga", "second_name": "2. Bundesliga",
+            "slug": "bundesliga", "timezone": "Europe/Berlin", "relegation": 2, "playoff": 16, "head_to_head": False,
+            "schedule_url": OPENFOOTBALL + "/deutschland/master/{season}/1-bundesliga.txt"},
+    "FRA": {"name": "Francia", "top": "F1", "second": "F2", "competition": "Ligue 1", "second_name": "Ligue 2",
+            "slug": "ligue-1", "timezone": "Europe/Paris", "relegation": 2, "playoff": 16, "head_to_head": False,
+            "schedule_url": OPENFOOTBALL + "/europe/master/france/{season}_fr1.txt"},
 }
-LAST_SEASON = 2025                         # 2025-26: última temporada completa
+PRODUCT_LEAGUES: dict[str, dict] = {
+    "ENG": {"name": "Inglaterra", "top": "E0", "second": "E1", "competition": "Premier League",
+            "second_name": "Championship", "slug": "premier", "timezone": "Europe/London", "relegation": 3,
+            "playoff": None, "head_to_head": False,
+            "schedule_url": OPENFOOTBALL + "/england/master/{season}/1-premierleague.txt"},
+    **LEAGUES,
+}
+LAST_SEASON = 2025                         # 2025-26: última temporada completa (la investigación llega hasta acá)
 LEAGUES_DIR = PROCESSED_DIR / "leagues"
 QUALITY_REPORT_PATH = PROJECT_ROOT / "reports" / "replication" / "calidad_ligas.json"
 SHOT_COLUMNS = ["home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target"]
@@ -49,14 +67,17 @@ def matches_path(code: str) -> Path:
     return LEAGUES_DIR / f"{code}_matches.parquet"
 
 
-def download_league(code: str, force: bool = False) -> None:
-    session, league = _session(), LEAGUES[code]
-    for division in (league["top"], league["second"]):
-        for start in range(FIRST_SEASON_START_YEAR, LAST_SEASON + 1):
-            path = football_data_path(division, start)
-            if force or not path.exists():
-                url = FOOTBALL_DATA_URL.format(season_code=season_code(start), division=division)
-                logger.info("Descargado %s (%d bytes)", url, _fetch(session, url, path))
+def download_league(code: str, force: bool = False, today: date | None = None) -> None:
+    """Primera y segunda división hasta la temporada en curso (que se vuelve a descargar siempre)."""
+    league = LEAGUES[code]
+    download_football_data(force=force, today=today, divisions=(league["top"], league["second"]))
+
+
+def assign_match_ids(matches: pd.DataFrame, code: str) -> pd.Series:
+    """Id estable por división y temporada: agregar una temporada no cambia los ids de las anteriores."""
+    i = matches.groupby(["division", "season_start"]).cumcount()
+    return pd.Series([f"{code}-{d}-{s}-{n:04d}" for d, s, n in zip(matches["division"], matches["season_start"], i)],
+                     index=matches.index)
 
 
 def round_robin_check(season: pd.DataFrame) -> dict:
@@ -74,11 +95,16 @@ def shot_coverage(season: pd.DataFrame) -> float:
     return float(season[SHOT_COLUMNS].notna().all(axis=1).mean())
 
 
-def load_league(code: str) -> tuple[pd.DataFrame, dict]:
+def load_league(code: str, today: date | None = None) -> tuple[pd.DataFrame, dict]:
+    """Partidos de las dos divisiones desde 2000-01 hasta la temporada en curso (si ya está publicada)."""
     league, frames, report = LEAGUES[code], [], {"seasons": {}, "long_rows": {}, "invalid_odds_rows": 0}
+    current = season_start_year(today or date.today())
     for division in (league["top"], league["second"]):
-        for start in range(FIRST_SEASON_START_YEAR, LAST_SEASON + 1):
-            s = read_season(football_data_path(division, start), division, start)
+        for start in range(FIRST_SEASON_START_YEAR, current + 1):
+            path = football_data_path(division, start)
+            if start > LAST_SEASON and not path.exists():
+                continue                              # temporada en curso todavía no publicada
+            s = read_season(path, division, start)
             if s.attrs["n_long_rows"]:
                 report["long_rows"][f"{division} {season_label(start)}"] = s.attrs["n_long_rows"]
             if s["date"].isna().any():
@@ -92,8 +118,7 @@ def load_league(code: str) -> tuple[pd.DataFrame, dict]:
             report["seasons"][f"{division} {season_label(start)}"] = {**check, "shots": shot_coverage(s)}
             frames.append(s)
     matches = pd.concat(frames, ignore_index=True)
-    matches["match_id"] = [f"{code}-{d}-{s}-{i:04d}" for i, (d, s) in
-                           enumerate(zip(matches["division"], matches["season_start"]))]
+    matches["match_id"] = assign_match_ids(matches, code)
     # columnas que build_features espera y que en otras ligas no existen (Elo de ClubElo)
     matches["clubelo_home"] = matches["clubelo_away"] = float("nan")
     matches["clubelo_provisional"] = False

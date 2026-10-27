@@ -63,11 +63,11 @@ def football_data_path(division: str, start_year: int) -> Path:
     return FOOTBALL_DATA_DIR / f"{division}_{season_code(start_year)}.csv"
 
 
-def download_football_data(force: bool = False, today: date | None = None) -> list[Path]:
+def download_football_data(force: bool = False, today: date | None = None, divisions=DIVISIONS) -> list[Path]:
     current = season_start_year(today or date.today())
     session = _session()
     paths = []
-    for division in DIVISIONS:
+    for division in divisions:
         for start_year in range(FIRST_SEASON_START_YEAR, current + 1):
             path = football_data_path(division, start_year)
             is_current = start_year == current
