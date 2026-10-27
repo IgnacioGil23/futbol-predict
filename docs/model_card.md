@@ -1,6 +1,7 @@
-# Model card · Marcador Probable (Premier League)
+# Model card · Marcador Probable (cinco ligas)
 
 Ficha del modelo en el formato de *model cards* (Mitchell et al., 2019, "Model Cards for Model Reporting").
+Las secciones 1 a 6 describen el modelo de la Premier League; las otras cuatro ligas están en la sección "Otras ligas".
 Todas las cifras salen de los artefactos del repositorio (`models/production/model.json`, notebooks 01-03) con
 datos hasta el **20/09/2026**.
 
@@ -8,17 +9,18 @@ datos hasta el **20/09/2026**.
 
 | | |
 |---|---|
-| **Tarea** | Estimar, antes de un partido de Premier League, la distribución de probabilidad del marcador exacto y, a partir de ella, de local / empate / visitante. |
+| **Tarea** | Estimar, antes de un partido de Premier League, LaLiga, Serie A, Bundesliga o Ligue 1, la distribución de probabilidad del marcador exacto y, a partir de ella, de local / empate / visitante. |
 | **Modelo** | Dos regresiones de Poisson (goles del local y goles del visitante, en la línea de Maher 1982) con una sola variable: la diferencia previa al partido de un **rating Elo basado en cuotas** (ELO-Odds, sección 5 bis), en producción desde el 01/10/2026. Hasta entonces, la variable era el Elo de resultados (sección 3). Marcador = producto de las dos distribuciones de Poisson, recortado en 10 goles y renormalizado. |
 | **Parámetros** | 4 (intercepto y pendiente de cada regresión) + 5 del rating (`configs/odds_elo_params.json`). Artefacto en JSON, sin pickle. |
-| **Entrenamiento** | 8.360 partidos de Premier League, temporadas 2004-05 a 2025-26 (2002-03 y 2003-04 son el arranque del rating; se reentrena una vez por temporada). |
+| **Entrenamiento** | Las regresiones de cada liga se entrenan con sus propios partidos. Premier League: 8.360 partidos, temporadas 2004-05 a 2025-26 (2002-03 y 2003-04 son el arranque del rating; se reentrena una vez por temporada). España y Francia desde 2005-06; Italia y Alemania desde 2006-07 (sección "Otras ligas"). |
 | **Uso previsto** | Divulgación y portfolio: mostrar cómo se construye, valida y comunica un modelo probabilístico. |
 | **Fuera de alcance** | Apuestas o decisiones con dinero. El modelo **no** le gana al mercado (sección 5). |
 
 ## 2. Datos
 
 * **Fuente base:** [Football-Data.co.uk](https://www.football-data.co.uk/): resultados y cuotas de Premier League (E0) y
-  Championship (E1), 2000-01 a 2026-27 (9.930 y 14.447 partidos). Columnas documentadas en
+  Championship (E1), 2000-01 a 2026-27 (9.930 y 14.447 partidos); para las otras ligas, primera y segunda división
+  (SP1/SP2, I1/I2, D1/D2, F1/F2). Columnas documentadas en
   [notes.txt](https://www.football-data.co.uk/notes.txt).
 * **Por qué no el dataset derivado que se usaba al principio** (*Club Football Match Data*, A. Gábor): la auditoría del
   notebook 01 encontró que le faltaban 90 partidos (filas con campos extra en el CSV original, descartadas por su
@@ -354,6 +356,46 @@ fijados antes de mirar (`src/analysis/error_analysis.py`, `reports/analysis/anal
   probabilidades demasiado extremas. Límite honesto: antes de la fecha 1 de 2015-16 le daba 0% al Leicester, el campeón.
   Salvedades: el Elo se ajustó con temporadas que incluyen parte de las evaluadas, y 11 campeones son pocos.
   Reporte: `reports/season/evaluacion_2026-09-30.json`.
+
+## Otras ligas
+
+Desde el 27/10/2026 el producto cubre también LaLiga, la Serie A, la Bundesliga y la Ligue 1 con **el mismo modelo**: ELO-Odds
+→ dos regresiones de Poisson → probabilidad de cada marcador exacto. Las regresiones de cada liga se entrenan con sus
+propios partidos (España y Francia desde 2005-06, Italia y Alemania desde 2006-07). Datos: primera y segunda división de
+Football-Data.co.uk; calendarios de openfootball (dominio público).
+
+* **Parámetros de rating** ([preregistro](preregistro_ligas.md), reporte `reports/leagues/parametros_2026-10-27.json`):
+  los dos ratings de cada liga (Elo de cuotas y Elo de resultados) se reajustaron con su primera división 2004-05 a
+  2014-15 y se compararon fuera de muestra (2015-16 a 2025-26) con los parámetros ajustados en Inglaterra. Regla: adoptar los
+  de la liga solo si la diferencia media de log loss es ≤ −0,002 y el IC 99,375% (Bonferroni, 8 comparaciones) queda
+  entero por debajo de 0. **Ninguna de las 8 comparaciones la cumplió** (liga menos Inglaterra entre −0,0002 y +0,0011),
+  así que todas las ligas usan los parámetros de Inglaterra (los ajustados por liga se sobreajustan a la ventana de
+  ajuste).
+* **Test 2023-24 a 2025-26** (log loss, modelo contra Bet365 pre-cierre):
+
+| Liga | Modelo | Bet365 pre-cierre |
+|---|---|---|
+| LaLiga | 0,9640 | 0,9529 |
+| Serie A | 0,9771 | 0,9668 |
+| Bundesliga | 0,9769 | 0,9614 |
+| Ligue 1 | 0,9891 | 0,9819 |
+
+* **Simulación de la temporada por liga** (modelo con Elo de resultados), validada con el protocolo de la Premier: cortes
+  proporcionales a la temporada (antes de la fecha 1 y tras el 26%, 53% y 79% de los partidos), plazas de descenso de
+  cada liga, Francia 2019-20 omitida. Habilidad contra el simulador con equipos iguales antes de la fecha 1:
+
+| Liga | Top 4 | Campeón |
+|---|---|---|
+| LaLiga | 71% | 27% |
+| Serie A | 50% | 39% |
+| Bundesliga | 49% | 72% |
+| Ligue 1 | 35% | 50% |
+
+  Intervalos de 95% en `reports/season/<LIGA>_evaluacion_2026-10-27.json`. No se modela el desempate por enfrentamiento
+  directo (LaLiga, Serie A); en Bundesliga y Ligue 1 el 16.º juega un repechaje de ascenso y no se cuenta como descendido.
+* **Monitoreo:** el registro de la Premier sigue igual; las demás ligas registran predicciones previas desde el 27/10/2026
+  (`ledger/<LIGA>_predictions.csv`, rama `monitoring`) y se evaluarán con media temporada de datos.
+* **Web:** escudos y fotos de estadios solo para la Premier; las demás ligas muestran iniciales de 3 letras.
 
 ## 6. Limitaciones
 

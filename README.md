@@ -1,8 +1,9 @@
-# Marcador Probable · Premier League match predictor
+# Marcador Probable · five-league football match predictor
 
 **An end-to-end, honestly evaluated football forecasting system:** it predicts the probability of every exact score of a
-Premier League match (and from it home / draw / away), serves it through an API and a live website, logs every
-prediction before kick-off in a tamper-evident ledger, and tests every improvement with pre-registered experiments.
+match in five leagues (Premier League, LaLiga, Serie A, Bundesliga and Ligue 1; and from it home / draw / away),
+serves it through an API and a live website with a league selector, logs every prediction before kick-off in a
+tamper-evident ledger, and tests every improvement with pre-registered experiments.
 
 **[Live site](https://ignaciogil23.github.io/futbol-predict/)** (Spanish UI) · **[Model card](docs/model_card.md)** ·
 [Versión en español](README.es.md)
@@ -39,7 +40,7 @@ flowchart LR
 ## How the model works
 
 1. **Own Elo rating** updated match by match over the Premier League and Championship, with a goal-difference factor
-   (Hvattum & Arntzen 2010), tuned only on training seasons.
+   (Hvattum & Arntzen 2010), tuned only on training seasons. The same model runs in all five leagues.
 2. **Two Poisson regressions** (home goals, away goals) on the Elo difference give the expected goals of each side;
    their product gives the probability of every score, and summing cells gives home / draw / away.
 3. **Selection by evidence, not by complexity:** frequencies, an Elo logit, Dixon-Coles, the Poisson GLM and XGBoost were
@@ -54,8 +55,8 @@ flowchart LR
   market (Shin de-margining) as the benchmark; paired bootstrap confidence intervals; a fixed promotion rule
   (≥ 0.005 log loss and CI below 0).
 * **Pre-registration.** Each new candidate has a protocol committed to git *before* its code and results
-  (`docs/preregistro_*.md`), so the history proves the order. Other leagues serve as a test bed, so the Premier League
-  data are not reused over and over.
+  (`docs/preregistro_*.md`), so the history proves the order. The other four leagues were the test bed for the model
+  (so the Premier League data are not reused over and over) and are now also part of the product.
 * **Tamper-evident monitoring.** Predictions are appended to a ledger on a separate branch before kick-off and never
   rewritten; alert thresholds come from a 10-season backtest; retraining arrives as a pull request with sanity checks.
 * **Portable, auditable artifact.** The model is JSON parameters (no pickle) with a hash version; the website runs the
@@ -78,6 +79,44 @@ flowchart LR
 
 Full tables, confidence intervals and reasoning: [model card](docs/model_card.md).
 
+## Five leagues
+
+The live product covers the Premier League (England), LaLiga (Spain), Serie A (Italy), the Bundesliga (Germany) and
+Ligue 1 (France). The website has a league selector and every section (matches and previews, table and season
+projection, statistics, team pages, out-of-sample review, monitoring) works per league; the API accepts `league`
+(`ENG`, `ESP`, `ITA`, `GER`, `FRA`; default `ENG`).
+
+* **Same model everywhere:** odds-based Elo (ELO-Odds) → two Poisson regressions (home and away goals) → probability
+  of every exact score. Each league's regressions are trained on its own matches (Premier from 2004-05, Spain and
+  France from 2005-06, Italy and Germany from 2006-07). Data: Football-Data.co.uk first and second divisions
+  (SP1/SP2, I1/I2, D1/D2, F1/F2); schedules from openfootball (espana, italy, deutschland, europe/france).
+* **League-specific rating parameters were tested and rejected.** Following a pre-registration
+  ([`docs/preregistro_ligas.md`](docs/preregistro_ligas.md), report `reports/leagues/parametros_2026-10-27.json`),
+  each league's two ratings were re-tuned on its 2004-05..2014-15 first division and compared out of sample
+  (2015-16..2025-26) with England's parameters. Rule: adopt only if the mean log-loss difference is ≤ −0.002 and the
+  99.375% CI (Bonferroni, 8 comparisons) is entirely below 0. None of the 8 comparisons met it (league minus England
+  between −0.0002 and +0.0011), so every league uses the England-tuned parameters.
+
+| League | Model log loss | Bet365 pre-closing |
+|---|---|---|
+| LaLiga | 0.9640 | 0.9529 |
+| Serie A | 0.9771 | 0.9668 |
+| Bundesliga | 0.9769 | 0.9614 |
+| Ligue 1 | 0.9891 | 0.9819 |
+
+Test seasons 2023-24 to 2025-26 (Premier League figures are in the table above).
+
+* **Season simulation per league** (results-Elo model), validated with the Premier protocol (cutoffs proportional to the
+  season: before matchday 1 and after 26%, 53% and 79% of matches; relegation spots per league; France 2019-20 skipped;
+  reports in `reports/season/<LEAGUE>_evaluacion_2026-10-27.json`). Skill against the equal-teams baseline before
+  matchday 1, top 4: Spain 71%, Italy 50%, Germany 49%, France 35%; champion: Spain 27%, Italy 39%, Germany 72%,
+  France 50% (95% intervals in the reports). Head-to-head tiebreaks (LaLiga, Serie A) are not modelled; the
+  Bundesliga and Ligue 1 16th place plays a promotion playoff and is not counted as relegated.
+* **Live monitoring:** the Premier League ledger is unchanged; the other leagues start logging pre-match predictions
+  on 2026-10-27 (`ledger/<LEAGUE>_predictions.csv` on the monitoring branch) and will be evaluated with half a season
+  of data.
+* Club crests and stadium photos are only shown for the Premier League (the other leagues show 3-letter initials).
+
 ## Tech stack
 
 Python 3.11 · pandas · scikit-learn · XGBoost · MLflow · FastAPI · Docker · Google Cloud Run · GitHub Actions ·
@@ -89,9 +128,14 @@ React · TypeScript · Vite · D3 · pytest · Vitest · ruff · oxlint
 python -m venv venv && source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements-dev.txt
 python -m src.data.download && python -m src.data.load  # Football-Data (E0 + E1)
+python -m src.data.leagues                              # other four leagues (first and second divisions)
 python -m src.features.build
+python -m src.serving.league_state                      # per-league rating state
 python -m src.models.experiments --stage validation     # model selection (MLflow: mlflow.db)
 python -m src.serving.production                        # models/production/model.json
+python -m src.serving.league_models --train             # per-league Poisson models
+python -m src.models.league_params                      # per-league rating-parameter check
+python -m src.models.season_eval --league ESP           # season-simulation evaluation (per league)
 python -m src.export.site --out web/public/data         # JSON for the website
 pytest && ruff check .                                  # tests and lint (same as CI)
 uvicorn src.api.main:app --reload                       # API
@@ -106,10 +150,10 @@ in its docstring and each pre-registration names the command.
 | Data | Source |
 |---|---|
 | Results, match statistics and odds (England, Spain, Italy, Germany, France) | [Football-Data.co.uk](https://www.football-data.co.uk/) |
-| Fixtures | [openfootball/england](https://github.com/openfootball/england) (public domain) |
+| Fixtures | openfootball ([england](https://github.com/openfootball/england), [espana](https://github.com/openfootball/espana), [italy](https://github.com/openfootball/italy), [deutschland](https://github.com/openfootball/deutschland), [europe/france](https://github.com/openfootball/europe)) (public domain) |
 | ClubElo ratings (comparison only) | [Club-Football-Match-Data](https://github.com/xgabora/Club-Football-Match-Data) |
-| Club crests (website) | Served by premierleague.com; trademarks of each club, shown only as a visual reference |
-| Stadium photos (website) | Lead image of each stadium's Wikipedia article, on [Wikimedia Commons](https://commons.wikimedia.org/) under CC BY / CC BY-SA; author and licence credited next to each photo (`src/export/stadiums.py`) |
+| Club crests (website, Premier League only) | Served by premierleague.com; trademarks of each club, shown only as a visual reference |
+| Stadium photos (website, Premier League only) | Lead image of each stadium's Wikipedia article, on [Wikimedia Commons](https://commons.wikimedia.org/) under CC BY / CC BY-SA; author and licence credited next to each photo (`src/export/stadiums.py`) |
 
 Raw data are downloaded at build time and not versioned; only aggregated reports are published.
 Educational project. **Not betting advice.**

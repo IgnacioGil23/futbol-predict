@@ -1,8 +1,9 @@
-# Marcador Probable · Premier League
+# Marcador Probable · cinco ligas
 
-Modelo de Machine Learning que estima la **probabilidad de cada marcador exacto** de un partido de la Premier League
-(y de ahí local / empate / visitante), evaluado con honestidad contra el mercado de apuestas. Incluye el pipeline de
-datos, la experimentación, una API y una web interactiva.
+Modelo de Machine Learning que estima la **probabilidad de cada marcador exacto** de un partido de cinco ligas
+(Premier League, LaLiga, Serie A, Bundesliga y Ligue 1; y de ahí local / empate / visitante), evaluado con honestidad
+contra el mercado de apuestas. Incluye el pipeline de datos, la experimentación, una API y una web interactiva con
+selector de liga.
 
 [English version](README.md) · **[Web](https://ignaciogil23.github.io/futbol-predict/)** · **[Model card](docs/model_card.md)**
 
@@ -24,6 +25,46 @@ datos, la experimentación, una API y una web interactiva.
   de uso de esas fuentes.
 * **Análisis de errores:** la brecha con el mercado está en la información de cada partido (la mitad sale del 14% de
   partidos con mayor desacuerdo) y se duplica en las fechas 1 a 5.
+
+## Cinco ligas
+
+El producto cubre la Premier League (Inglaterra), LaLiga (España), la Serie A (Italia), la Bundesliga (Alemania) y la
+Ligue 1 (Francia). La web tiene un selector de liga y todas las secciones (partidos y previas, tabla y proyección de la
+temporada, estadísticas, fichas de equipo, revisión fuera de muestra, monitoreo) funcionan por liga; la API acepta
+`league` (`ENG`, `ESP`, `ITA`, `GER`, `FRA`; por defecto `ENG`).
+
+* **El mismo modelo en todas:** Elo basado en cuotas (ELO-Odds) → dos regresiones de Poisson (goles del local y del
+  visitante) → probabilidad de cada marcador exacto. Las regresiones de cada liga se entrenan con sus propios partidos
+  (Premier desde 2004-05, España y Francia desde 2005-06, Italia y Alemania desde 2006-07). Datos: primera y segunda
+  división de Football-Data.co.uk (SP1/SP2, I1/I2, D1/D2, F1/F2); calendarios de openfootball (espana, italy,
+  deutschland, europe/france).
+* **Los parámetros de rating propios de cada liga se probaron y se descartaron.** Con un preregistro
+  ([`docs/preregistro_ligas.md`](docs/preregistro_ligas.md), reporte `reports/leagues/parametros_2026-10-27.json`),
+  los dos ratings de cada liga se reajustaron con su primera división 2004-05..2014-15 y se compararon fuera de muestra
+  (2015-16..2025-26) con los parámetros de Inglaterra. Regla: adoptarlos solo si la diferencia media de log loss es
+  ≤ −0,002 y el IC 99,375% (Bonferroni, 8 comparaciones) queda entero por debajo de 0. Ninguna de las 8 comparaciones
+  la cumplió (liga menos Inglaterra entre −0,0002 y +0,0011), así que todas usan los parámetros ajustados en Inglaterra.
+
+| Liga | Log loss del modelo | Bet365 pre-cierre |
+|---|---|---|
+| LaLiga | 0,9640 | 0,9529 |
+| Serie A | 0,9771 | 0,9668 |
+| Bundesliga | 0,9769 | 0,9614 |
+| Ligue 1 | 0,9891 | 0,9819 |
+
+Test 2023-24 a 2025-26 (las cifras de la Premier están arriba).
+
+* **Simulación de la temporada por liga** (modelo con Elo de resultados), validada con el protocolo de la Premier
+  (cortes proporcionales a la temporada: antes de la fecha 1 y tras el 26%, 53% y 79% de los partidos; plazas de
+  descenso de cada liga; Francia 2019-20 omitida; reportes en `reports/season/<LIGA>_evaluacion_2026-10-27.json`).
+  Habilidad contra el simulador con equipos iguales antes de la fecha 1, top 4: España 71%, Italia 50%, Alemania 49%,
+  Francia 35%; campeón: España 27%, Italia 39%, Alemania 72%, Francia 50% (intervalos de 95% en los reportes). No
+  modela el desempate por enfrentamiento directo (LaLiga, Serie A); en Bundesliga y Ligue 1 el 16.º juega un
+  repechaje y no se cuenta como descendido.
+* **Monitoreo en vivo:** el registro de la Premier sigue igual; las demás ligas empiezan a registrar predicciones
+  previas el 27/10/2026 (`ledger/<LIGA>_predictions.csv` en la rama `monitoring`) y se evaluarán con media temporada de
+  datos.
+* Los escudos y las fotos de estadios solo se muestran para la Premier (las demás ligas muestran iniciales de 3 letras).
 
 ## Qué hay adentro
 
@@ -71,11 +112,16 @@ pip install -r requirements-dev.txt
 
 python -m src.data.download                # Football-Data.co.uk (E0 + E1) y snapshots de ClubElo
 python -m src.data.load                    # data/processed/matches.parquet + data_quality.json
+python -m src.data.leagues                 # las otras cuatro ligas (primera y segunda división)
 python -m src.features.tune_elo            # (opcional) re-ajusta el Elo -> configs/elo_params.json
 python -m src.features.build               # features.parquet + elo_history.parquet
 python -m src.models.experiments --stage validation   # selección (registra en MLflow: mlflow.db)
 python -m src.models.experiments --stage test         # evaluación final (una sola vez)
 python -m src.serving.production           # modelo de producción -> models/production/model.json
+python -m src.serving.league_state         # estado del rating por liga
+python -m src.serving.league_models --train           # modelos de Poisson por liga
+python -m src.models.league_params         # control de parámetros de rating por liga
+python -m src.models.season_eval --league ESP         # evaluación de la simulación de temporada (por liga)
 python -m src.export.site --out web/public/data       # JSON para la web
 pytest && ruff check .                     # tests y lint (igual que en CI)
 ```
@@ -108,9 +154,9 @@ cd web && npm install && npm run dev
 |---|---|
 | Resultados, estadísticas y cuotas | [Football-Data.co.uk](https://www.football-data.co.uk/) ([notes.txt](https://www.football-data.co.uk/notes.txt)) |
 | Elo de comparación (ClubElo) | [Club Football Match Data](https://github.com/xgabora/Club-Football-Match-Data) (A. Gábor), `EloRatings.csv` |
-| Calendario de las próximas jornadas | [openfootball/england](https://github.com/openfootball/england) (dominio público) |
-| Escudos (web) | Servidos por premierleague.com; marcas registradas de cada club, mostradas solo como referencia visual |
-| Fotos de estadios (web) | Imagen principal del artículo de cada estadio en Wikipedia, en [Wikimedia Commons](https://commons.wikimedia.org/) con licencia CC BY / CC BY-SA; autor y licencia junto a cada foto (`src/export/stadiums.py`) |
+| Calendario de las próximas jornadas | openfootball ([england](https://github.com/openfootball/england), [espana](https://github.com/openfootball/espana), [italy](https://github.com/openfootball/italy), [deutschland](https://github.com/openfootball/deutschland), [europe/france](https://github.com/openfootball/europe)) (dominio público) |
+| Escudos (web, solo Premier) | Servidos por premierleague.com; marcas registradas de cada club, mostradas solo como referencia visual |
+| Fotos de estadios (web, solo Premier) | Imagen principal del artículo de cada estadio en Wikipedia, en [Wikimedia Commons](https://commons.wikimedia.org/) con licencia CC BY / CC BY-SA; autor y licencia junto a cada foto (`src/export/stadiums.py`) |
 
 Proyecto educativo. **No es una recomendación de apuestas.**
 
