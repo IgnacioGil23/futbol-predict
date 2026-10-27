@@ -57,8 +57,9 @@ def rating_logloss(diff: np.ndarray, results: np.ndarray) -> float:
     return float(log_loss(results, model.predict_proba(x), labels=model.classes_))
 
 
-def evaluate(matches: pd.DataFrame, params: EloParams, mask: np.ndarray, results: np.ndarray) -> float:
-    per_match, _ = compute_elo(matches, params)
+def evaluate(matches: pd.DataFrame, params: EloParams, mask: np.ndarray, results: np.ndarray,
+             top_division: str = PREMIER_LEAGUE) -> float:
+    per_match, _ = compute_elo(matches, params, top_division=top_division)
     per_match = per_match.set_index("match_id").loc[matches["match_id"]]
     diff = (per_match["elo_home"] - per_match["elo_away"]).to_numpy()[mask]
     return rating_logloss(diff, results)
@@ -70,9 +71,13 @@ def calibrated_home_advantage(results: np.ndarray) -> float:
     return float(round(400 * np.log10(score / (1 - score)), 1))
 
 
-def tune(matches: pd.DataFrame, start: EloParams = EloParams(), max_passes: int = 4) -> tuple[EloParams, float, list]:
+def tune(matches: pd.DataFrame, start: EloParams = EloParams(), max_passes: int = 4, division: str = PREMIER_LEAGUE,
+         seasons=None) -> tuple[EloParams, float, list]:
+    """Descenso por coordenadas sobre GRID con los partidos de `division` en `seasons` (por defecto, la Premier en
+    TRAIN_SEASONS; las otras ligas en docs/preregistro_ligas.md)."""
+    seasons = TRAIN_SEASONS if seasons is None else seasons
     matches = matches.sort_values(["date", "match_id"]).reset_index(drop=True)
-    mask = ((matches["division"] == PREMIER_LEAGUE) & matches["season_start"].isin(TRAIN_SEASONS)
+    mask = ((matches["division"] == division) & matches["season_start"].isin(seasons)
             & matches["home_goals"].notna()).to_numpy()
     results = matches.loc[mask, "result"].astype(str).to_numpy()
     start = replace(start, home_advantage=calibrated_home_advantage(results))
@@ -81,7 +86,7 @@ def tune(matches: pd.DataFrame, start: EloParams = EloParams(), max_passes: int 
 
     def score(p: EloParams) -> float:
         if p not in cache:
-            cache[p] = evaluate(matches, p, mask, results)
+            cache[p] = evaluate(matches, p, mask, results, top_division=division)
         return cache[p]
 
     best, best_score = start, score(start)

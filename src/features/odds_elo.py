@@ -77,11 +77,14 @@ def calibrated_home_advantage(scores: np.ndarray) -> float:
     return float(round(400 * np.log10(s / (1 - s)), 1))
 
 
-def tune(matches: pd.DataFrame, start: EloParams, max_passes: int = 4) -> tuple[EloParams, float, list]:
-    """Descenso por coordenadas sobre GRID, como src/features/tune_elo.tune, en partidos de Premier de TUNE_SEASONS."""
+def tune(matches: pd.DataFrame, start: EloParams, max_passes: int = 4, division: str = PREMIER_LEAGUE,
+         seasons=None) -> tuple[EloParams, float, list]:
+    """Descenso por coordenadas sobre GRID, como src/features/tune_elo.tune, en partidos de `division` de `seasons`
+    (por defecto, la Premier en TUNE_SEASONS; las otras ligas en docs/preregistro_ligas.md)."""
+    seasons = TUNE_SEASONS if seasons is None else seasons
     from src.features.tune_elo import rating_logloss  # import diferido: tune_elo importa build, que importa este módulo
     matches = matches.sort_values(["date", "match_id"]).reset_index(drop=True)
-    mask = ((matches["division"] == PREMIER_LEAGUE) & matches["season_start"].isin(TUNE_SEASONS)
+    mask = ((matches["division"] == division) & matches["season_start"].isin(seasons)
             & matches["home_goals"].notna()).to_numpy()
     results = matches.loc[mask, "result"].astype(str).to_numpy()
     scores = market_score(matches)[mask]
@@ -90,7 +93,7 @@ def tune(matches: pd.DataFrame, start: EloParams, max_passes: int = 4) -> tuple[
 
     def score(p: EloParams) -> float:
         if p not in cache:
-            ratings = compute_odds_elo(matches, p).set_index("match_id").loc[matches["match_id"]]
+            ratings = compute_odds_elo(matches, p, top_division=division).set_index("match_id").loc[matches["match_id"]]
             diff = (ratings["odds_elo_home"] - ratings["odds_elo_away"]).to_numpy()[mask]
             cache[p] = rating_logloss(diff, results)
         return cache[p]
