@@ -118,3 +118,21 @@ def test_read_ledger_rejects_missing_columns(tmp_path):
     path.write_text("season,home_team\n2006-07,A\n", encoding="utf-8")
     with pytest.raises(LedgerIntegrityError):
         read_ledger(path)
+
+
+def test_main_logs_another_league_with_its_own_fixtures_and_model(tmp_path, monkeypatch, store, predictor):
+    import src.monitoring.ledger as ledger
+    asked = {}
+
+    def fake_fixtures(division="E0"):
+        asked["division"] = division
+        return fixtures(("2026-11-01", "A", "B"))
+
+    monkeypatch.setattr(ledger, "fetch_fixtures", fake_fixtures)
+    monkeypatch.setattr(ledger, "league_artifacts", lambda code: (store, predictor))
+    monkeypatch.setattr(ledger, "datetime", type("D", (), {"now": staticmethod(lambda tz=None: NOW)}))
+    path = tmp_path / "ESP_predictions.csv"
+    monkeypatch.setattr("sys.argv", ["ledger", "--league", "ESP", "--ledger", str(path)])
+    ledger.main()
+    assert asked["division"] == "SP1"
+    assert len(read_ledger(path)) == 1

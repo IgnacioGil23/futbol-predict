@@ -44,6 +44,18 @@ jobs:
           python -m src.data.download
           python -m src.data.load
           python -m src.serving.build_state
+          python -m src.data.leagues
+          python -m src.serving.league_state
+
+      # Otras ligas (docs/preregistro_ligas.md): cada una con su registro, con el mismo mecanismo protegido que los
+      # modelos en evaluación, para que una falla en una liga no frene el monitoreo de la Premier.
+      - name: Registrar predicciones de LaLiga, Serie A, Bundesliga y Ligue 1
+        run: |
+          for league in ESP ITA GER FRA; do
+            python -m src.monitoring.guarded --file "monitoring-branch/ledger/${league}_predictions.csv" \
+              --label "el registro de ${league}" -- \
+              python -m src.monitoring.ledger --league "$league" --ledger "monitoring-branch/ledger/${league}_predictions.csv"
+          done
 
       - name: Registrar predicciones de los próximos partidos
         run: |

@@ -35,7 +35,9 @@ import pandas as pd
 
 from src.config import season_label, season_start_year
 from src.data.fixtures import fetch_fixtures
+from src.league_registry import PRODUCT_LEAGUES
 from src.odds import shin_probabilities
+from src.serving.league_state import model_path, serving_path
 from src.serving.predictor import EloPoissonPredictor
 from src.serving.store import MatchStore
 
@@ -193,16 +195,25 @@ def reconstructed_entries(review_matches: list[dict], predictor: EloPoissonPredi
     return pd.DataFrame(rows, columns=COLUMNS)
 
 
+def league_artifacts(code: str) -> tuple[MatchStore, EloPoissonPredictor]:
+    """Estado y modelo publicado de la liga (la Premier, los de siempre)."""
+    if code == "ENG":
+        return MatchStore.load(), EloPoissonPredictor.load()
+    return MatchStore.load(serving_path(code)), EloPoissonPredictor.load(model_path(code))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Registra predicciones de próximos partidos")
     parser.add_argument("--ledger", type=Path, default=DEFAULT_LEDGER)
+    parser.add_argument("--league", default="ENG", choices=list(PRODUCT_LEAGUES),
+                        help="liga (cada una con su propio registro; ENG = Premier)")
     parser.add_argument("--seed-reconstructed", type=Path, default=None,
                         help="JSON de revisión de la temporada en curso (web/public/data/review/AAAA-AA.json)")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     now = datetime.now(UTC)
     commit = os.getenv("GITHUB_SHA", "local")[:12]
-    store, predictor = MatchStore.load(), EloPoissonPredictor.load()
+    store, predictor = league_artifacts(args.league)
     existing = read_ledger(args.ledger)
 
     if args.seed_reconstructed:
@@ -214,11 +225,11 @@ def main() -> None:
         logger.info("Reconstruidas: %d", append_entries(args.ledger, entries))
         return
 
-    fixtures = fetch_fixtures()
+    fixtures = fetch_fixtures(division=PRODUCT_LEAGUES[args.league]["top"])
     entries = new_live_entries(fixtures, store, predictor, existing, now, commit)
     added = append_entries(args.ledger, entries)
-    logger.info("Próximos partidos publicados: %d · registrados ahora: %d · total en el registro: %d",
-                len(fixtures), added, len(existing) + added)
+    logger.info("%s: próximos partidos publicados: %d · registrados ahora: %d · total en el registro: %d",
+                args.league, len(fixtures), added, len(existing) + added)
 
 
 if __name__ == "__main__":
