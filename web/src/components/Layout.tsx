@@ -48,8 +48,10 @@ function useNavIndicator(pathname: string) {
     const nav = navRef.current
     if (!nav) return
     const measure = () => {
+      // Posición relativa al <nav> (no offsetLeft: los botones de grupo están dentro de un .nav-group posicionado).
       const active = nav.querySelector<HTMLElement>('.nav-top.active')
-      setBox(active ? { left: active.offsetLeft, width: active.offsetWidth } : null)
+      const left = active ? active.getBoundingClientRect().left - nav.getBoundingClientRect().left - nav.clientLeft : 0
+      setBox(active ? { left, width: active.offsetWidth } : null)
     }
     measure()
     const ro = new ResizeObserver(measure)
@@ -75,7 +77,7 @@ export function Layout() {
     if (!group) return
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setGroupAt(null) }
     const onDown = (e: MouseEvent) => {
-      if (!(e.target as Element).closest('.nav-group')) setGroupAt(null)
+      if (!(e.target instanceof Element) || !e.target.closest('.nav-group')) setGroupAt(null)
     }
     window.addEventListener('keydown', onKey)
     document.addEventListener('mousedown', onDown)
