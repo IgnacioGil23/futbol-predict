@@ -79,3 +79,65 @@ def league_summary(rows: pd.DataFrame) -> dict:
         "ht_leader_win_pct": _ratio(leader_won.sum(), len(with_leader)),
         "ht_trailer_comeback_pct": _ratio(trailer_won.sum(), len(with_leader)),
     }
+
+
+def _record(g: pd.DataFrame) -> dict:
+    return {"played": int(len(g)), "won": int((g["points"] == 3).sum()), "drawn": int((g["points"] == 1).sum()),
+            "lost": int((g["points"] == 0).sum()), "points_per_game": _ratio(g["points"].sum(), len(g)),
+            "gf": int(g["gf"].sum()), "ga": int(g["ga"].sum())}
+
+
+def _streak(flags: pd.Series) -> int:
+    """Partidos seguidos, contando desde el último hacia atrás, en que se cumple la condición."""
+    n = 0
+    for ok in reversed(flags.to_numpy()):
+        if not ok:
+            break
+        n += 1
+    return n
+
+
+def _team(team: str, g: pd.DataFrame) -> dict:
+    n = len(g)
+    ht = {}
+    for state in ("leading", "level", "trailing"):
+        s = g[g["ht_state"] == state]
+        ht[state] = {"n": int(len(s)), "won": int((s["points"] == 3).sum()), "drawn": int((s["points"] == 1).sum()),
+                     "lost": int((s["points"] == 0).sum())}
+    gf_2h, ga_2h = g["gf"] - g["gf_ht"], g["ga"] - g["ga_ht"]
+    shots, shots_a, sot, sot_a = (g[c].sum() for c in ("shots", "shots_against", "sot", "sot_against"))
+    conversion, save_pct = _ratio(g["gf"].sum(), sot), (None if not sot_a else r4(1 - g["ga"].sum() / sot_a))
+    priced = g[g["p_win"].notna()]
+    expected = (3 * priced["p_win"] + priced["p_draw"]).sum()
+    return {
+        "team": team, "played": int(n),
+        "home": _record(g[g["is_home"]]), "away": _record(g[~g["is_home"]]),
+        "halves": {"gf_1h": int(g["gf_ht"].sum()), "ga_1h": int(g["ga_ht"].sum()),
+                   "gf_2h": int(gf_2h.sum()), "ga_2h": int(ga_2h.sum()),
+                   "points_1h": int(_points(g["gf_ht"], g["ga_ht"]).sum()),
+                   "points_2h": int(_points(gf_2h, ga_2h).sum())},
+        "ht": {**ht,
+               "points_dropped_leading": int((3 - g.loc[g["ht_state"] == "leading", "points"]).sum()),
+               "points_won_trailing": int(g.loc[g["ht_state"] == "trailing", "points"].sum())},
+        "goals": {"gf_per_game": _ratio(g["gf"].sum(), n), "ga_per_game": _ratio(g["ga"].sum(), n),
+                  "clean_sheet_pct": _ratio((g["ga"] == 0).sum(), n),
+                  "failed_to_score_pct": _ratio((g["gf"] == 0).sum(), n),
+                  "btts_pct": _ratio(((g["gf"] > 0) & (g["ga"] > 0)).sum(), n),
+                  "over25_pct": _ratio((g["gf"] + g["ga"] >= 3).sum(), n)},
+        "shots": {"shots_per_game": _ratio(shots, n), "shots_against_per_game": _ratio(shots_a, n),
+                  "sot_per_game": _ratio(sot, n), "sot_against_per_game": _ratio(sot_a, n),
+                  "shot_share": _ratio(shots, shots + shots_a), "sot_share": _ratio(sot, sot + sot_a),
+                  "accuracy": _ratio(sot, shots), "conversion": conversion, "save_pct": save_pct,
+                  "pdo": None if conversion is None or save_pct is None else round(1000 * (conversion + save_pct), 1)},
+        "discipline": {"yellow_per_game": _ratio(g["yellow"].sum(), n), "red_total": int(g["red"].sum())},
+        "market": {"market_matches": int(len(priced)), "points": int(priced["points"].sum()),
+                   "expected_points": r4(expected) if len(priced) else None,
+                   "difference": r4(priced["points"].sum() - expected) if len(priced) else None},
+        "streaks": {"unbeaten": _streak(g["points"] > 0), "winless": _streak(g["points"] < 3),
+                    "scoring": _streak(g["gf"] > 0)},
+    }
+
+
+def team_stats(rows: pd.DataFrame) -> list[dict]:
+    """Un resumen por equipo (filas en orden cronológico, como las deja team_match_rows)."""
+    return [_team(team, g) for team, g in rows.groupby("team", sort=True)]

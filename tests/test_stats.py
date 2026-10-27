@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.export.stats import league_summary, team_match_rows
+from src.export.stats import league_summary, team_match_rows, team_stats
 
 
 def make_matches() -> pd.DataFrame:
@@ -59,3 +59,33 @@ def test_league_summary_values():
     assert s["ht_leader_win_pct"] == pytest.approx(0.0)       # los dos que ganaban al entretiempo perdieron
     assert s["ht_trailer_comeback_pct"] == pytest.approx(1.0)
     assert json.dumps(s)
+
+
+def test_team_stats_for_A():
+    a = next(t for t in team_stats(team_match_rows(matches)) if t["team"] == "A")
+    assert a["played"] == 2 and a["home"]["won"] == 1 and a["away"]["won"] == 1
+    assert a["home"]["points_per_game"] == 3 and a["away"]["gf"] == 3
+    assert a["ht"]["trailing"] == {"n": 2, "won": 2, "drawn": 0, "lost": 0}   # perdía al entretiempo en los dos
+    assert a["ht"]["points_won_trailing"] == 6 and a["ht"]["points_dropped_leading"] == 0
+    assert a["halves"]["gf_1h"] == 0 and a["halves"]["gf_2h"] == 5
+    assert a["halves"]["points_1h"] == 0 and a["halves"]["points_2h"] == 6
+    assert a["shots"]["accuracy"] == pytest.approx(11 / 27, abs=1e-4)          # (5 + 6) / (12 + 15)
+    assert a["shots"]["sot_share"] == pytest.approx(11 / 17, abs=1e-4)         # 11 / (11 + 3 + 3)
+    assert a["shots"]["pdo"] == pytest.approx(1000 * (5 / 11 + 1 - 2 / 6), abs=0.1)
+    assert a["market"]["market_matches"] == 1          # el partido 3 no tiene cuotas
+    assert a["market"]["points"] == 3
+    assert a["streaks"] == {"unbeaten": 2, "winless": 0, "scoring": 2}
+
+
+def test_streaks_count_back_from_last_match():
+    b = next(t for t in team_stats(team_match_rows(matches)) if t["team"] == "B")
+    assert b["streaks"] == {"unbeaten": 1, "winless": 2, "scoring": 0}
+
+
+def test_ratios_are_none_without_denominator():
+    one = matches[matches.match_id == 2].assign(home_shots=0.0, away_shots=0.0,
+                                                home_shots_on_target=0.0, away_shots_on_target=0.0)
+    b = next(t for t in team_stats(team_match_rows(one)) if t["team"] == "B")
+    assert b["shots"]["accuracy"] is None and b["shots"]["pdo"] is None
+    assert b["away"]["points_per_game"] is None         # B no jugó de visitante
+    assert json.dumps(b, allow_nan=False)               # sin NaN que rompa el JSON
