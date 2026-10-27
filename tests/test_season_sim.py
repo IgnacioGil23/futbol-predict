@@ -89,3 +89,14 @@ def test_state_from_matches_splits_known_and_remaining_and_takes_elo_before_next
     assert s.teams == ["A", "B", "C", "D"] and list(s.points) == [3, 0, 1, 1]
     assert list(s.elo) == [1510.0, 1490.0, 1500.0, 1500.0] and s.fixtures == [("B", "A"), ("D", "C")]
     assert list(final_table(season).team) == ["A", "C", "B", "D"]
+
+
+def test_relegation_spots_are_a_parameter():
+    state = SeasonState(teams=["A", "B", "C", "D"], points=np.zeros(4), goal_diff=np.zeros(4), goals_for=np.zeros(4),
+                        played=np.zeros(4), elo=np.full(4, 1500.0), fixtures=[])
+    sim = {"positions": np.array([[1, 2, 3, 4], [4, 3, 2, 1]]), "points": np.zeros((2, 4)), "elo": np.zeros((2, 4))}
+    three = summarize(state, sim).set_index("team")["p_relegation"]
+    two = summarize(state, sim, relegated=2).set_index("team")["p_relegation"]
+    assert three["B"] == 1.0 and two["B"] == 0.5 and two["C"] == 0.5
+    one = summarize(state, sim, relegated=1).set_index("team")["p_relegation"]
+    assert one["B"] == 0.0 and one["A"] == 0.5

@@ -79,14 +79,15 @@ def simulate(state: SeasonState, rates, elo_params: EloParams, n_sims: int = N_S
     return {"positions": positions, "points": points, "elo": elo}
 
 
-def summarize(state: SeasonState, sim: dict) -> pd.DataFrame:
+def summarize(state: SeasonState, sim: dict, relegated: int = RELEGATED) -> pd.DataFrame:
+    """Probabilidades por equipo; `relegated`: puestos de descenso directo de la liga."""
     pos, n = sim["positions"], len(state.teams)
     dist = np.stack([(pos == p).mean(axis=0) for p in range(1, n + 1)], axis=1)   # equipos × posiciones
     out = pd.DataFrame({
         "team": state.teams, "elo": state.elo, "points_now": state.points, "played": state.played,
         "expected_points": sim["points"].mean(axis=0),
         "p_champion": dist[:, 0], "p_top4": dist[:, :TOP4].sum(axis=1), "p_top6": dist[:, :TOP6].sum(axis=1),
-        "p_relegation": dist[:, n - RELEGATED:].sum(axis=1),
+        "p_relegation": dist[:, n - relegated:].sum(axis=1),
     })
     out["positions"] = list(dist)
     return out.sort_values(["expected_points", "p_champion"], ascending=False).reset_index(drop=True)
