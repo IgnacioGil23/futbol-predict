@@ -1,0 +1,30 @@
+{
+  "league": "ESP",
+  "name": "España",
+  "preregistration": "docs/preregistro_ligas.md",
+  "report": "reports/leagues/parametros_2026-10-27.json",
+  "odds_elo": {
+    "description": "Elo de cuotas (modelo publicado)",
+    "source": "Inglaterra",
+    "params": {
+      "k0": 150,
+      "lam": 0.0,
+      "home_advantage": 57.7,
+      "season_regression": 0.1,
+      "initial_gap": 400,
+      "newcomer_offset": -50
+    }
+  },
+  "elo": {
+    "description": "Elo de resultados (simulación de la temporada)",
+    "source": "Inglaterra",
+    "params": {
+      "k0": 7.5,
+      "lam": 1.0,
+      "home_advantage": 59.4,
+      "season_regression": 0.05,
+      "initial_gap": 250,
+      "newcomer_offset": -50
+    }
+  }
+}

@@ -100,3 +100,25 @@ def test_relegation_spots_are_a_parameter():
     assert three["B"] == 1.0 and two["B"] == 0.5 and two["C"] == 0.5
     one = summarize(state, sim, relegated=1).set_index("team")["p_relegation"]
     assert one["B"] == 0.0 and one["A"] == 0.5
+
+
+def test_league_cutoffs_are_proportional_to_the_season():
+    from src.models.season_eval import cutoff_points
+    assert cutoff_points(380) == [0, 100, 200, 300]
+    assert cutoff_points(306) == [0, 80, 161, 241]
+
+
+def test_relegation_spots_follow_the_preregistration():
+    from src.models.season_eval import relegation_spots
+    assert relegation_spots("ENG", 2020) == 3 and relegation_spots("GER", 2020) == 2
+    assert [relegation_spots("FRA", s) for s in (2015, 2016, 2021, 2022, 2023, 2025)] == [3, 2, 2, 4, 2, 2]
+
+
+def test_scores_use_the_given_relegation_spots():
+    from src.models.season_eval import scores
+    teams = ["A", "B", "C", "D"]
+    final = pd.DataFrame({"team": teams, "position": [1, 2, 3, 4]})
+    from src.models.season_sim import N_SIMS
+    positions = np.array([[1, 2, 3, 4]] * N_SIMS)
+    two = scores(positions, teams, final, relegated=2)["descenso"]
+    assert two["y"] == [0.0, 0.0, 1.0, 1.0] and two["p"] == [0.0, 0.0, 1.0, 1.0]
