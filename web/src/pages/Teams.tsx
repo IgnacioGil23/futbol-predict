@@ -8,7 +8,7 @@ import { TeamBadge } from '../components/TeamBadge'
 import { TeamPreviewPopover, type TeamSeasonSummary } from '../components/TeamPreview'
 import { formatDate, num, pct, pct1, useData } from '../lib/data'
 import { useTeamIndex } from '../lib/teams'
-import type { SeasonFile, StateFile, TeamFile, TeamSeason } from '../lib/types'
+import type { SeasonFile, StateFile, StatsFile, StatsIndex, TeamFile, TeamSeason } from '../lib/types'
 import './teams.css'
 
 const delay = (d: number) => ({ '--d': d }) as CSSProperties
@@ -127,12 +127,8 @@ export function Teams() {
 
       {others.length > 0 && (
         <section className="teams-block">
-          <div className="section-title">
-            <div>
-              <span className="eyebrow">Archivo</span>
-              <h2>Otros clubes en la Premier desde 2000-01</h2>
-            </div>
-          </div>
+          <details className="archive">
+          <summary>Otros clubes en la Premier desde 2000-01 ({others.length})</summary>
           <div className="club-grid club-grid-sm">
             {others.map((t) => (
               <Link key={t.slug} to={`/equipos/${t.slug}`} className="card card-link club-card club-card-sm">
@@ -144,6 +140,7 @@ export function Teams() {
               </Link>
             ))}
           </div>
+          </details>
         </section>
       )}
       {state.data && !shown.length && !others.length && <p className="callout">Ningún club coincide con "{query}".</p>}
@@ -165,6 +162,47 @@ function VsLeague({ value, label, goodWhenNegative = false }: { value: number; l
       <div className="vs-league-num tabular" style={{ color }}>{value > 0 ? '+' : ''}{pct(value)}</div>
       <div className="small" style={{ color: 'var(--ink-2)', margin: '4px 0 10px' }}>{label}</div>
       <div className="vs-league-track"><div style={{ width: `${width}%`, background: color }} /></div>
+    </div>
+  )
+}
+
+const ratio = (v: number | null, digits = 2) => (v === null ? '—' : num(v, digits))
+
+/** Detalle de la temporada en curso (local/visitante, por tiempos, entretiempo) según Estadísticas. */
+function SeasonDetail({ team }: { team: string }) {
+  const index = useData<StatsIndex>('stats/index.json')
+  const current = index.data?.find((x) => x.current)?.season ?? index.data?.[0]?.season
+  const { data: s } = useData<StatsFile>(current ? `stats/${current}.json` : null)
+  const t = s?.teams.find((x) => x.team === team)
+  if (!s || !t) return null
+  const rows = [['Local', t.home], ['Visitante', t.away]] as const
+  const { halves: h, ht } = t
+  return (
+    <div className="card" style={{ marginBottom: 18 }}>
+      <h3>Esta temporada en detalle</h3>
+      <div className="table-wrap">
+        <table className="table">
+          <thead>
+            <tr><th></th><th className="num">PJ</th><th className="num">G</th><th className="num">E</th><th className="num">P</th><th className="num">Pts/PJ</th><th className="num">GF</th><th className="num">GC</th></tr>
+          </thead>
+          <tbody>
+            {rows.map(([label, v]) => (
+              <tr key={label}>
+                <td>{label}</td>
+                <td className="num">{v.played}</td><td className="num">{v.won}</td><td className="num">{v.drawn}</td><td className="num">{v.lost}</td>
+                <td className="num">{ratio(v.points_per_game)}</td><td className="num">{v.gf}</td><td className="num">{v.ga}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="small" style={{ marginTop: 10, color: 'var(--ink-2)' }}>
+        Goles por tiempo: 1T {h.gf_1h}-{h.ga_1h} · 2T {h.gf_2h}-{h.ga_2h}
+      </p>
+      <p className="small" style={{ marginTop: 4, color: 'var(--ink-2)' }}>
+        Al entretiempo: ganando {ht.leading.n} (ganó {ht.leading.won}) · empatando {ht.level.n} · perdiendo {ht.trailing.n} (rescató {ht.points_won_trailing} pts)
+      </p>
+      <p className="small" style={{ marginTop: 8 }}><Link to="/estadisticas">Ver todas las estadísticas →</Link></p>
     </div>
   )
 }
@@ -254,6 +292,8 @@ export function TeamDetail() {
             </div>
           </div>
         )}
+
+        <SeasonDetail team={t.team} />
 
         <div className="card" style={{ marginBottom: 18 }}>
           <div className="card-head">

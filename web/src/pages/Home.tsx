@@ -10,7 +10,8 @@ import { formatDate, num, pct, pct1, useData } from '../lib/data'
 import { forecast, topScores } from '../lib/model'
 import { useTeamIndex } from '../lib/teams'
 import type {
-  MetaFile, ModelFile, Probabilities, ReviewSeasonSummary, SeasonFile, StateFile, TeamIndexItem, UpcomingFile, UpcomingMatch,
+  MetaFile, ModelFile, Probabilities, ReviewSeasonSummary, SeasonFile, StateFile, StatsFile, StatsIndex, TeamIndexItem, UpcomingFile,
+  UpcomingMatch,
 } from '../lib/types'
 import './home.css'
 
@@ -140,6 +141,61 @@ function Race({ title, eyebrow, rows, color, teams, foot, to }: {
   )
 }
 
+/** "Datos de la temporada": tres datos curiosos de la temporada en curso, tomados de Estadísticas. */
+function SeasonData({ teams }: { teams: Map<string, TeamIndexItem> }) {
+  const index = useData<StatsIndex>('stats/index.json')
+  const current = index.data?.find((x) => x.current)?.season ?? index.data?.[0]?.season
+  const { data: s } = useData<StatsFile>(current ? `stats/${current}.json` : null)
+  if (!s) return null
+  const link = (team: string) => {
+    const t = teams.get(team)
+    return t ? <Link to={`/equipos/${t.slug}`}>{t.name}</Link> : team
+  }
+  let over: { team: string; diff: number } | null = null
+  let rescue: { team: string; points: number } | null = null
+  for (const t of s.teams) {
+    const d = t.market.difference
+    if (d !== null && d > 0 && (!over || d > over.diff)) over = { team: t.team, diff: d }
+    if (t.ht.points_won_trailing > 0 && (!rescue || t.ht.points_won_trailing > rescue.points)) rescue = { team: t.team, points: t.ht.points_won_trailing }
+  }
+  const gpm = s.league.goals_per_match
+  const ref = s.league_reference.goals_per_match
+  return (
+    <section className="container home-section">
+      <div className="section-title">
+        <div>
+          <span className="eyebrow">Estadísticas · temporada {s.season}</span>
+          <h2>Datos de la temporada</h2>
+        </div>
+        <Link className="btn" to="/estadisticas">Ver todas las estadísticas <span className="arrow"><Icon name="arrow" size={16} /></span></Link>
+      </div>
+      <div className="grid grid-3">
+        <div className="card">
+          <span className="small muted">Goles por partido</span>
+          <strong className="big-num tabular" style={{ display: 'block' }}>{gpm === null ? '—' : num(gpm, 2)}</strong>
+          <span className="small muted">Promedio histórico: {ref === null ? '—' : num(ref, 2)}</span>
+        </div>
+        {over && (
+          <div className="card">
+            <span className="small muted">Suma más de lo que esperaba el mercado</span>
+            <strong className="big-num" style={{ display: 'block' }}>{link(over.team)}</strong>
+            <strong className="tabular">+{num(over.diff, 1)} puntos</strong>
+            <span className="small muted" style={{ display: 'block' }}>Puntos reales contra los que le daban las cuotas antes de cada partido</span>
+          </div>
+        )}
+        {rescue && (
+          <div className="card">
+            <span className="small muted">Rescata puntos yendo abajo</span>
+            <strong className="big-num" style={{ display: 'block' }}>{link(rescue.team)}</strong>
+            <strong className="tabular">{rescue.points} puntos rescatados</strong>
+            <span className="small muted" style={{ display: 'block' }}>Sumados en partidos que perdía al entretiempo</span>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
 export function Home() {
   const meta = useData<MetaFile>('meta.json')
   const state = useData<StateFile>('state.json')
@@ -194,10 +250,8 @@ export function Home() {
             </span>
             <h1 className="reveal" style={delay(1)}>Cada marcador,<br /><span className="grad-text">con su probabilidad.</span></h1>
             <p className="lede reveal" style={delay(2)}>
-              Un modelo de Machine Learning estima los goles esperados de cada equipo a partir de un Elo que aprende de las
-              cuotas de partidos anteriores, y los convierte
-              en la probabilidad de cada resultado exacto de la Premier League. Evaluado con honestidad contra el
-              mercado de apuestas.
+              Un modelo de Machine Learning calcula la probabilidad de cada resultado de la Premier League. Lo comparamos
+              en vivo con el mercado de apuestas.
             </p>
             <div className="hero-ctas reveal" style={delay(3)}>
               <Link className="btn btn-primary" to="/partidos">Ver la próxima jornada <span className="arrow"><Icon name="arrow" size={16} /></span></Link>
@@ -281,6 +335,8 @@ export function Home() {
           ) : <div className="skeleton" style={{ minHeight: 320 }} />}
         </div>
       </section>
+
+      <SeasonData teams={byTeam} />
 
       <section className="container home-section">
         <div className="section-title">

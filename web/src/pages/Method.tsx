@@ -1,7 +1,10 @@
+import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { CalibrationChart } from '../components/CalibrationChart'
 import { formatDate, num, pct, REPO, useData } from '../lib/data'
 import { useTeamIndex } from '../lib/teams'
-import type { CalibrationFile, MetaFile, ReviewSeasonSummary } from '../lib/types'
+import type { CalibrationFile, MetaFile, ReviewSeasonSummary, SeasonFile } from '../lib/types'
+import { Evaluation } from './Season'
 
 const REPO_NOTE = 'Código, notebooks y tests en el repositorio del proyecto.'
 
@@ -9,6 +12,12 @@ export function Method() {
   const meta = useData<MetaFile>('meta.json')
   const calib = useData<CalibrationFile>('calibration.json')
   const review = useData<ReviewSeasonSummary[]>('review/index.json')
+  const season = useData<SeasonFile>('season.json')
+  const { hash } = useLocation()
+  const ready = !meta.loading && !calib.loading && !review.loading && !season.loading
+  useEffect(() => {
+    if (ready && hash) document.getElementById(hash.slice(1))?.scrollIntoView()
+  }, [ready, hash])
   const { list } = useTeamIndex()
   const photos = list.filter((t) => t.stadium)
   const m = meta.data?.model
@@ -116,6 +125,16 @@ export function Method() {
             </div>
             <p className="small muted" style={{ marginTop: 8 }}>Log loss (menor es mejor). Mercado: Bet365 pre-cierre. Temporadas en curso con pocos partidos: cifras muy ruidosas.</p>
           </div>
+        )}
+
+        {season.data?.evaluation && (
+          <Evaluation ev={season.data.evaluation} id="simulacion" title="Validación de la simulación de la temporada"
+            intro={(
+              <p className="small muted" style={{ maxWidth: 820, marginBottom: 12 }}>
+                La simulación usa el modelo con el Elo de resultados (el evaluado en su preregistro): el Elo basado en
+                cuotas del resto del sitio no puede actualizarse con partidos simulados, porque no tienen cuotas.
+              </p>
+            )} />
         )}
 
         <div className="card">

@@ -190,7 +190,7 @@ export function Monitoring() {
           <div key={name} className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline' }}>
               <h3 style={{ margin: 0, fontSize: '1.05rem' }}>{ind.description}</h3>
-              <span className={`status-pill pill-${ind.status}`}>{ind.status_label}</span>
+              {r.status !== 'insuficiente' && <span className={`status-pill pill-${ind.status}`}>{ind.status_label}</span>}
             </div>
             <div className="big-num tabular" style={{ margin: '6px 0 2px' }}>{fmt(name, ind.value)}</div>
             <div className="small muted">{ind.n} partidos</div>

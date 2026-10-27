@@ -185,7 +185,7 @@ export function Layout() {
             </div>
           </div>
           <div className="footer-bottom small muted">
-            <span>{meta.data ? <>Datos actualizados al {formatDate(meta.data.last_match_in_data)} · modelo {meta.data.model_version}</> : ' '}</span>
+            <span>{meta.data ? <>Datos actualizados al {formatDate(meta.data.last_match_in_data)}</> : ' '}</span>
             <span>No es un servicio de apuestas.</span>
           </div>
         </div>

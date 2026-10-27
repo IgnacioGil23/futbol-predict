@@ -107,3 +107,6 @@
 .pos-badge.gold { background: color-mix(in srgb, var(--warn) 22%, transparent); color: var(--warn); }
 .pos-badge.top { background: color-mix(in srgb, var(--home) 18%, transparent); color: var(--home); }
 .pos-badge.rel { background: color-mix(in srgb, var(--away) 18%, transparent); color: var(--away); }
+
+.archive > summary { cursor: pointer; font-family: var(--display); font-size: clamp(1.4rem, 2.6vw, 1.9rem); font-weight: 800; line-height: 1; text-transform: uppercase; margin-bottom: 16px; }
+.archive:not([open]) > summary { margin-bottom: 0; }

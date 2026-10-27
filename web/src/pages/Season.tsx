@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { TeamName } from '../components/TeamName'
 import { formatDate, num, pct, pct1, REPO, useData } from '../lib/data'
 import { useTeamIndex } from '../lib/teams'
@@ -80,12 +82,13 @@ function CalibrationHelp({ rows, event }: { rows: SeasonEvaluation['calibration'
   )
 }
 
-function Evaluation({ ev }: { ev: SeasonEvaluation }) {
+export function Evaluation({ ev, id, title, intro }: { ev: SeasonEvaluation; id?: string; title: string; intro?: ReactNode }) {
   const events = ['campeon', 'top4', 'descenso'] as const
   const cutoffs = [...new Set(ev.table.map((r) => r.cutoff))].sort((a, b) => a - b)
   return (
-    <section style={{ marginTop: 32 }}>
-      <h2 style={{ marginBottom: 8 }}>¿Son creíbles estas probabilidades?</h2>
+    <section id={id} style={{ marginTop: 32 }}>
+      <h2 style={{ marginBottom: 8 }}>{title}</h2>
+      {intro}
       <p className="lede" style={{ maxWidth: 820 }}>
         Simulamos las temporadas {ev.seasons[0]} a {ev.seasons[ev.seasons.length - 1]} desde cuatro momentos, cada una
         con el modelo entrenado solo con temporadas anteriores, y comparamos con lo que pasó. La regla se fijó antes de
@@ -189,9 +192,7 @@ export function Season() {
         <p className="lede" style={{ maxWidth: 820 }}>
           Jugamos los {s.remaining_matches} partidos que faltan {num(s.n_sims, 0)} veces con el modelo. En cada
           simulación, el Elo de los equipos se actualiza con los resultados simulados, así una racha cambia las chances de
-          lo que viene, como en la realidad. Desempates: puntos, diferencia de gol y goles a favor. La simulación usa el
-          modelo con el Elo de resultados (el evaluado en su preregistro): el Elo de cuotas del resto del sitio no puede
-          actualizarse con partidos simulados, porque no tienen cuotas.
+          lo que viene, como en la realidad. Desempates: puntos, diferencia de gol y goles a favor.
         </p>
       </div>
       <div className="card">
@@ -199,7 +200,7 @@ export function Season() {
           <table className="table season-table">
             <thead>
               <tr>
-                <th>Equipo</th><th className="num">Pts (PJ)</th><th className="num" title="Elo de resultados">Elo (res.)</th><th className="num">Pts esperados</th>
+                <th>Equipo</th><th className="num">Pts (PJ)</th><th className="num">Pts esperados</th>
                 <th className="num">Campeón</th><th className="num">Top 4</th><th className="num">Top 6</th><th className="num">Descenso</th>
               </tr>
             </thead>
@@ -208,7 +209,6 @@ export function Season() {
                 <tr key={t.slug}>
                   <td><TeamName team={byTeam.get(t.team)} name={t.name} to={`/equipos/${t.slug}`} /></td>
                   <td className="num tabular">{t.points} <span className="muted">({t.played})</span></td>
-                  <td className="num tabular">{num(t.elo, 0)}</td>
                   <td className="num tabular">{num(t.expected_points, 1)}</td>
                   <ProbCell p={t.p_champion} tone="up" />
                   <ProbCell p={t.p_top4} tone="up" />
@@ -228,14 +228,16 @@ export function Season() {
         </p>
         <p className="small muted" style={{ marginTop: 8 }}>
           "Top 4" y "Top 6" son posiciones en la tabla: los cupos europeos exactos dependen también de las copas. No se
-          modelan descuentos de puntos ni desempates por cara a cara. Modelo {s.model_version}.
+          modelan descuentos de puntos ni desempates por cara a cara.
         </p>
       </div>
 
       <h2 style={{ margin: '32px 0 12px' }}>Todas las posiciones posibles</h2>
       <div className="card"><PositionGrid teams={s.teams} index={byTeam} /></div>
 
-      {s.evaluation && <Evaluation ev={s.evaluation} />}
+      <p className="small muted" style={{ marginTop: 24 }}>
+        ¿Qué tan confiables son estas probabilidades? <Link to="/metodologia#simulacion">Ver la validación →</Link>
+      </p>
     </div>
   )
 }
