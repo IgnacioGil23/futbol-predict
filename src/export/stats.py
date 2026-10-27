@@ -54,8 +54,13 @@ def team_match_rows(matches: pd.DataFrame) -> pd.DataFrame:
         }))
     rows = pd.concat(sides, ignore_index=True)
     rows["points"] = _points(rows["gf"], rows["ga"])
-    rows["ht_state"] = np.select([rows["gf_ht"] > rows["ga_ht"], rows["gf_ht"] < rows["ga_ht"]],
-                                 ["leading", "trailing"], "level")
+    # Sin marcador del entretiempo (faltan en algunos partidos de otras ligas): "unknown", fuera de las métricas por
+    # tiempo y del entretiempo.
+    gf_ht = rows["gf_ht"].to_numpy(dtype=float, na_value=np.nan)
+    ga_ht = rows["ga_ht"].to_numpy(dtype=float, na_value=np.nan)
+    rows["gf_ht"], rows["ga_ht"] = gf_ht, ga_ht
+    rows["ht_state"] = np.select([np.isnan(gf_ht) | np.isnan(ga_ht), gf_ht > ga_ht, gf_ht < ga_ht],
+                                 ["unknown", "leading", "trailing"], "level")
     return rows.sort_values(["date", "match_id", "is_home"], ascending=[True, True, False]).reset_index(drop=True)
 
 
@@ -64,7 +69,8 @@ def league_summary(rows: pd.DataFrame) -> dict:
     h = rows[rows["is_home"]]
     n = len(h)
     goals = h["gf"] + h["ga"]
-    with_leader = h[h["ht_state"] != "level"]
+    with_leader = h[h["ht_state"].isin(["leading", "trailing"])]
+    known = h[h["ht_state"] != "unknown"]
     leader_won = ((with_leader["ht_state"] == "leading") & (with_leader["points"] == 3)) | \
                  ((with_leader["ht_state"] == "trailing") & (with_leader["points"] == 0))
     trailer_won = ((with_leader["ht_state"] == "trailing") & (with_leader["points"] == 3)) | \
@@ -75,7 +81,7 @@ def league_summary(rows: pd.DataFrame) -> dict:
         "draw_pct": _ratio((h["points"] == 1).sum(), n),
         "away_win_pct": _ratio((h["points"] == 0).sum(), n),
         "goals_per_match": _ratio(goals.sum(), n),
-        "first_half_goals_share": _ratio((h["gf_ht"] + h["ga_ht"]).sum(), goals.sum()),
+        "first_half_goals_share": _ratio((known["gf_ht"] + known["ga_ht"]).sum(), (known["gf"] + known["ga"]).sum()),
         "btts_pct": _ratio(((h["gf"] > 0) & (h["ga"] > 0)).sum(), n),
         "over25_pct": _ratio((goals >= 3).sum(), n),
         "ht_leader_win_pct": _ratio(leader_won.sum(), len(with_leader)),
@@ -106,7 +112,8 @@ def _team(team: str, g: pd.DataFrame) -> dict:
         s = g[g["ht_state"] == state]
         ht[state] = {"n": int(len(s)), "won": int((s["points"] == 3).sum()), "drawn": int((s["points"] == 1).sum()),
                      "lost": int((s["points"] == 0).sum())}
-    gf_2h, ga_2h = g["gf"] - g["gf_ht"], g["ga"] - g["ga_ht"]
+    k = g[g["ht_state"] != "unknown"]                    # partidos con marcador del entretiempo
+    gf_2h, ga_2h = k["gf"] - k["gf_ht"], k["ga"] - k["ga_ht"]
     shots, shots_a, sot, sot_a = (g[c].sum() for c in ("shots", "shots_against", "sot", "sot_against"))
     conversion, save_pct = _ratio(g["gf"].sum(), sot), (None if not sot_a else r4(1 - g["ga"].sum() / sot_a))
     priced = g[g["p_win"].notna()]
@@ -114,9 +121,9 @@ def _team(team: str, g: pd.DataFrame) -> dict:
     return {
         "team": team, "played": int(n),
         "home": _record(g[g["is_home"]]), "away": _record(g[~g["is_home"]]),
-        "halves": {"gf_1h": int(g["gf_ht"].sum()), "ga_1h": int(g["ga_ht"].sum()),
+        "halves": {"gf_1h": int(k["gf_ht"].sum()), "ga_1h": int(k["ga_ht"].sum()),
                    "gf_2h": int(gf_2h.sum()), "ga_2h": int(ga_2h.sum()),
-                   "points_1h": int(_points(g["gf_ht"], g["ga_ht"]).sum()),
+                   "points_1h": int(_points(k["gf_ht"], k["ga_ht"]).sum()),
                    "points_2h": int(_points(gf_2h, ga_2h).sum())},
         "ht": {**ht,
                "points_dropped_leading": int((3 - g.loc[g["ht_state"] == "leading", "points"]).sum()),

@@ -168,3 +168,17 @@ def test_export_stats_in_summer_break_has_no_remaining_schedule(tmp_path, monkey
     assert all(not i["current"] for i in index)          # la temporada nueva todavía no empezó
     finished = json.loads((out / "stats" / "2026-27.json").read_text(encoding="utf-8"))
     assert finished["difficulty"] is None and finished["referees_next"] is None
+
+
+def test_matches_without_half_time_score_are_left_out_of_half_metrics():
+    m = make_matches()
+    m["ht_home_goals"] = pd.array([0, pd.NA, 1], dtype="Int64")      # B 0-0 C sin entretiempo
+    m["ht_away_goals"] = pd.array([1, pd.NA, 0], dtype="Int64")
+    rows = team_match_rows(m)
+    assert set(rows[rows.match_id == 2].ht_state) == {"unknown"}
+    s = league_summary(rows)
+    assert s["first_half_goals_share"] == pytest.approx(2 / 7, abs=1e-4)   # el 0-0 no aporta goles
+    b = next(t for t in team_stats(rows) if t["team"] == "B")
+    assert b["halves"]["gf_1h"] + b["halves"]["gf_2h"] == 1                  # solo el partido con entretiempo
+    assert b["ht"]["level"]["n"] == 0
+    assert json.dumps(b, allow_nan=False)
