@@ -65,3 +65,49 @@ def test_check_against_results_reports_mismatches():
     assert report["played_in_schedule"] == 4
     assert report["not_found_in_football_data"] == ["Leeds v Crystal Palace"]
     assert report["score_mismatches"] == ["Brighton v Aston Villa: 4-0 vs 3-0"]
+
+
+# ------------------------------------------------------------------ otras ligas
+SPAIN = """= Spain Primera División 2026/27
+
+▪ Matchday 1
+  Sat Aug 15 2026
+    19:30  Deportivo Alavés        v Getafe CF                3-0 (0-0)
+    21:30  Sevilla FC              v Rayo Vallecano de Madrid  2-1 (0-1)
+  Sun Aug 16
+    17:00  Club Atlético de Madrid v Sevilla FC
+"""
+
+
+def test_other_league_keeps_raw_names_and_uses_its_time_zone():
+    from zoneinfo import ZoneInfo
+
+    from src.data.schedule import parse_schedule
+    df = parse_schedule(SPAIN, 2026, names={"Deportivo Alavés": "Alaves"}, tz=ZoneInfo("Europe/Madrid"))
+    assert list(df.home_team) == ["Alaves", "Sevilla FC", "Club Atlético de Madrid"]
+    assert list(df.home_raw) == ["Deportivo Alavés", "Sevilla FC", "Club Atlético de Madrid"]
+    # 19:30 en Madrid (CEST, UTC+2) = 14:30 en Argentina (UTC-3)
+    assert df.kickoff_ar.iloc[0] == "2026-08-15 14:30"
+
+
+def test_names_are_inferred_from_played_results():
+    from src.data.schedule import infer_names, parse_schedule
+    schedule = parse_schedule(SPAIN, 2026, names={})
+    results = pd.DataFrame({
+        "date": pd.to_datetime(["2026-08-15", "2026-08-15"]),
+        "home_team": ["Alaves", "Sevilla"], "away_team": ["Getafe", "Vallecano"],
+        "home_goals": [3.0, 2.0], "away_goals": [0.0, 1.0]})
+    names = infer_names(schedule, results)
+    assert names == {"Deportivo Alavés": "Alaves", "Getafe CF": "Getafe", "Sevilla FC": "Sevilla",
+                     "Rayo Vallecano de Madrid": "Vallecano"}
+
+
+def test_ambiguous_results_are_not_guessed():
+    from src.data.schedule import infer_names, parse_schedule
+    schedule = parse_schedule(SPAIN, 2026, names={})
+    # dos partidos 3-0 ese día: no se puede saber cuál es cuál
+    results = pd.DataFrame({
+        "date": pd.to_datetime(["2026-08-15", "2026-08-15"]),
+        "home_team": ["Alaves", "Betis"], "away_team": ["Getafe", "Osasuna"],
+        "home_goals": [3.0, 3.0], "away_goals": [0.0, 0.0]})
+    assert "Deportivo Alavés" not in infer_names(schedule, results)

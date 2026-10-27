@@ -10,9 +10,12 @@ temporada con las 38 jornadas, día, horario y resultado cuando ya se jugó:
         15:00  Sunderland AFC          v Brighton & Hove Albion FC
                Chelsea FC              v AFC Bournemouth        <- mismo horario que la línea anterior
 
-Los horarios se publican como hora local de Inglaterra (los horarios típicos de la
-Premier: 12:30, 15:00, 17:30) y se convierten a hora de Argentina con las zonas
-horarias oficiales, que contemplan el cambio de horario del Reino Unido.
+Los horarios se publican como hora local de cada liga (Inglaterra: los típicos 12:30, 15:00, 17:30) y se
+convierten a hora de Argentina con las zonas horarias oficiales, que contemplan los cambios de horario.
+
+Otras ligas (src/data/leagues.py): mismo formato en openfootball/espana, italy, deutschland y europe/france. Sus
+nombres se traducen a los de Football-Data con una tabla (configs/leagues/team_names.json) que se deduce de los
+partidos ya jugados (`infer_names`: misma fecha y mismo resultado).
 """
 
 import logging
@@ -65,8 +68,13 @@ def to_canonical(name: str) -> str:
     return canonical_team(_FROM_DISPLAY.get(short, _FROM_DISPLAY.get(name, short)))
 
 
-def parse_schedule(text: str, season_start: int) -> pd.DataFrame:
-    """Texto de openfootball -> un partido por fila (jornada, fecha, horarios, equipos, resultado si lo hay)."""
+def parse_schedule(text: str, season_start: int, names: dict | None = None, tz: ZoneInfo = UK) -> pd.DataFrame:
+    """Texto de openfootball -> un partido por fila (jornada, fecha, horarios, equipos, resultado si lo hay).
+
+    `names`: tabla nombre de openfootball -> Football-Data de otra liga (los que no figuran quedan como vienen);
+    sin tabla, las reglas de la Premier (`to_canonical`). `tz`: zona horaria de los horarios publicados.
+    """
+    canonical = to_canonical if names is None else (lambda raw: names.get(raw.strip(), raw.strip()))
     rows, matchday, day, kickoff = [], None, None, None
     for line in text.splitlines():
         if not line.strip() or line.lstrip().startswith(("#", "=")):
@@ -84,32 +92,69 @@ def parse_schedule(text: str, season_start: int) -> pd.DataFrame:
             rows.append({
                 "matchday": matchday, "date": pd.Timestamp(day),
                 "time_uk": kickoff,
-                "home_team": to_canonical(m.group("home")), "away_team": to_canonical(m.group("away")),
+                "home_team": canonical(m.group("home")), "away_team": canonical(m.group("away")),
+                "home_raw": m.group("home").strip(), "away_raw": m.group("away").strip(),
                 "home_goals": float(m.group("hg")) if m.group("hg") else float("nan"),
                 "away_goals": float(m.group("ag")) if m.group("ag") else float("nan"),
             })
             continue
         logger.warning("Línea del calendario no reconocida: %r", line)
-    df = pd.DataFrame(rows, columns=["matchday", "date", "time_uk", "home_team", "away_team", "home_goals", "away_goals"])
-    df["kickoff_ar"] = [to_argentina(d, t) for d, t in zip(df["date"], df["time_uk"])]
+    df = pd.DataFrame(rows, columns=["matchday", "date", "time_uk", "home_team", "away_team", "home_raw", "away_raw",
+                                     "home_goals", "away_goals"])
+    df["kickoff_ar"] = [to_argentina(d, t, tz) for d, t in zip(df["date"], df["time_uk"])]
     df["played"] = df["home_goals"].notna()
     return df
 
 
-def to_argentina(day: pd.Timestamp, time_uk: str | None) -> str | None:
-    """Fecha y hora inglesa -> 'AAAA-MM-DD HH:MM' en hora de Argentina (None si no hay horario)."""
+def to_argentina(day: pd.Timestamp, time_uk: str | None, tz: ZoneInfo = UK) -> str | None:
+    """Fecha y hora local de la liga (`tz`) -> 'AAAA-MM-DD HH:MM' en hora de Argentina (None si no hay horario)."""
     if not time_uk:
         return None
     hh, mm = map(int, time_uk.split(":"))
-    local = datetime(day.year, day.month, day.day, hh, mm, tzinfo=UK)
+    local = datetime(day.year, day.month, day.day, hh, mm, tzinfo=tz)
     return local.astimezone(ARGENTINA).strftime("%Y-%m-%d %H:%M")
 
 
-def fetch_schedule(season_start: int, timeout: int = 60) -> pd.DataFrame:
-    url = SCHEDULE_URL.format(season=season_label(season_start))
-    response = requests.get(url, timeout=timeout)
+def schedule_url(season_start: int, league: str = "ENG") -> str:
+    from src.data.leagues import PRODUCT_LEAGUES
+    return PRODUCT_LEAGUES[league]["schedule_url"].format(season=season_label(season_start))
+
+
+def fetch_schedule(season_start: int, timeout: int = 60, league: str = "ENG", names: dict | None = None) -> pd.DataFrame:
+    """Calendario de `league` (por defecto la Premier). En otras ligas, `names` traduce los nombres (ver
+    `src.data.team_names.load_names`)."""
+    from src.data.leagues import PRODUCT_LEAGUES
+    response = requests.get(schedule_url(season_start, league), timeout=timeout)
     response.raise_for_status()
-    return parse_schedule(response.content.decode("utf-8"), season_start)
+    tz = ZoneInfo(PRODUCT_LEAGUES[league]["timezone"])
+    if league != "ENG" and names is None:
+        names = {}
+    return parse_schedule(response.content.decode("utf-8"), season_start, names=names, tz=tz)
+
+
+def infer_names(schedule: pd.DataFrame, results: pd.DataFrame, max_days: int = 1) -> dict[str, str]:
+    """Nombre de openfootball -> Football-Data, deducido de los partidos jugados: misma fecha (±`max_days`) y mismo
+    resultado. Solo cuentan los partidos con un único candidato; cada nombre se queda con el más votado, y si dos
+    nombres eligen el mismo equipo, ninguno se traduce (ambigüedad)."""
+    votes: dict[str, dict[str, int]] = {}
+    played = schedule[schedule["home_goals"].notna()]
+    res = results[results["home_goals"].notna()]
+    for r in played.itertuples(index=False):
+        near = res[((res["date"] - r.date).abs() <= pd.Timedelta(days=max_days))
+                   & (res["home_goals"] == r.home_goals) & (res["away_goals"] == r.away_goals)]
+        if len(near) != 1:
+            continue
+        fd = near.iloc[0]
+        for raw, name in ((r.home_raw, fd["home_team"]), (r.away_raw, fd["away_team"])):
+            votes.setdefault(raw, {}).setdefault(name, 0)
+            votes[raw][name] += 1
+    best = {}
+    for raw, v in votes.items():
+        ranked = sorted(v.items(), key=lambda kv: -kv[1])
+        if len(ranked) == 1 or ranked[0][1] > ranked[1][1]:
+            best[raw] = ranked[0][0]
+    taken = pd.Series(best).value_counts()
+    return {raw: name for raw, name in best.items() if taken[name] == 1}
 
 
 def check_against_results(schedule: pd.DataFrame, results: pd.DataFrame) -> dict:
