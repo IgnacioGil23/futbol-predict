@@ -108,7 +108,7 @@ def parse_schedule(text: str, season_start: int, names: dict | None = None, tz: 
 
 def to_argentina(day: pd.Timestamp, time_uk: str | None, tz: ZoneInfo = UK) -> str | None:
     """Fecha y hora local de la liga (`tz`) -> 'AAAA-MM-DD HH:MM' en hora de Argentina (None si no hay horario)."""
-    if not time_uk:
+    if not isinstance(time_uk, str) or not time_uk:      # sin horario (None, o NaN en columnas de texto)
         return None
     hh, mm = map(int, time_uk.split(":"))
     local = datetime(day.year, day.month, day.day, hh, mm, tzinfo=tz)

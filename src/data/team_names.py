@@ -6,7 +6,7 @@ Por liga:
 * "display": nombre para mostrar en la web (curado a mano; sin entrada, el de Football-Data).
 * "short": abreviatura de tres letras para el escudo genérico.
 
-Uso (actualiza la tabla con la temporada en curso y la anterior):
+Uso (actualiza la tabla con la temporada en curso):
     python -m src.data.team_names
 """
 
@@ -62,7 +62,7 @@ def update(today: date | None = None) -> dict:
     for code, league in LEAGUES.items():
         entry = table.setdefault(code, {"openfootball": {}, "display": {}, "short": {}})
         matches = pd.read_parquet(matches_path(code))
-        for season in (current - 1, current):
+        for season in (current,):          # openfootball cambió de formato: las temporadas viejas no se leen
             try:
                 schedule = fetch_schedule(season, league=code, names={})
             except requests.RequestException as err:

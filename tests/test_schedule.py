@@ -111,3 +111,14 @@ def test_ambiguous_results_are_not_guessed():
         "home_team": ["Alaves", "Betis"], "away_team": ["Getafe", "Osasuna"],
         "home_goals": [3.0, 3.0], "away_goals": [0.0, 0.0]})
     assert "Deportivo Alavés" not in infer_names(schedule, results)
+
+
+def test_matches_without_kickoff_time_have_no_argentina_time():
+    from src.data.schedule import parse_schedule
+    text = "▪ Matchday 9\n  Sat Oct 31 2026\n    Real Madrid C.F.  v  Valencia CF\n"
+    df = parse_schedule(text, 2026, names={})
+    assert len(df) == 1 and df.kickoff_ar.iloc[0] is None
+
+
+def test_to_argentina_treats_missing_kickoff_as_none():
+    assert to_argentina(pd.Timestamp("2026-10-31"), float("nan")) is None
