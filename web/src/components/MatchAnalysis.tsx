@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { num, pct1, useData } from '../lib/data'
+import { useLeagueData } from '../lib/league'
+import { num, pct1 } from '../lib/data'
 import { topScores } from '../lib/model'
 import type { EloPoint, FormMatch, H2H, MetaFile, Probabilities, Rest } from '../lib/types'
 import { EloChart } from './EloChart'
@@ -33,7 +34,7 @@ interface Props {
 
 export function MatchAnalysis({ view, home, homeName, awayName, homeSlug, awaySlug }: Props) {
   const top = topScores(view.grid, 3)
-  const review = useData<MetaFile>('meta.json').data?.review
+  const review = useLeagueData<MetaFile>('meta.json').data?.review
   const diff = view.elo.home - view.elo.away
   return (
     <>

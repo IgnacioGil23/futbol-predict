@@ -41,9 +41,9 @@ export function useData<T>(path: string | null): Async<T> {
 // ------------------------------------------------------------------- API
 export const API_URL: string | undefined = import.meta.env.VITE_API_URL || undefined
 
-export async function fetchPrediction(home: string, away: string, date: string, signal?: AbortSignal): Promise<ApiPrediction> {
+export async function fetchPrediction(home: string, away: string, date: string, league: string, signal?: AbortSignal): Promise<ApiPrediction> {
   if (!API_URL) throw new Error('La API no está configurada en esta versión del sitio.')
-  const params = new URLSearchParams({ home, away, date })
+  const params = new URLSearchParams({ home, away, date, league })
   const r = await fetch(`${API_URL}/predict?${params}`, { signal })
   const body = await r.json().catch(() => ({}))
   if (!r.ok) throw new Error(typeof body.detail === 'string' ? body.detail : `Error ${r.status} de la API`)

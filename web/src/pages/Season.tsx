@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { TeamName } from '../components/TeamName'
-import { formatDate, num, pct, pct1, REPO, useData } from '../lib/data'
+import { formatDate, num, pct, pct1, REPO } from '../lib/data'
+import { LeagueSwitcher } from '../components/LeagueSwitcher'
+import { useLeague, useLeagueData } from '../lib/league'
 import { useTeamIndex } from '../lib/teams'
 import type { SeasonEvaluation, SeasonFile, SeasonTeam, TeamIndexItem } from '../lib/types'
 import './season.css'
@@ -24,7 +26,7 @@ function ProbCell({ p, tone }: { p: number; tone: 'up' | 'down' }) {
   )
 }
 
-function PositionGrid({ teams, index }: { teams: SeasonTeam[]; index: Map<string, TeamIndexItem> }) {
+function PositionGrid({ teams, index, relegation }: { teams: SeasonTeam[]; index: Map<string, TeamIndexItem>; relegation: number }) {
   const n = teams.length
   return (
     <div className="table-wrap">
@@ -32,7 +34,7 @@ function PositionGrid({ teams, index }: { teams: SeasonTeam[]; index: Map<string
            role="table" aria-label="Probabilidad de cada posición final">
         <div className="pos-head" role="columnheader">Equipo</div>
         {Array.from({ length: n }, (_, i) => (
-          <div key={i} className={`pos-head num ${i < 4 ? 'zone-top' : i >= n - 3 ? 'zone-rel' : ''}`} role="columnheader">{i + 1}</div>
+          <div key={i} className={`pos-head num ${i < 4 ? 'zone-top' : i >= n - relegation ? 'zone-rel' : ''}`} role="columnheader">{i + 1}</div>
         ))}
         {teams.map((t) => (
           <div key={t.slug} className="pos-row" role="row">
@@ -50,7 +52,7 @@ function PositionGrid({ teams, index }: { teams: SeasonTeam[]; index: Map<string
         <strong>Cómo leerla:</strong> cada fila es un equipo y cada columna, una posición final. Cuanto más intenso el
         color, más probable es que termine ahí (el número, en %, se muestra desde 10%). Cada fila suma 100%: una fila con
         el color concentrado en pocas columnas es un equipo con destino bastante claro; una fila con el color repartido,
-        uno que todavía puede terminar en muchos lugares. Columnas 1-4 en azul: puestos de top 4; 18-20 en naranja:
+        uno que todavía puede terminar en muchos lugares. Columnas 1-4 en azul: puestos de top 4; {n - relegation + 1}-{n} en naranja:
         descenso.
       </p>
     </div>
@@ -178,8 +180,9 @@ export function Evaluation({ ev, id, title, intro }: { ev: SeasonEvaluation; id?
 }
 
 export function Season() {
-  const { data: s, error, loading } = useData<SeasonFile>('season.json')
+  const { data: s, error, loading } = useLeagueData<SeasonFile>('season.json')
   const { byTeam } = useTeamIndex()
+  const { league } = useLeague()
   if (loading) return <div className="container section"><div className="skeleton" style={{ minHeight: 400 }} /></div>
   if (error || !s) {
     return <div className="container section"><p className="callout">Todavía no hay una simulación publicada.</p></div>
@@ -194,6 +197,7 @@ export function Season() {
           simulación, el Elo de los equipos se actualiza con los resultados simulados, así una racha cambia las chances de
           lo que viene, como en la realidad. Desempates: puntos, diferencia de gol y goles a favor.
         </p>
+        <LeagueSwitcher />
       </div>
       <div className="card">
         <div className="table-wrap">
@@ -228,12 +232,23 @@ export function Season() {
         </p>
         <p className="small muted" style={{ marginTop: 8 }}>
           "Top 4" y "Top 6" son posiciones en la tabla: los cupos europeos exactos dependen también de las copas. No se
-          modelan descuentos de puntos ni desempates por cara a cara.
+          modelan descuentos de puntos.
         </p>
+        {s.zones?.playoff ? (
+          <p className="small muted" style={{ marginTop: 8 }}>
+            El {s.zones.playoff}.º juega la promoción contra un equipo de {league.second}: no se cuenta como descenso.
+          </p>
+        ) : null}
+        {s.zones?.head_to_head ? (
+          <p className="small muted" style={{ marginTop: 8 }}>
+            En {league.competition} el primer desempate es el enfrentamiento directo; la simulación desempata por
+            diferencia de gol y goles a favor.
+          </p>
+        ) : null}
       </div>
 
       <h2 style={{ margin: '32px 0 12px' }}>Todas las posiciones posibles</h2>
-      <div className="card"><PositionGrid teams={s.teams} index={byTeam} /></div>
+      <div className="card"><PositionGrid teams={s.teams} index={byTeam} relegation={s.zones?.relegation ?? 3} /></div>
 
       <p className="small muted" style={{ marginTop: 24 }}>
         ¿Qué tan confiables son estas probabilidades? <Link to="/metodologia#simulacion">Ver la validación →</Link>

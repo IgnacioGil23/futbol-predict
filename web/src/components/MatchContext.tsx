@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom'
 import { formatDate } from '../lib/data'
+import { useLeague } from '../lib/league'
 import type { FormMatch, H2H, Rest } from '../lib/types'
 
 const OUTCOME_LABEL = { G: 'Ganó', E: 'Empató', P: 'Perdió' } as const
 
 export function FormStrip({ form, name }: { form: FormMatch[]; name: string }) {
+  const { league } = useLeague()
   if (!form.length) return <p className="small muted">Sin partidos previos en los datos.</p>
   return (
     <div>
@@ -21,7 +23,7 @@ export function FormStrip({ form, name }: { form: FormMatch[]; name: string }) {
           <li key={m.date} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '3px 0', borderBottom: '1px solid var(--line)' }}>
             <span className="muted tabular">{formatDate(m.date, { day: 'numeric', month: 'short' })}</span>
             <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {m.home ? 'vs' : 'en'} {m.opponent}{m.division === 'E1' ? ' · Champ.' : ''}
+              {m.home ? 'vs' : 'en'} {m.opponent}{m.division === league.second_division ? ' · 2.ª div.' : ''}
             </span>
             <span className="tabular" title={OUTCOME_LABEL[m.outcome]}><strong>{m.goals_for}-{m.goals_against}</strong></span>
           </li>
@@ -44,7 +46,8 @@ export function RestBlock({ rest, name }: { rest: Rest; name: string }) {
 }
 
 export function H2HBlock({ h2h, homeTeam, homeName, awayName }: { h2h: H2H; homeTeam: string; homeName: string; awayName: string }) {
-  if (!h2h.matches) return <p className="small muted">No se enfrentaron en Premier ni Championship desde 2000-01.</p>
+  const { league } = useLeague()
+  if (!h2h.matches) return <p className="small muted">No se enfrentaron en {league.competition} ni {league.second} desde 2000-01.</p>
   const total = h2h.matches
   const rows = [
     { label: homeName, n: h2h.home_team_wins, color: 'var(--home)' },

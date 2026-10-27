@@ -3,6 +3,7 @@ import { scaleLinear, scaleUtc } from 'd3-scale'
 import { line } from 'd3-shape'
 import { useMemo, useState } from 'react'
 import { formatDate, num } from '../lib/data'
+import { useLeague } from '../lib/league'
 import type { EloPoint } from '../lib/types'
 import { useWidth } from '../lib/useWidth'
 
@@ -12,8 +13,9 @@ interface Props { series: EloSeries[]; height?: number; markDate?: string }
 
 const toDate = (s: string) => new Date(`${s.slice(0, 10)}T00:00:00Z`)
 
-/** Evolución del Elo; tramos jugados en Championship en línea punteada. Tooltip con cursor. */
+/** Evolución del Elo; tramos jugados en segunda división en línea punteada. Tooltip con cursor. */
 export function EloChart({ series, height = 260, markDate }: Props) {
+  const { league } = useLeague()
   const [ref, width] = useWidth<HTMLDivElement>(600)
   const [hoverX, setHoverX] = useState<number | null>(null)
   const m = { top: 12, right: 16, bottom: 26, left: 44 }
@@ -39,7 +41,7 @@ export function EloChart({ series, height = 260, markDate }: Props) {
     return { s, p: s.points[i] }
   }).filter((h) => h.p)
 
-  // Tramos consecutivos por división (Championship punteado).
+  // Tramos consecutivos por división (segunda división punteada).
   const segments = (pts: EloPoint[]) => {
     const out: { div: string; pts: EloPoint[] }[] = []
     pts.forEach((p, i) => {
@@ -81,7 +83,7 @@ export function EloChart({ series, height = 260, markDate }: Props) {
         )}
         {series.map((s) => segments(s.points).map((seg, i) => (
           <path key={`${s.name}-${i}`} d={path(seg.pts) ?? ''} fill="none" stroke={s.color}
-                strokeWidth={2} strokeDasharray={seg.div === 'E1' ? '4 3' : undefined} strokeLinejoin="round" />
+                strokeWidth={2} strokeDasharray={seg.div === league.second_division ? '4 3' : undefined} strokeLinejoin="round" />
         )))}
         {hoverX !== null && (
           <g>
@@ -97,7 +99,7 @@ export function EloChart({ series, height = 260, markDate }: Props) {
           {hovered.map(({ s, p }) => (
             <div key={s.name}>
               <span style={{ color: s.color }}>●</span> {s.name}: <strong>{num(p.elo, 0)}</strong>
-              <span style={{ opacity: 0.75 }}> · {formatDate(p.date)} · {p.home ? 'vs' : 'en'} {p.opponent} {p.score}{p.division === 'E1' ? ' (Championship)' : ''}</span>
+              <span style={{ opacity: 0.75 }}> · {formatDate(p.date)} · {p.home ? 'vs' : 'en'} {p.opponent} {p.score}{p.division === league.second_division ? ` (${league.second})` : ''}</span>
             </div>
           ))}
         </div>
@@ -106,7 +108,7 @@ export function EloChart({ series, height = 260, markDate }: Props) {
         {series.map((s) => (
           <span key={s.name}><span style={{ display: 'inline-block', width: 14, height: 3, background: s.color, verticalAlign: 'middle', marginRight: 6 }} />{s.name}</span>
         ))}
-        <span>- - - en Championship</span>
+        <span>- - - en {league.second}</span>
       </div>
     </div>
   )

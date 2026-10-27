@@ -1,8 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { formatDate, REPO, useData } from '../lib/data'
+import { formatDate, REPO } from '../lib/data'
+import { useLeagueData } from '../lib/league'
 import type { MetaFile } from '../lib/types'
 import { BrandMark, Icon } from './Icon'
+import { LeagueSwitcher } from './LeagueSwitcher'
 import './layout.css'
 
 type NavItem = { to: string; label: string }
@@ -63,7 +65,7 @@ function useNavIndicator(pathname: string) {
 
 export function Layout() {
   const { isDark, toggle } = useTheme()
-  const meta = useData<MetaFile>('meta.json')
+  const meta = useLeagueData<MetaFile>('meta.json')
   const { pathname } = useLocation()
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -108,7 +110,7 @@ export function Layout() {
             <BrandMark size={32} />
             <span className="brand-text">
               <span className="brand-name">Marcador Probable</span>
-              <span className="brand-sub">Premier League · ML</span>
+              <span className="brand-sub">Cinco ligas · ML</span>
             </span>
           </NavLink>
           <nav id="nav" ref={navRef} className={`nav ${open ? 'open' : ''}`} aria-label="Principal">
@@ -141,6 +143,7 @@ export function Layout() {
             })}
           </nav>
           <div className="topbar-actions">
+            <LeagueSwitcher variant="menu" />
             <button className="icon-btn" onClick={toggle} aria-label={isDark ? 'Usar modo claro' : 'Usar modo oscuro'} title="Cambiar tema">
               <Icon name={isDark ? 'sun' : 'moon'} />
             </button>
@@ -163,8 +166,8 @@ export function Layout() {
               </Link>
               <p className="small muted">
                 Proyecto de portfolio de Machine Learning: un modelo de Poisson sobre Elo que calcula la probabilidad de
-                cada marcador de la Premier League. Probabilidades, no certezas: el modelo no conoce lesiones,
-                alineaciones ni noticias.
+                cada marcador de la Premier League, LaLiga, la Serie A, la Bundesliga y la Ligue 1. Probabilidades, no
+                certezas: el modelo no conoce lesiones, alineaciones ni noticias.
               </p>
               <a className="btn btn-sm" href={REPO} target="_blank" rel="noreferrer"><Icon name="github" size={16} /> Código en GitHub</a>
             </div>

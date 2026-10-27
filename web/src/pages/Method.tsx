@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { CalibrationChart } from '../components/CalibrationChart'
-import { formatDate, num, pct, REPO, useData } from '../lib/data'
+import { formatDate, num, pct, REPO } from '../lib/data'
+import { LeagueSwitcher } from '../components/LeagueSwitcher'
+import { useLeagueData } from '../lib/league'
 import { useTeamIndex } from '../lib/teams'
 import type { CalibrationFile, MetaFile, ReviewSeasonSummary, SeasonFile } from '../lib/types'
 import { Evaluation } from './Season'
@@ -9,10 +11,10 @@ import { Evaluation } from './Season'
 const REPO_NOTE = 'Código, notebooks y tests en el repositorio del proyecto.'
 
 export function Method() {
-  const meta = useData<MetaFile>('meta.json')
-  const calib = useData<CalibrationFile>('calibration.json')
-  const review = useData<ReviewSeasonSummary[]>('review/index.json')
-  const season = useData<SeasonFile>('season.json')
+  const meta = useLeagueData<MetaFile>('meta.json')
+  const calib = useLeagueData<CalibrationFile>('calibration.json')
+  const review = useLeagueData<ReviewSeasonSummary[]>('review/index.json')
+  const season = useLeagueData<SeasonFile>('season.json')
   const { hash } = useLocation()
   const ready = !meta.loading && !calib.loading && !review.loading && !season.loading
   useEffect(() => {
@@ -29,6 +31,7 @@ export function Method() {
         <span className="eyebrow">Ficha del modelo</span>
         <h1>Cómo funciona</h1>
         <p className="lede">Qué hace el modelo, con qué datos, cómo se evaluó y, sobre todo, qué no puede hacer.</p>
+        <LeagueSwitcher />
       </div>
 
       <div className="grid" style={{ gap: 16 }}>
@@ -41,13 +44,17 @@ export function Method() {
             esperados de cada uno se calcula la probabilidad de cada marcador exacto, y sumando celdas, la de victoria
             local, empate y victoria visitante.
           </p>
+          <p style={{ color: 'var(--ink-2)', marginTop: 8 }}>
+            El modelo publicado es el mismo en las cinco ligas: los parámetros del rating se ajustaron en Inglaterra y se
+            comprobaron liga por liga (<a href={`${REPO}/blob/main/docs/preregistro_ligas.md`} target="_blank" rel="noreferrer">preregistro</a>).
+          </p>
           {m && <p className="small muted" style={{ marginTop: 8 }}>Entrenado con {num(m.trained_on.matches, 0)} partidos ({m.trained_on.seasons}). {REPO_NOTE}</p>}
         </div>
 
         <div className="card">
           <h3>El rating: un Elo que aprende del mercado</h3>
           <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-2)' }}>
-            <li>Partido a partido sobre Premier League <strong>y Championship</strong>, para que los ascendidos lleguen con historia.</li>
+            <li>Partido a partido sobre la primera <strong>y la segunda división</strong> de cada liga, para que los ascendidos lleguen con historia.</li>
             <li>Después de cada partido ya jugado, el rating de cada equipo se acerca a lo que el mercado esperaba de él
               <strong> antes</strong> de jugarlo (probabilidad de ganar más la mitad de la de empatar, Bet365 sin margen):
               así absorbe fichajes, lesiones largas y cambios de entrenador (Wunderlich y Memmert, 2018).</li>
@@ -141,7 +148,7 @@ export function Method() {
           <h3>Limitaciones (sin letra chica)</h3>
           <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-2)' }}>
             <li>No conoce lesiones, suspensiones, alineaciones, fichajes ni cambios de entrenador.</li>
-            <li>Solo ve partidos de liga (Premier y Championship): no FA Cup, League Cup ni competiciones europeas. El descanso y la congestión que muestra la web son solo de liga.</li>
+            <li>Solo ve partidos de liga (primera y segunda división): no copas nacionales ni competiciones europeas. El descanso y la congestión que muestra la web son solo de liga.</li>
             <li>La ventaja de local cambió con el tiempo (se achicó con los estadios vacíos de 2020-21); el modelo la estima con los datos hasta cada temporada.</li>
             <li>Los datos se actualizan una vez por semana; los partidos de la fecha se publican pocos días antes.</li>
             <li>Es un proyecto educativo de portfolio: <strong>no es una recomendación de apuestas</strong>.</li>

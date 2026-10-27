@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { OutcomeBar } from '../components/OutcomeBar'
 import { ScoreHeatmap } from '../components/ScoreHeatmap'
-import { formatDate, num, pct, useData } from '../lib/data'
+import { formatDate, num, pct } from '../lib/data'
+import { LeagueSwitcher } from '../components/LeagueSwitcher'
+import { useLeague, useLeagueData } from '../lib/league'
 import { forecast } from '../lib/model'
 import type { ReviewMatch, ReviewSeasonFile, ReviewSeasonSummary } from '../lib/types'
 
@@ -17,12 +19,19 @@ function gridFrom(lam: number, mu: number) {
 
 type Sort = 'fecha' | 'sorpresas' | 'aciertos'
 
+/** El filtro por equipo y el orden son del estado de la liga: se reinician al cambiar de liga. */
 export function Review() {
+  const { league } = useLeague()
+  return <ReviewLiga key={league.slug} />
+}
+
+function ReviewLiga() {
   const [params, setParams] = useSearchParams()
-  const index = useData<ReviewSeasonSummary[]>('review/index.json')
+  const index = useLeagueData<ReviewSeasonSummary[]>('review/index.json')
   const seasons = index.data ?? []
-  const season = params.get('season') || seasons[seasons.length - 2]?.season || ''
-  const file = useData<ReviewSeasonFile>(season ? `review/${season}.json` : null)
+  const fromUrl = params.get('season')
+  const season = (fromUrl && seasons.some((x) => x.season === fromUrl) ? fromUrl : '') || seasons[seasons.length - 2]?.season || ''
+  const file = useLeagueData<ReviewSeasonFile>(season ? `review/${season}.json` : null)
   const [sort, setSort] = useState<Sort>('fecha')
   const [team, setTeam] = useState('')
   const selectedId = params.get('match')
@@ -56,6 +65,7 @@ export function Review() {
           Cada predicción se hizo como si fuera antes del partido: el modelo se reentrena al comienzo de cada temporada
           solo con las anteriores, y el Elo usa solo partidos previos. Sin maquillaje: acá están también los errores.
         </p>
+        <LeagueSwitcher />
       </div>
 
       <div className="grid grid-main" style={{ alignItems: 'start' }}>

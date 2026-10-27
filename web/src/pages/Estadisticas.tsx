@@ -1,7 +1,9 @@
 import { useState, type ReactNode } from 'react'
 import { SortableTable, type Column } from '../components/SortableTable'
 import { TeamName } from '../components/TeamName'
-import { num, pct, useData } from '../lib/data'
+import { LeagueSwitcher } from '../components/LeagueSwitcher'
+import { num, pct } from '../lib/data'
+import { useLeague, useLeagueData } from '../lib/league'
 import { useTeamIndex } from '../lib/teams'
 import type { LeagueSummary, RefereeStats, StatsFile, StatsIndex, TeamIndexItem, TeamStats } from '../lib/types'
 import './estadisticas.css'
@@ -69,11 +71,18 @@ function LeagueNumbers({ l, r, seasons }: { l: LeagueSummary; r: LeagueSummary; 
   )
 }
 
+/** La temporada elegida es del estado de la liga: se reinicia al cambiar de liga. */
 export function Estadisticas() {
-  const index = useData<StatsIndex>('stats/index.json')
+  const { league } = useLeague()
+  return <EstadisticasLiga key={league.slug} />
+}
+
+function EstadisticasLiga() {
+  const { league } = useLeague()
+  const index = useLeagueData<StatsIndex>('stats/index.json')
   const [chosen, setChosen] = useState<string | null>(null)
   const season = chosen ?? index.data?.find((s) => s.current)?.season ?? index.data?.[0]?.season ?? null
-  const { data: s, error, loading } = useData<StatsFile>(season ? `stats/${season}.json` : null)
+  const { data: s, error, loading } = useLeagueData<StatsFile>(season ? `stats/${season}.json` : null)
   const { byTeam } = useTeamIndex()
 
   if (index.error) return <div className="container section"><p className="callout">Todavía no hay estadísticas publicadas.</p></div>
@@ -88,13 +97,14 @@ export function Estadisticas() {
   return (
     <div className="container section">
       <div className="section-head">
-        <span className="eyebrow">Premier League{s ? ` · temporada ${s.season}` : ''}</span>
+        <span className="eyebrow">{league.competition}{s ? ` · temporada ${s.season}` : ''}</span>
         <h1>Estadísticas</h1>
         <p className="lede">
           Los números que se miran antes de un partido: cómo rinde cada equipo de local y de visitante, en cada tiempo,
           cuando va ganando o perdiendo, y señales de si su campaña se sostiene con su juego o con una racha. Tocá el
           encabezado de una columna para ordenar.
         </p>
+        <LeagueSwitcher />
       </div>
 
       <div className="stats-toolbar">

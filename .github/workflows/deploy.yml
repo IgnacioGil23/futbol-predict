@@ -44,6 +44,8 @@ jobs:
           python -m src.data.load
           python -m src.features.build
           python -m src.serving.build_state
+          python -m src.data.leagues
+          python -m src.serving.league_state
           python -m src.export.site --out web/public/data
           if [ -f /tmp/monitoring.json ]; then cp /tmp/monitoring.json web/public/data/monitoring.json; echo "Reporte de monitoreo incluido."
           else rm -f web/public/data/monitoring.json; echo "Todavía no hay reporte de monitoreo."; fi

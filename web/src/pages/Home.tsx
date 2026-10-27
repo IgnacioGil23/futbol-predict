@@ -6,7 +6,9 @@ import { OutcomeBar } from '../components/OutcomeBar'
 import { Pitch } from '../components/Pitch'
 import { TeamBadge } from '../components/TeamBadge'
 import { TeamName } from '../components/TeamName'
-import { formatDate, num, pct, pct1, useData } from '../lib/data'
+import { formatDate, num, pct, pct1 } from '../lib/data'
+import { LeagueSwitcher } from '../components/LeagueSwitcher'
+import { useLeague, useLeagueData } from '../lib/league'
 import { forecast, topScores } from '../lib/model'
 import { useTeamIndex } from '../lib/teams'
 import type {
@@ -143,9 +145,9 @@ function Race({ title, eyebrow, rows, color, teams, foot, to }: {
 
 /** "Datos de la temporada": tres datos curiosos de la temporada en curso, tomados de Estadísticas. */
 function SeasonData({ teams }: { teams: Map<string, TeamIndexItem> }) {
-  const index = useData<StatsIndex>('stats/index.json')
+  const index = useLeagueData<StatsIndex>('stats/index.json')
   const current = index.data?.find((x) => x.current)?.season ?? index.data?.[0]?.season
-  const { data: s } = useData<StatsFile>(current ? `stats/${current}.json` : null)
+  const { data: s } = useLeagueData<StatsFile>(current ? `stats/${current}.json` : null)
   if (!s) return null
   const link = (team: string) => {
     const t = teams.get(team)
@@ -203,12 +205,13 @@ function SeasonData({ teams }: { teams: Map<string, TeamIndexItem> }) {
 }
 
 export function Home() {
-  const meta = useData<MetaFile>('meta.json')
-  const state = useData<StateFile>('state.json')
-  const model = useData<ModelFile>('model.json')
-  const upcoming = useData<UpcomingFile>('upcoming.json')
-  const season = useData<SeasonFile>('season.json')
-  const review = useData<ReviewSeasonSummary[]>('review/index.json')
+  const { league } = useLeague()
+  const meta = useLeagueData<MetaFile>('meta.json')
+  const state = useLeagueData<StateFile>('state.json')
+  const model = useLeagueData<ModelFile>('model.json')
+  const upcoming = useLeagueData<UpcomingFile>('upcoming.json')
+  const season = useLeagueData<SeasonFile>('season.json')
+  const review = useLeagueData<ReviewSeasonSummary[]>('review/index.json')
   const { byTeam } = useTeamIndex()
 
   const teams = [...(state.data?.teams ?? [])].sort((a, b) => b.elo - a.elo)
@@ -252,12 +255,12 @@ export function Home() {
         <div className="container hero-grid">
           <div className="hero-copy">
             <span className="pill pill-accent reveal"><span className="live-dot" />
-              {state.data ? `Temporada ${state.data.season} · datos al ${formatDate(meta.data?.last_match_in_data ?? state.data.as_of)}` : 'Premier League'}
+              {state.data ? `Temporada ${state.data.season} · datos al ${formatDate(meta.data?.last_match_in_data ?? state.data.as_of)}` : league.competition}
             </span>
             <h1 className="reveal" style={delay(1)}>Cada marcador,<br /><span className="grad-text">con su probabilidad.</span></h1>
             <p className="lede reveal" style={delay(2)}>
-              Un modelo de Machine Learning calcula la probabilidad de cada resultado de la Premier League. Lo comparamos
-              en vivo con el mercado de apuestas.
+              Un modelo de Machine Learning calcula la probabilidad de cada resultado de la Premier League, LaLiga, la Serie A, la Bundesliga y la Ligue 1.
+              Lo comparamos en vivo con el mercado de apuestas.
             </p>
             <div className="hero-ctas reveal" style={delay(3)}>
               <Link className="btn btn-primary" to="/partidos">Ver la próxima jornada <span className="arrow"><Icon name="arrow" size={16} /></span></Link>
@@ -314,10 +317,11 @@ export function Home() {
       )}
 
       <section className="container home-section">
+        <div style={{ marginBottom: 16 }}><LeagueSwitcher /></div>
         <div className="section-title">
           <div>
             <span className="eyebrow">{sim ? `${num(sim.n_sims, 0)} simulaciones de la temporada` : 'La temporada'}</span>
-            <h2>Cómo viene la Premier</h2>
+            <h2>Cómo viene {league.competition}</h2>
           </div>
           <Link className="btn" to="/temporada">Todas las posiciones <span className="arrow"><Icon name="arrow" size={16} /></span></Link>
         </div>
@@ -329,7 +333,7 @@ export function Home() {
                     foot="Probabilidad de terminar primero" />
               <Race eyebrow="Descenso" title="Pelea por no descender" color="var(--away)" teams={byTeam} to="/temporada"
                     rows={releg.map((t) => ({ team: t.team, name: t.name, value: t.p_relegation, label: probLabel(t.p_relegation), width: t.p_relegation / releg[0].p_relegation }))}
-                    foot="Probabilidad de terminar 18º a 20º" />
+                    foot={`Probabilidad de terminar ${sim.teams.length - (sim.zones?.relegation ?? 3) + 1}º a ${sim.teams.length}º`} />
             </>
           ) : (
             <><div className="skeleton" style={{ minHeight: 320 }} /><div className="skeleton" style={{ minHeight: 320 }} /></>
@@ -354,7 +358,7 @@ export function Home() {
         </div>
         <div className="steps">
           {[
-            { n: '01', t: 'Un Elo que aprende', d: 'Después de cada partido de Premier y Championship, el rating de cada equipo se acerca a lo que el mercado esperaba de él antes de jugarlo.' },
+            { n: '01', t: 'Un Elo que aprende', d: 'Después de cada partido de primera y segunda división, el rating de cada equipo se acerca a lo que el mercado esperaba de él antes de jugarlo.' },
             { n: '02', t: 'Goles esperados', d: 'Dos regresiones de Poisson convierten la diferencia de Elo en los goles esperados del local y del visitante.' },
             { n: '03', t: 'Cada marcador', d: 'Con esos goles se calcula la probabilidad de cada resultado exacto; sumando celdas, la de victoria, empate o derrota.' },
           ].map((s) => (

@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
-import { useData } from './data'
+import { useLeagueData } from './league'
 import type { TeamIndexItem } from './types'
 
-/** Índice de clubes (escudo, abreviatura, estadio) por nombre canónico y por slug. */
+/** Índice de clubes de la liga elegida (escudo, abreviatura, estadio) por nombre canónico y por slug. */
 export function useTeamIndex() {
-  const index = useData<TeamIndexItem[]>('teams.json')
+  const index = useLeagueData<TeamIndexItem[]>('teams.json')
   return useMemo(() => {
     const byTeam = new Map<string, TeamIndexItem>()
     const bySlug = new Map<string, TeamIndexItem>()

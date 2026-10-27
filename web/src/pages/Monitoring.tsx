@@ -2,7 +2,9 @@ import { scaleLinear } from 'd3-scale'
 import { line } from 'd3-shape'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { formatDate, num, pct, REPO, useData } from '../lib/data'
+import { formatDate, num, pct, REPO } from '../lib/data'
+import { LeagueSwitcher } from '../components/LeagueSwitcher'
+import { useLeague, useLeagueData } from '../lib/league'
 import type { MonitoringIndicator, MonitoringReport, MonitoringStatus } from '../lib/types'
 import { useWidth } from '../lib/useWidth'
 import './monitoring.css'
@@ -101,13 +103,19 @@ function GapChart({ report }: { report: MonitoringReport }) {
 }
 
 export function Monitoring() {
-  const { data: r, error, loading } = useData<MonitoringReport>('monitoring.json')
+  const { league } = useLeague()
+  const { data: r, error, loading } = useLeagueData<MonitoringReport>('monitoring.json')
   if (loading) return <div className="container section"><div className="skeleton" style={{ minHeight: 400 }} /></div>
   if (error || !r) {
     return (
       <div className="container section">
         <h1>Monitoreo del modelo</h1>
-        <p className="callout" style={{ marginTop: 16 }}>Todavía no hay un reporte de monitoreo publicado.</p>
+        <div style={{ marginTop: 16 }}><LeagueSwitcher /></div>
+        <p className="callout" style={{ marginTop: 16 }}>
+          {league.path
+            ? `Todavía no hay registro en vivo de ${league.competition}: las predicciones se empiezan a registrar antes de cada partido desde ahora y la primera evaluación llega con media temporada.`
+            : 'Todavía no hay un reporte de monitoreo publicado.'}
+        </p>
       </div>
     )
   }
@@ -123,6 +131,7 @@ export function Monitoring() {
           (<a href={`${REPO}/commits/monitoring`} target="_blank" rel="noreferrer">historial de cambios</a>). Después del partido se compara
           con el resultado y con el mercado de apuestas. Así se ve si el modelo se degrada con el tiempo.
         </p>
+        <LeagueSwitcher />
       </div>
 
       <div className={`card status-card status-${r.status}`}>

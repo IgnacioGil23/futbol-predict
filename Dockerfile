@@ -11,7 +11,9 @@ COPY src/ src/
 COPY configs/ configs/
 RUN python -m src.data.download \
  && python -m src.data.load \
- && python -m src.serving.build_state
+ && python -m src.serving.build_state \
+ && python -m src.data.leagues \
+ && python -m src.serving.league_state
 
 # ---------- Etapa 2: runtime ------------------------------------------------
 FROM python:3.11-slim
@@ -23,7 +25,9 @@ COPY requirements-api.txt .
 RUN pip install --no-cache-dir -r requirements-api.txt
 COPY src/ src/
 COPY models/production/model.json models/production/model.json
+COPY models/leagues/ models/leagues/
 COPY --from=data /app/data/processed/serving_matches.csv.gz data/processed/serving_matches.csv.gz
+COPY --from=data /app/data/processed/leagues/*_serving_matches.csv.gz data/processed/leagues/
 USER app
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \

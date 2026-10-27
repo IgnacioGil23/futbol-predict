@@ -44,7 +44,7 @@ export interface Stadium {
 }
 export interface TeamIndexItem {
   team: string; name: string; slug: string; badge: string | null; short: string; stadium: Stadium | null
-  premier_seasons: number; last_premier_season: string
+  top_seasons: number; last_top_season: string
 }
 export interface TeamSeason {
   season: string; played: number; points: number; position: number
@@ -71,6 +71,7 @@ export interface SeasonEvaluation {
 export interface SeasonFile {
   as_of: string; season: string; n_sims: number; remaining_matches: number; model_version: string
   teams: SeasonTeam[]; evaluation: SeasonEvaluation | null
+  zones?: { relegation: number; playoff: number | null; head_to_head: boolean }
 }
 
 export interface Probabilities { home: number; draw: number; away: number }
@@ -113,6 +114,7 @@ export interface MetaFile {
   /** Resumen de las predicciones fuera de muestra (sección Revisión). */
   review?: { matches: number; first_season: string; last_season: string; max_top_score: number }
   model: ModelMeta
+  league?: { code: string; competition: string; country: string; second: string }
   sources: { name: string; url: string; use: string }[]
 }
 

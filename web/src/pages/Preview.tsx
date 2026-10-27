@@ -3,7 +3,9 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { Icon } from '../components/Icon'
 import { MatchAnalysis, type MatchView } from '../components/MatchAnalysis'
 import { TeamBadge } from '../components/TeamBadge'
-import { API_URL, fetchPrediction, formatDate, loadData, twoSeasonsBefore, useData } from '../lib/data'
+import { API_URL, fetchPrediction, formatDate, loadData, twoSeasonsBefore } from '../lib/data'
+import { LeagueSwitcher } from '../components/LeagueSwitcher'
+import { leagueFile, useLeague, useLeagueData } from '../lib/league'
 import { forecast } from '../lib/model'
 import type { H2H, MetaFile, ModelFile, StateFile, TeamFile, TeamIndexItem, UpcomingFile } from '../lib/types'
 
@@ -15,10 +17,11 @@ interface View extends MatchView {
 
 export function Preview() {
   const [params, setParams] = useSearchParams()
-  const meta = useData<MetaFile>('meta.json')
-  const state = useData<StateFile>('state.json')
-  const index = useData<TeamIndexItem[]>('teams.json')
-  const upcoming = useData<UpcomingFile>('upcoming.json')
+  const { league } = useLeague()
+  const meta = useLeagueData<MetaFile>('meta.json')
+  const state = useLeagueData<StateFile>('state.json')
+  const index = useLeagueData<TeamIndexItem[]>('teams.json')
+  const upcoming = useLeagueData<UpcomingFile>('upcoming.json')
 
   const today = meta.data?.as_of ?? ''
   const date = params.get('date') || today
@@ -26,8 +29,10 @@ export function Preview() {
   const current = state.data?.teams ?? []
   const byElo = [...current].sort((a, b) => b.elo - a.elo)
   const firstUpcoming = upcoming.data?.matchdays[0]?.matches[0]
-  const home = params.get('home') || firstUpcoming?.home_team || byElo[0]?.team || ''
-  const away = params.get('away') || firstUpcoming?.away_team || byElo[1]?.team || ''
+  // Un equipo de la URL que no es de la liga elegida (al cambiar de liga) se ignora.
+  const inLeague = (t: string | null) => (t && index.data?.some((x) => x.team === t) ? t : null)
+  const home = inLeague(params.get('home')) || firstUpcoming?.home_team || byElo[0]?.team || ''
+  const away = inLeague(params.get('away')) || firstUpcoming?.away_team || byElo[1]?.team || ''
   const names = useMemo(() => new Map((index.data ?? []).map((t) => [t.team, t.name])), [index.data])
   const nameOf = (t: string) => names.get(t) ?? t
   const slugOf = (t: string) => index.data?.find((x) => x.team === t)?.slug
@@ -40,7 +45,7 @@ export function Preview() {
     : (index.data ?? []).map((t) => ({ team: t.team, name: t.name }))
 
   // Resultado del último cálculo, con la clave que lo produjo: 'cargando' se deriva comparando claves.
-  const key = `${home}|${away}|${date}`
+  const key = `${league.path}|${home}|${away}|${date}`
   const [result, setResult] = useState<{ key: string; view: View | null; error: string | null } | null>(null)
 
   useEffect(() => {
@@ -48,18 +53,19 @@ export function Preview() {
     if (home === away) return
     let alive = true
     const ctrl = new AbortController()
-    const k = `${home}|${away}|${date}`
+    const k = `${league.path}|${home}|${away}|${date}`
     const run = async (): Promise<View> => {
       if (isToday) {
         const [model, h2hAll, up] = await Promise.all([
-          loadData<ModelFile>('model.json'), loadData<Record<string, H2H>>('h2h.json'), loadData<UpcomingFile>('upcoming.json'),
+          loadData<ModelFile>(leagueFile(league, 'model.json')), loadData<Record<string, H2H>>(leagueFile(league, 'h2h.json')),
+          loadData<UpcomingFile>(leagueFile(league, 'upcoming.json')),
         ])
         const hs = state.data!.teams.find((t) => t.team === home)
         const as = state.data!.teams.find((t) => t.team === away)
-        if (!hs || !as) throw new Error('Para la fecha de hoy solo están disponibles los equipos de la Premier de esta temporada.')
+        if (!hs || !as) throw new Error(`Para la fecha de hoy solo están disponibles los equipos de ${league.competition} de esta temporada.`)
         const f = forecast(model.params, hs.elo, as.elo, model.max_goals)
         const [hf, af] = await Promise.all([
-          loadData<TeamFile>(`teams/${hs.slug}.json`), loadData<TeamFile>(`teams/${as.slug}.json`),
+          loadData<TeamFile>(leagueFile(league, `teams/${hs.slug}.json`)), loadData<TeamFile>(leagueFile(league, `teams/${as.slug}.json`)),
         ])
         const since = twoSeasonsBefore(today)
         // Si el cruce está en las próximas jornadas, se muestra el mercado (cuando ya hay cuotas publicadas).
@@ -73,7 +79,7 @@ export function Preview() {
           warnings: [],
         }
       }
-      const r = await fetchPrediction(home, away, date, ctrl.signal)
+      const r = await fetchPrediction(home, away, date, league.code, ctrl.signal)
       return {
         date, mode: 'historico', elo: r.elo, lam: r.expected_goals.home, mu: r.expected_goals.away,
         probabilities: r.probabilities, grid: r.score_grid, market: null,
@@ -85,7 +91,7 @@ export function Preview() {
     run().then((v) => alive && setResult({ key: k, view: v, error: null }))
       .catch((e: Error) => { if (alive && e.name !== 'AbortError') setResult({ key: k, view: null, error: e.message }) })
     return () => { alive = false; ctrl.abort() }
-  }, [home, away, date, isToday, today, state.data])
+  }, [home, away, date, isToday, today, state.data, league])
 
   const update = (patch: Record<string, string>) => {
     const next = new URLSearchParams(params)
@@ -121,6 +127,7 @@ export function Preview() {
           Elegí dos equipos y una fecha. El modelo convierte la diferencia de Elo en goles esperados y, de ahí, en la
           probabilidad de cada marcador. ¿Querés ver la próxima jornada completa? <Link to="/partidos">Próximos partidos →</Link>
         </p>
+        <LeagueSwitcher />
       </div>
 
       <div className="card preview-controls">

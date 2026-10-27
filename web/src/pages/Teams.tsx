@@ -6,7 +6,9 @@ import { Icon } from '../components/Icon'
 import { FormStrip } from '../components/MatchContext'
 import { TeamBadge } from '../components/TeamBadge'
 import { TeamPreviewPopover, type TeamSeasonSummary } from '../components/TeamPreview'
-import { formatDate, num, pct, pct1, useData } from '../lib/data'
+import { formatDate, num, pct, pct1 } from '../lib/data'
+import { LeagueSwitcher } from '../components/LeagueSwitcher'
+import { useLeague, useLeagueData } from '../lib/league'
 import { useTeamIndex } from '../lib/teams'
 import type { SeasonFile, StateFile, StatsFile, StatsIndex, TeamFile, TeamSeason } from '../lib/types'
 import './teams.css'
@@ -48,10 +50,17 @@ function ClubCard({ s, i, onOpen, onLeave, active }: {
   )
 }
 
+/** La búsqueda y la vista previa abierta son del estado de la liga: se reinician al cambiar de liga. */
 export function Teams() {
+  const { league } = useLeague()
+  return <TeamsLiga key={league.slug} />
+}
+
+function TeamsLiga() {
+  const { league } = useLeague()
   const { list, byTeam } = useTeamIndex()
-  const state = useData<StateFile>('state.json')
-  const season = useData<SeasonFile>('season.json')
+  const state = useLeagueData<StateFile>('state.json')
+  const season = useLeagueData<SeasonFile>('season.json')
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState<{ s: TeamSeasonSummary; rect: DOMRect; modal: boolean } | null>(null)
   const timer = useRef<number | undefined>(undefined)
@@ -99,6 +108,7 @@ export function Teams() {
           Pasá el mouse por un club para ver su temporada sobre la foto de su estadio; hacé clic para abrir la ficha
           completa con la evolución del Elo y el rendimiento frente a la liga, temporada por temporada.
         </p>
+        <LeagueSwitcher />
         <div className="field search teams-search">
           <label htmlFor="q" className="sr-only">Buscar un equipo</label>
           <Icon name="search" size={17} />
@@ -112,8 +122,8 @@ export function Teams() {
         <section className="teams-block">
           <div className="section-title">
             <div>
-              <span className="eyebrow">Premier League {state.data?.season}</span>
-              <h2>Los 20 de esta temporada</h2>
+              <span className="eyebrow">{league.competition} {state.data?.season}</span>
+              <h2>Los {state.data?.teams.length} de esta temporada</h2>
             </div>
             <span className="small muted hover-hint"><Icon name="info" size={15} /> Ordenados por su posición en la tabla</span>
           </div>
@@ -129,14 +139,14 @@ export function Teams() {
         <section className="teams-block">
           {/* Con una búsqueda activa se abre: si no, un club histórico que coincide quedaría escondido. */}
           <details className="archive" open={query.trim() !== '' || undefined}>
-          <summary>Otros clubes en la Premier desde 2000-01 ({others.length})</summary>
+          <summary>Otros clubes en {league.competition} desde 2000-01 ({others.length})</summary>
           <div className="club-grid club-grid-sm">
             {others.map((t) => (
               <Link key={t.slug} to={`/equipos/${t.slug}`} className="card card-link club-card club-card-sm">
                 <TeamBadge badge={t.badge} short={t.short} name={t.name} size={34} decorative />
                 <span className="club-main">
                   <strong>{t.name}</strong>
-                  <span className="small muted">{t.premier_seasons} temporadas · última {t.last_premier_season}</span>
+                  <span className="small muted">{t.top_seasons} temporadas · última {t.last_top_season}</span>
                 </span>
               </Link>
             ))}
@@ -171,9 +181,9 @@ const ratio = (v: number | null, digits = 2) => (v === null ? '—' : num(v, dig
 
 /** Detalle de la temporada en curso (local/visitante, por tiempos, entretiempo) según Estadísticas. */
 function SeasonDetail({ team }: { team: string }) {
-  const index = useData<StatsIndex>('stats/index.json')
+  const index = useLeagueData<StatsIndex>('stats/index.json')
   const current = index.data?.find((x) => x.current)?.season ?? index.data?.[0]?.season
-  const { data: s } = useData<StatsFile>(current ? `stats/${current}.json` : null)
+  const { data: s } = useLeagueData<StatsFile>(current ? `stats/${current}.json` : null)
   const t = s?.teams.find((x) => x.team === team)
   if (!s || !t) return null
   const rows = [['Local', t.home], ['Visitante', t.away]] as const
@@ -209,10 +219,11 @@ function SeasonDetail({ team }: { team: string }) {
 }
 
 export function TeamDetail() {
+  const { league } = useLeague()
   const { slug } = useParams()
-  const team = useData<TeamFile>(slug ? `teams/${slug}.json` : null)
-  const state = useData<StateFile>('state.json')
-  const season = useData<SeasonFile>('season.json')
+  const team = useLeagueData<TeamFile>(slug ? `teams/${slug}.json` : null)
+  const state = useLeagueData<StateFile>('state.json')
+  const season = useLeagueData<SeasonFile>('season.json')
   const [range, setRange] = useState<'3' | 'all'>('3')
   const [imgLoaded, setImgLoaded] = useState(false)
   const t = team.data
@@ -234,6 +245,7 @@ export function TeamDetail() {
   const latest: TeamSeason | undefined = seasons[0]
   const latestIsCurrent = latest && state.data && latest.season === state.data.season
   const table = current?.table
+  const nTeams = state.data?.teams.length ?? 20
 
   return (
     <>
@@ -249,7 +261,7 @@ export function TeamDetail() {
             <div>
               {t.stadium
                 ? <span className="team-hero-stadium"><Icon name="pin" size={14} /> {t.stadium.name}</span>
-                : <span className="eyebrow">{t.seasons.length} temporadas en Premier desde 2000-01</span>}
+                : <span className="eyebrow">{t.seasons.length} temporadas en {league.competition} desde 2000-01</span>}
               <h1>{t.name}</h1>
             </div>
           </div>
@@ -280,7 +292,7 @@ export function TeamDetail() {
       <div className="container section team-body">
         {latest && (
           <div className="card" style={{ marginBottom: 18 }}>
-            <h3>{latestIsCurrent ? `Esta temporada (${latest.season}), hasta ahora` : `Su última temporada en Premier (${latest.season})`}</h3>
+            <h3>{latestIsCurrent ? `Esta temporada (${latest.season}), hasta ahora` : `Su última temporada en ${league.competition} (${latest.season})`}</h3>
             <p className="card-sub">
               Comparado con la media de la liga en esa temporada ({num(latest.league_goals_per_team_game)} goles por equipo y partido).
               {latestIsCurrent && latest.played < 10 && ` Ojo: con ${latest.played} partidos jugados, estos porcentajes todavía se mueven mucho.`}
@@ -310,15 +322,15 @@ export function TeamDetail() {
 
         <div className="grid grid-main">
           <div className="card">
-            <h3>Temporadas en Premier League</h3>
+            <h3>Temporadas en {league.competition}</h3>
             <div className="table-wrap">
               <table className="table">
                 <thead><tr><th>Temporada</th><th className="num">Pos.</th><th className="num">Pts</th><th className="num">GF/PJ</th><th className="num">GC/PJ</th><th className="num">Ataque vs liga</th><th className="num">Defensa vs liga</th></tr></thead>
                 <tbody>
                   {seasons.map((s) => (
                     <tr key={s.season}>
-                      <td>{s.season}{s.played < 38 ? <span className="muted"> ({s.played} PJ)</span> : ''}</td>
-                      <td className="num"><span className={`pos-badge ${s.position === 1 ? 'gold' : s.position <= 4 ? 'top' : s.position >= 18 ? 'rel' : ''}`}>{s.position}º</span></td>
+                      <td>{s.season}{s.played < 2 * (nTeams - 1) ? <span className="muted"> ({s.played} PJ)</span> : ''}</td>
+                      <td className="num"><span className={`pos-badge ${s.position === 1 ? 'gold' : s.position <= 4 ? 'top' : s.position > nTeams - league.relegation ? 'rel' : ''}`}>{s.position}º</span></td>
                       <td className="num">{s.points}</td>
                       <td className="num">{num(s.goals_for_per_game)}</td>
                       <td className="num">{num(s.goals_against_per_game)}</td>

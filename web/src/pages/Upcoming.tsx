@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { MatchAnalysis, type MatchView } from '../components/MatchAnalysis'
 import { TeamBadge } from '../components/TeamBadge'
-import { formatDate, loadData, num, pct, twoSeasonsBefore, useData } from '../lib/data'
+import { formatDate, loadData, num, pct, twoSeasonsBefore } from '../lib/data'
+import { LeagueSwitcher } from '../components/LeagueSwitcher'
+import { leagueFile, useLeague, useLeagueData } from '../lib/league'
 import { useTeamIndex } from '../lib/teams'
 import type { MetaFile, TeamFile, TeamIndexItem, UpcomingFile, UpcomingMatch } from '../lib/types'
 import './upcoming.css'
@@ -33,15 +35,16 @@ function MiniBar({ m }: { m: UpcomingMatch }) {
 
 /** Análisis completo de un partido de la jornada (carga la evolución del Elo al abrirse). */
 function UpcomingDetail({ m, today }: { m: UpcomingMatch; today: string }) {
+  const { league } = useLeague()
   const [history, setHistory] = useState<MatchView['eloHistory']>(null)
   useEffect(() => {
     let alive = true
     const since = twoSeasonsBefore(today)
-    Promise.all([loadData<TeamFile>(`teams/${m.home_slug}.json`), loadData<TeamFile>(`teams/${m.away_slug}.json`)])
+    Promise.all([loadData<TeamFile>(leagueFile(league, `teams/${m.home_slug}.json`)), loadData<TeamFile>(leagueFile(league, `teams/${m.away_slug}.json`))])
       .then(([h, a]) => alive && setHistory({ home: h.elo.filter((p) => p.date >= since), away: a.elo.filter((p) => p.date >= since) }))
       .catch(() => alive && setHistory({ home: [], away: [] }))
     return () => { alive = false }
-  }, [m.home_slug, m.away_slug, today])
+  }, [m.home_slug, m.away_slug, today, league])
   const view: MatchView = {
     elo: m.elo, lam: m.expected_goals.home, mu: m.expected_goals.away, probabilities: m.probabilities,
     grid: m.score_grid, market: m.market,
@@ -59,8 +62,8 @@ function UpcomingDetail({ m, today }: { m: UpcomingMatch; today: string }) {
 
 export function Upcoming() {
   const [params, setParams] = useSearchParams()
-  const data = useData<UpcomingFile>('upcoming.json')
-  const meta = useData<MetaFile>('meta.json')
+  const data = useLeagueData<UpcomingFile>('upcoming.json')
+  const meta = useLeagueData<MetaFile>('meta.json')
   const { byTeam } = useTeamIndex()
   const badge = (t: TeamIndexItem | undefined, size: number) =>
     t ? <TeamBadge badge={t.badge} short={t.short} name={t.name} size={size} decorative /> : null
@@ -106,6 +109,7 @@ export function Upcoming() {
             partido para ver el análisis completo: grilla de marcadores, Elo, forma, cara a cara y descanso.
           </p>
         )}
+        <LeagueSwitcher />
         <Link className="btn" style={{ marginTop: 16 }} to="/partidos/previa">Armar una previa</Link>
       </div>
 
@@ -188,7 +192,7 @@ export function Upcoming() {
           </span>
           <span>
             Predicción con el estado de los equipos a hoy: si antes del partido se juegan otros (por ejemplo, entre semana),
-            el Elo se actualiza y la predicción puede cambiar. Calendario: <a href="https://github.com/openfootball/england" target="_blank" rel="noreferrer">openfootball</a> (dominio público).
+            el Elo se actualiza y la predicción puede cambiar. Calendario: <a href={data.data?.sources.schedule ?? 'https://github.com/openfootball'} target="_blank" rel="noreferrer">openfootball (dominio público)</a>.
           </span>
         </div>
       )}

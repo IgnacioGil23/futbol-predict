@@ -1,6 +1,7 @@
 import { HashRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Icon } from './components/Icon'
 import { Layout } from './components/Layout'
+import { LeagueProvider } from './components/LeagueProvider'
 import { Estadisticas } from './pages/Estadisticas'
 import { Home } from './pages/Home'
 import { Method } from './pages/Method'
@@ -33,7 +34,7 @@ export default function App() {
   return (
     <HashRouter>
       <Routes>
-        <Route element={<Layout />}>
+        <Route element={<LeagueProvider><Layout /></LeagueProvider>}>
           <Route index element={<Home />} />
           <Route path="partidos" element={<Upcoming />} />
           <Route path="partidos/previa" element={<Preview />} />
