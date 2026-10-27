@@ -137,7 +137,7 @@ export function Review() {
                 <ScoreHeatmap grid={gridFrom(selected.expected_goals[0], selected.expected_goals[1])}
                               homeName={selected.home_name} awayName={selected.away_name} actual={selected.score} size={6} />
               </div>
-              <Link className="btn" style={{ marginTop: 12 }} to={`/previa?home=${encodeURIComponent(selected.home_team)}&away=${encodeURIComponent(selected.away_team)}`}>
+              <Link className="btn" style={{ marginTop: 12 }} to={`/partidos/previa?home=${encodeURIComponent(selected.home_team)}&away=${encodeURIComponent(selected.away_team)}`}>
                 Este cruce hoy →
               </Link>
             </>

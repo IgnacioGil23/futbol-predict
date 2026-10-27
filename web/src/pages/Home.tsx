@@ -98,7 +98,7 @@ function FixtureCard({ m, matchday, teams, i }: { m: UpcomingMatch; matchday: nu
   }
   return (
     <Link className="card card-link fixture reveal" style={delay(i)}
-          to={`/proximos?jornada=${matchday}&partido=${encodeURIComponent(`${m.home_team}|${m.away_team}`)}`}>
+          to={`/partidos?jornada=${matchday}&partido=${encodeURIComponent(`${m.home_team}|${m.away_team}`)}`}>
       <div className="fx-when small muted">{when(m.date, m.kickoff_ar)}</div>
       {row(m.home_team, m.home_name, p.home, 'var(--home)', fav === 'home')}
       {row(m.away_team, m.away_name, p.away, 'var(--away)', fav === 'away')}
@@ -161,7 +161,7 @@ export function Home() {
       probs: fixture.probabilities, market: fixture.market, lam: fixture.expected_goals.home, mu: fixture.expected_goals.away,
       elo: fixture.elo, scores: fixture.top_scores.slice(0, 3).map((s) => ({ home: s.home_goals, away: s.away_goals, p: s.probability })),
       label: `Partido destacado · jornada ${nextMd.matchday}`, date: fixture.date, kickoff: fixture.kickoff_ar,
-      href: `/proximos?jornada=${nextMd.matchday}&partido=${encodeURIComponent(`${fixture.home_team}|${fixture.away_team}`)}`,
+      href: `/partidos?jornada=${nextMd.matchday}&partido=${encodeURIComponent(`${fixture.home_team}|${fixture.away_team}`)}`,
     }
   } else if (teams.length >= 2 && model.data) {
     const f = forecast(model.data.params, teams[0].elo, teams[1].elo)
@@ -169,7 +169,7 @@ export function Home() {
       home: teams[0].team, away: teams[1].team, homeName: teams[0].name, awayName: teams[1].name,
       probs: f.probabilities, market: null, lam: f.lam, mu: f.mu, elo: { home: teams[0].elo, away: teams[1].elo },
       scores: topScores(f.grid, 3), label: 'Si se enfrentaran hoy', date: null, kickoff: null,
-      href: `/previa?home=${encodeURIComponent(teams[0].team)}&away=${encodeURIComponent(teams[1].team)}`,
+      href: `/partidos/previa?home=${encodeURIComponent(teams[0].team)}&away=${encodeURIComponent(teams[1].team)}`,
     }
   }
 
@@ -200,8 +200,8 @@ export function Home() {
               mercado de apuestas.
             </p>
             <div className="hero-ctas reveal" style={delay(3)}>
-              <Link className="btn btn-primary" to="/proximos">Ver la próxima jornada <span className="arrow"><Icon name="arrow" size={16} /></span></Link>
-              <Link className="btn" to="/previa">Armar una previa</Link>
+              <Link className="btn btn-primary" to="/partidos">Ver la próxima jornada <span className="arrow"><Icon name="arrow" size={16} /></span></Link>
+              <Link className="btn" to="/partidos/previa">Armar una previa</Link>
             </div>
             {tm && meta.data && (
               <dl className="hero-stats reveal" style={delay(4)}>
@@ -237,7 +237,7 @@ export function Home() {
                 {formatDate(nextMd.to, { weekday: 'long', day: 'numeric', month: 'long' })} · horarios de Argentina
               </p>
             </div>
-            <Link className="btn" to="/proximos">La jornada completa <span className="arrow"><Icon name="arrow" size={16} /></span></Link>
+            <Link className="btn" to="/partidos">La jornada completa <span className="arrow"><Icon name="arrow" size={16} /></span></Link>
           </div>
           <div className="fixture-grid">
             {nextMd.matches.map((m, i) => <FixtureCard key={`${m.home_team}-${m.away_team}`} m={m} matchday={nextMd.matchday} teams={byTeam} i={i} />)}
@@ -248,7 +248,7 @@ export function Home() {
         <section className="container home-section">
           <p className="callout">
             No hay partidos pendientes publicados en el calendario. Mientras tanto, podés armar cualquier cruce en la{' '}
-            <Link to="/previa">previa</Link>.
+            <Link to="/partidos/previa">previa</Link>.
           </p>
         </section>
       )}

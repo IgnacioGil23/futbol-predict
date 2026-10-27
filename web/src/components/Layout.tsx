@@ -5,15 +5,27 @@ import type { MetaFile } from '../lib/types'
 import { BrandMark, Icon } from './Icon'
 import './layout.css'
 
-const LINKS = [
-  { to: '/proximos', label: 'Próximos' },
-  { to: '/previa', label: 'Previa' },
-  { to: '/temporada', label: 'Temporada' },
-  { to: '/equipos', label: 'Equipos' },
-  { to: '/revision', label: 'Revisión' },
-  { to: '/monitoreo', label: 'Monitoreo' },
-  { to: '/metodologia', label: 'Cómo funciona' },
+type NavItem = { to: string; label: string }
+const NAV: { label: string; to?: string; items?: NavItem[] }[] = [
+  { label: 'Partidos', to: '/partidos' },
+  { label: 'Liga', items: [
+    { to: '/temporada', label: 'Tabla y proyección' },
+    { to: '/estadisticas', label: 'Estadísticas' },
+    { to: '/equipos', label: 'Equipos' } ] },
+  { label: 'El modelo', items: [
+    { to: '/metodologia', label: 'Cómo funciona' },
+    { to: '/revision', label: 'Revisión' },
+    { to: '/monitoreo', label: 'Monitoreo' } ] },
 ]
+
+const FOOTER_LINKS: NavItem[] = [
+  { to: '/partidos', label: 'Partidos' },
+  { to: '/partidos/previa', label: 'Armar una previa' },
+  ...NAV.flatMap((g) => g.items ?? []),
+]
+
+const isIn = (pathname: string, to: string) => pathname === to || pathname.startsWith(`${to}/`)
+const groupActive = (pathname: string, items: NavItem[]) => items.some((i) => isIn(pathname, i.to))
 
 type Theme = 'light' | 'dark'
 
@@ -36,7 +48,7 @@ function useNavIndicator(pathname: string) {
     const nav = navRef.current
     if (!nav) return
     const measure = () => {
-      const active = nav.querySelector<HTMLElement>('a.active')
+      const active = nav.querySelector<HTMLElement>('.nav-top.active')
       setBox(active ? { left: active.offsetLeft, width: active.offsetWidth } : null)
     }
     measure()
@@ -54,8 +66,24 @@ export function Layout() {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { navRef, box } = useNavIndicator(pathname)
+  const [groupAt, setGroupAt] = useState<{ label: string; path: string } | null>(null)
+  const group = groupAt?.path === pathname ? groupAt.label : null
+  const setGroup = (label: string | null) => setGroupAt(label ? { label, path: pathname } : null)
 
   useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  useEffect(() => {
+    if (!group) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setGroupAt(null) }
+    const onDown = (e: MouseEvent) => {
+      if (!(e.target as Element).closest('.nav-group')) setGroupAt(null)
+    }
+    window.addEventListener('keydown', onKey)
+    document.addEventListener('mousedown', onDown)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.removeEventListener('mousedown', onDown)
+    }
+  }, [group])
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
     onScroll()
@@ -83,10 +111,32 @@ export function Layout() {
           </NavLink>
           <nav id="nav" ref={navRef} className={`nav ${open ? 'open' : ''}`} aria-label="Principal">
             {box && <span className="nav-indicator" style={{ transform: `translateX(${box.left}px)`, width: box.width }} aria-hidden="true" />}
-            {LINKS.map((l) => (
-              <NavLink key={l.to} to={l.to} onClick={() => setOpen(false)}
-                       className={({ isActive }) => (isActive ? 'active' : undefined)}>{l.label}</NavLink>
-            ))}
+            {NAV.map((g) => {
+              if (!g.items) {
+                return (
+                  <NavLink key={g.label} to={g.to!} onClick={() => setOpen(false)}
+                           className={() => `nav-top${isIn(pathname, g.to!) ? ' active' : ''}`}>{g.label}</NavLink>
+                )
+              }
+              const active = groupActive(pathname, g.items)
+              const expanded = group === g.label
+              return (
+                <div key={g.label} className={`nav-group ${expanded ? 'expanded' : ''}`}>
+                  <button type="button" className={`nav-top nav-group-btn${active ? ' active' : ''}`}
+                          aria-expanded={expanded} aria-haspopup="true"
+                          onClick={() => setGroup(expanded ? null : g.label)}>
+                    {g.label}<span className="nav-caret" aria-hidden="true" />
+                  </button>
+                  <div className="nav-group-label">{g.label}</div>
+                  <div className="nav-menu">
+                    {g.items.map((it) => (
+                      <NavLink key={it.to} to={it.to} onClick={() => { setOpen(false); setGroup(null) }}
+                               className={({ isActive }) => (isActive ? 'active' : undefined)}>{it.label}</NavLink>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
           </nav>
           <div className="topbar-actions">
             <button className="icon-btn" onClick={toggle} aria-label={isDark ? 'Usar modo claro' : 'Usar modo oscuro'} title="Cambiar tema">
@@ -119,7 +169,7 @@ export function Layout() {
             <div>
               <div className="footer-title">Explorar</div>
               <ul className="footer-links">
-                {LINKS.map((l) => <li key={l.to}><Link to={l.to}>{l.label}</Link></li>)}
+                {FOOTER_LINKS.map((l) => <li key={l.to}><Link to={l.to}>{l.label}</Link></li>)}
               </ul>
             </div>
             <div>

@@ -119,7 +119,7 @@ export function Preview() {
         </h1>
         <p className="lede">
           Elegí dos equipos y una fecha. El modelo convierte la diferencia de Elo en goles esperados y, de ahí, en la
-          probabilidad de cada marcador. ¿Querés ver la próxima jornada completa? <Link to="/proximos">Próximos partidos →</Link>
+          probabilidad de cada marcador. ¿Querés ver la próxima jornada completa? <Link to="/partidos">Próximos partidos →</Link>
         </p>
       </div>
 

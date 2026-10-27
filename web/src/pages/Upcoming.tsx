@@ -106,13 +106,14 @@ export function Upcoming() {
             partido para ver el análisis completo: grilla de marcadores, Elo, forma, cara a cara y descanso.
           </p>
         )}
+        <Link className="btn" style={{ marginTop: 16 }} to="/partidos/previa">Armar una previa</Link>
       </div>
 
       {data.loading && <div className="skeleton" style={{ minHeight: 420 }} />}
       {data.data && !matchdays.length && (
         <p className="callout">
           No hay partidos pendientes publicados en el calendario (fin de temporada o calendario todavía no disponible).
-          Mientras tanto podés armar cualquier cruce en la <Link to="/previa">Previa</Link>.
+          Mientras tanto podés armar cualquier cruce en la <Link to="/partidos/previa">Previa</Link>.
         </p>
       )}
 

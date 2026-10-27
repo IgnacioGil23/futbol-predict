@@ -52,6 +52,11 @@
 .nav a.active { color: var(--accent-ink); background: var(--grad-accent); }
 :root[data-theme='light'] .nav a.active { background: var(--accent); }
 .nav-indicator { display: none; }
+.nav-group { display: flex; flex-direction: column; gap: 2px; }
+.nav-group-btn { display: none; }
+.nav-group-label { padding: 12px 14px 4px; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 650; color: var(--muted); }
+.nav-menu { display: flex; flex-direction: column; gap: 2px; }
+.nav-menu a { padding-left: 22px; }
 .nav-scrim { position: fixed; inset: 0; z-index: 29; background: rgb(0 0 0 / 0.4); backdrop-filter: blur(2px); animation: rise-fade 0.2s ease both; }
 @keyframes rise-fade { from { opacity: 0; } }
 
@@ -64,9 +69,34 @@
     border-radius: 999px; box-shadow: none;
     opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition: none;
   }
-  .nav a { padding: 7px 13px; border-radius: 999px; font-size: 0.88rem; white-space: nowrap; }
+  .nav > a { padding: 7px 13px; border-radius: 999px; font-size: 0.88rem; white-space: nowrap; }
   .nav a:hover { background: transparent; }
-  .nav a.active, :root[data-theme='light'] .nav a.active { background: transparent; color: var(--accent-ink); }
+  .nav .nav-top.active, :root[data-theme='light'] .nav .nav-top.active { background: transparent; color: var(--accent-ink); }
+  .nav-group { position: relative; z-index: 1; }
+  .nav-group-label { display: none; }
+  .nav-group-btn {
+    position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 7px;
+    font: inherit; font-weight: 600; font-size: 0.88rem; white-space: nowrap; cursor: pointer;
+    padding: 7px 13px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-2);
+    transition: color 0.2s;
+  }
+  .nav-group-btn:hover { color: var(--ink); }
+  .nav-group-btn.active:hover { color: var(--accent-ink); }
+  .nav-caret {
+    width: 6px; height: 6px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor;
+    transform: translateY(-2px) rotate(45deg); transition: transform 0.25s var(--ease);
+  }
+  .nav-group.expanded .nav-caret { transform: translateY(1px) rotate(225deg); }
+  .nav-menu {
+    position: absolute; top: calc(100% + 10px); left: 0; min-width: 210px; padding: 6px; gap: 2px;
+    background: var(--surface); border: 1px solid var(--line-strong); border-radius: 16px; box-shadow: var(--shadow-lg);
+    opacity: 0; transform: translateY(-6px); pointer-events: none; visibility: hidden;
+    transition: opacity 0.2s var(--ease), transform 0.25s var(--ease), visibility 0s linear 0.25s;
+  }
+  .nav-group.expanded .nav-menu { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
+  .nav-menu a { padding: 9px 12px; border-radius: 10px; font-size: 0.88rem; }
+  .nav .nav-menu a:hover { background: var(--surface-2); color: var(--ink); }
+  .nav .nav-menu a.active, :root[data-theme='light'] .nav .nav-menu a.active { background: var(--surface-2); color: var(--accent); }
   .nav-indicator {
     display: block; position: absolute; left: 0; top: 4px; bottom: 4px; border-radius: 999px;
     background: var(--grad-accent); box-shadow: 0 6px 20px -8px var(--accent);
