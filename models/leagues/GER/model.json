@@ -1,0 +1,75 @@
+{
+  "params": {
+    "home_goals": {
+      "intercept": 0.473308800802,
+      "coef": 0.276833825005,
+      "feature_mean": -0.134212674619,
+      "feature_scale": 133.593977583018
+    },
+    "away_goals": {
+      "intercept": 0.236983662522,
+      "coef": -0.278241634701,
+      "feature_mean": -0.134212674619,
+      "feature_scale": 133.593977583018
+    }
+  },
+  "meta": {
+    "league": "GER",
+    "competition": "Bundesliga",
+    "model": "Poisson (goles del local y del visitante) sobre la diferencia del rating basado en cuotas (ELO-Odds)",
+    "features": [
+      "odds_elo_diff"
+    ],
+    "rating": "odds_elo",
+    "alpha": 0.0001,
+    "trained_on": {
+      "seasons": "2006-07 a 2025-26",
+      "matches": 6120
+    },
+    "trained_at": "2026-10-27T20:32:03",
+    "elo_params": {
+      "k0": 150,
+      "lam": 0.0,
+      "home_advantage": 57.7,
+      "season_regression": 0.1,
+      "initial_gap": 400,
+      "newcomer_offset": -50
+    },
+    "results_elo_params": {
+      "k0": 7.5,
+      "lam": 1.0,
+      "home_advantage": 59.4,
+      "season_regression": 0.05,
+      "initial_gap": 250,
+      "newcomer_offset": -50
+    },
+    "preregistration": "docs/preregistro_ligas.md",
+    "test_metrics": {
+      "seasons": "2023-24 a 2025-26",
+      "model": {
+        "log_loss": 0.976871341251792,
+        "rps": 0.19605772542044847,
+        "brier": 0.5797417076806962,
+        "accuracy": 0.5239651416122004,
+        "ece": 0.04129384763980115,
+        "n": 918
+      },
+      "bet365_pre_closing": {
+        "log_loss": 0.9613873530583112,
+        "rps": 0.19204877827954928,
+        "brier": 0.5703180619847026,
+        "accuracy": 0.5359477124183006,
+        "ece": 0.032866472421301356,
+        "n": 918
+      },
+      "pinnacle_closing": {
+        "log_loss": 0.9568921372625177,
+        "rps": 0.19156097777228737,
+        "brier": 0.5675085316033455,
+        "accuracy": 0.5519053876478318,
+        "ece": 0.03280291669820714,
+        "n": 761
+      }
+    }
+  }
+}
