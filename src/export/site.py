@@ -21,10 +21,12 @@ from scipy.stats import poisson
 
 from src.config import PREMIER_LEAGUE, TEST_SEASONS, season_label, season_start_year
 from src.data.fixtures import FIXTURES_URL, fetch_fixtures
+from src.data.load import MATCHES_PATH
 from src.data.schedule import SCHEDULE_URL, check_against_results, fetch_schedule
 from src.data.teams import display_name, slug
 from src.export.badges import badge
-from src.export.season import build_season
+from src.export.season import build_season, current_state
+from src.export.stats import build_stats, remaining_difficulty
 from src.export.stadiums import stadium
 from src.features.build import FEATURES_PATH
 from src.metrics import OUTCOMES, reliability_table, summarize
@@ -229,6 +231,48 @@ def export_upcoming(out: Path, store: MatchStore, predictor: EloPoissonPredictor
     return {"matchdays": len(matchdays), "matches": sum(len(m["matches"]) for m in matchdays)}
 
 
+def export_stats(out: Path, store: MatchStore, today: pd.Timestamp, rating: str) -> list[str]:
+    """Sección Estadísticas: temporada en curso y la anterior completa (stats/<temporada>.json + stats/index.json).
+
+    La dificultad del calendario usa el mismo rating que el resto del sitio (`rating`). Si el calendario o los fixtures
+    no se pueden descargar, esas partes quedan en null y el resto se exporta igual.
+    """
+    matches = pd.read_parquet(MATCHES_PATH)
+    played = matches[matches.home_goals.notna()]
+    current = season_start_year(today.date())
+    if not ((played.division == PREMIER_LEAGUE) & (played.season_start == current)).any():
+        current -= 1                                     # receso: la temporada nueva todavía no empezó
+    difficulty = referees_next = None
+    try:
+        state = current_state(store, fetch_schedule(current), today)
+        if state.fixtures:
+            ratings = {t: store.rating_as_of(t, today, rating) for t in state.teams}
+            if None in ratings.values():
+                logger.warning("Estadísticas sin dificultad del calendario: equipos sin rating %s",
+                               [t for t, r in ratings.items() if r is None])
+            else:
+                difficulty = remaining_difficulty(state.fixtures, ratings)
+    except requests.RequestException as err:
+        logger.warning("Estadísticas sin dificultad del calendario: %s", err)
+    try:
+        fixtures = fetch_fixtures()
+        if "Referee" in fixtures.columns:
+            refs = {f"{f.HomeTeam}|{f.AwayTeam}": str(f.Referee).strip() for f in fixtures.itertuples(index=False)
+                    if isinstance(f.Referee, str) and f.Referee.strip()}
+            referees_next = refs or None
+    except requests.RequestException as err:
+        logger.warning("Estadísticas sin árbitros de la próxima fecha: %s", err)
+
+    index = []
+    for season in (current, current - 1):
+        is_current = season == current
+        payload = build_stats(played, season, difficulty if is_current else None, referees_next if is_current else None)
+        write(out / "stats" / f"{payload['season']}.json", payload)
+        index.append({"season": payload["season"], "current": is_current})
+    write(out / "stats" / "index.json", index)
+    return [i["season"] for i in index]
+
+
 def export_review(out: Path, features: pd.DataFrame, current_season: int, rating: str) -> dict:
     """Predicciones fuera de muestra de cada partido desde 2005-06 (reentrenamiento anual)."""
     seasons = list(range(FIRST_REVIEW_SEASON, current_season + 1))
@@ -318,6 +362,7 @@ def main() -> None:
     teams = export_state(out, store, today, predictor.rating)
     export_teams(out, store, predictor.rating)
     upcoming = export_upcoming(out, store, predictor, today)
+    stats_seasons = export_stats(out, store, today, predictor.rating)
     review = export_review(out, features, season_start_year(today.date()), predictor.rating)
     # La simulación de la temporada sigue con el modelo de Elo de resultados (docs/preregistro_temporada.md): actualiza
     # el rating con los resultados simulados, algo que el rating basado en cuotas no puede hacer.
@@ -325,8 +370,9 @@ def main() -> None:
     if season_sim is not None:
         write(out / "season.json", season_sim)
     export_meta(out, store, predictor, today, upcoming["matches"], review)
-    logger.info("Exportado en %s: %d equipos actuales, %d próximos partidos en %d jornadas, %d temporadas de revisión",
-                out, len(teams), upcoming["matches"], upcoming["matchdays"], review["seasons"])
+    logger.info("Exportado en %s: %d equipos actuales, %d próximos partidos en %d jornadas, %d temporadas de revisión, "
+                "estadísticas de %s", out, len(teams), upcoming["matches"], upcoming["matchdays"], review["seasons"],
+                ", ".join(stats_seasons))
 
 
 if __name__ == "__main__":

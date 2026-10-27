@@ -11,9 +11,11 @@ resto del sitio.
 import numpy as np
 import pandas as pd
 
+from src.config import PREMIER_LEAGUE, season_label
 from src.odds import shin_probabilities
 
 ODDS_COLUMNS = ["b365_home", "b365_draw", "b365_away"]
+REFERENCE_SEASONS = 10   # contexto histórico: las 10 temporadas anteriores, partidos agrupados
 
 
 def r4(x) -> float:
@@ -141,3 +143,44 @@ def _team(team: str, g: pd.DataFrame) -> dict:
 def team_stats(rows: pd.DataFrame) -> list[dict]:
     """Un resumen por equipo (filas en orden cronológico, como las deja team_match_rows)."""
     return [_team(team, g) for team, g in rows.groupby("team", sort=True)]
+
+
+def referee_stats(matches: pd.DataFrame, min_matches: int = 3) -> list[dict]:
+    """Tarjetas por partido de cada árbitro (sumando los dos equipos), de más a menos amarillas por partido."""
+    m = matches[matches["home_goals"].notna()].assign(referee=matches["referee"].fillna("").astype(str).str.strip())
+    m = m[m["referee"] != ""]
+    out = []
+    for referee, g in m.groupby("referee"):
+        if len(g) >= min_matches:
+            out.append({"referee": referee, "matches": int(len(g)),
+                        "yellow_per_game": r4((g["home_yellow"] + g["away_yellow"]).sum() / len(g)),
+                        "red_total": int((g["home_red"] + g["away_red"]).sum())})
+    return sorted(out, key=lambda r: (-r["yellow_per_game"], r["referee"]))
+
+
+def remaining_difficulty(fixtures: list[tuple[str, str]], ratings: dict[str, float]) -> dict[str, dict]:
+    """Rating medio de los rivales que le quedan a cada equipo; rank 1 = el calendario más difícil."""
+    rivals: dict[str, list[float]] = {}
+    for home, away in fixtures:
+        rivals.setdefault(home, []).append(ratings[away])
+        rivals.setdefault(away, []).append(ratings[home])
+    avg = {team: float(np.mean(r)) for team, r in rivals.items()}
+    order = sorted(avg, key=lambda t: -avg[t])
+    return {team: {"remaining": len(rivals[team]), "avg_opponent_rating": round(avg[team], 1),
+                   "rank": order.index(team) + 1} for team in avg}
+
+
+def build_stats(matches: pd.DataFrame, season_start: int, difficulty: dict | None,
+                referees_next: dict | None) -> dict:
+    """Todo lo que muestra la página para una temporada de Premier League."""
+    pl = matches[(matches["division"] == PREMIER_LEAGUE) & matches["home_goals"].notna()]
+    season = pl[pl["season_start"] == season_start]
+    reference = pl[pl["season_start"].between(season_start - REFERENCE_SEASONS, season_start - 1)]
+    rows = team_match_rows(season)
+    return {
+        "season": season_label(season_start), "matches_played": int(len(season)),
+        "league": league_summary(rows), "league_reference": league_summary(team_match_rows(reference)),
+        "reference_seasons": f"{season_label(season_start - REFERENCE_SEASONS)} a {season_label(season_start - 1)}",
+        "teams": team_stats(rows), "referees": referee_stats(season),
+        "difficulty": difficulty, "referees_next": referees_next,
+    }

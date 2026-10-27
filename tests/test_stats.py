@@ -6,7 +6,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.export.stats import league_summary, team_match_rows, team_stats
+from src.export.stats import (build_stats, league_summary, referee_stats, remaining_difficulty, team_match_rows,
+                              team_stats)
 
 
 def make_matches() -> pd.DataFrame:
@@ -89,3 +90,35 @@ def test_ratios_are_none_without_denominator():
     assert b["shots"]["accuracy"] is None and b["shots"]["pdo"] is None
     assert b["away"]["points_per_game"] is None         # B no jugó de visitante
     assert json.dumps(b, allow_nan=False)               # sin NaN que rompa el JSON
+
+
+def test_referee_names_are_normalized_and_filtered():
+    m = matches.assign(referee=["M Oliver", "M Oliver ", ""])
+    assert referee_stats(m, min_matches=2) == [
+        {"referee": "M Oliver", "matches": 2, "yellow_per_game": 3.0, "red_total": 0}]
+
+
+def test_referees_below_minimum_are_left_out():
+    assert [r["referee"] for r in referee_stats(matches, min_matches=2)] == ["M Oliver"]
+
+
+def test_remaining_difficulty_ranks_hardest_first():
+    d = remaining_difficulty([("A", "B"), ("C", "A"), ("B", "C")], {"A": 2000, "B": 1800, "C": 1600})
+    assert d["A"] == {"remaining": 2, "avg_opponent_rating": 1700.0, "rank": 3}
+    assert d["C"]["rank"] == 1 and d["C"]["avg_opponent_rating"] == 1900.0
+
+
+def test_build_stats_without_schedule():
+    s = build_stats(matches, 2026, difficulty=None, referees_next=None)
+    assert s["season"] == "2026-27" and s["matches_played"] == 3
+    assert s["difficulty"] is None and s["referees_next"] is None
+    assert [t["team"] for t in s["teams"]] == ["A", "B", "C"]
+    assert s["league_reference"]["matches"] == 0      # no hay temporadas anteriores en el fixture
+    assert json.dumps(s, allow_nan=False)
+
+
+def test_build_stats_reference_uses_previous_ten_seasons_only():
+    old = [matches.assign(season_start=y, match_id=matches.match_id + 10 * (2026 - y)) for y in range(2014, 2026)]
+    s = build_stats(pd.concat([matches, *old]), 2026, difficulty=None, referees_next=None)
+    assert s["league_reference"]["matches"] == 30     # 2016-17 a 2025-26
+    assert s["matches_played"] == 3
