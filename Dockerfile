@@ -12,8 +12,12 @@ COPY configs/ configs/
 RUN python -m src.data.download \
  && python -m src.data.load \
  && python -m src.serving.build_state \
- && python -m src.data.leagues \
- && python -m src.serving.league_state
+ && mkdir -p data/processed/leagues
+# Otras ligas: si fallan, la imagen sale igual con la Premier (la API responde 503 para las que falten).
+RUN mkdir -p /app/serving-leagues \
+ && { python -m src.data.leagues && python -m src.serving.league_state \
+      && cp data/processed/leagues/*_serving_matches.csv.gz /app/serving-leagues/ \
+      || echo "Aviso: la imagen sale sin las otras ligas"; }
 
 # ---------- Etapa 2: runtime ------------------------------------------------
 FROM python:3.11-slim
@@ -27,7 +31,7 @@ COPY src/ src/
 COPY models/production/model.json models/production/model.json
 COPY models/leagues/ models/leagues/
 COPY --from=data /app/data/processed/serving_matches.csv.gz data/processed/serving_matches.csv.gz
-COPY --from=data /app/data/processed/leagues/*_serving_matches.csv.gz data/processed/leagues/
+COPY --from=data /app/serving-leagues/ data/processed/leagues/
 USER app
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \

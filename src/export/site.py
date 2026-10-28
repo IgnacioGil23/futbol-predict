@@ -414,12 +414,17 @@ def main() -> None:
     today = pd.Timestamp(args.today or date.today())
     contexts = []
     for code in args.leagues:
-        try:
-            ctx = premier_context() if code == "ENG" else league_context(code)
-        except FileNotFoundError as err:          # una liga sin modelos o sin datos no frena a las demás
-            logger.error("%s: no se exporta (%s)", code, err)
+        if code == "ENG":                          # la Premier es el producto base: si falla, falla la exportación
+            ctx = premier_context()
+            export_league(args.out, ctx, today)
+            contexts.append(ctx)
             continue
-        export_league(args.out, ctx, today)
+        try:                                       # otra liga que falle (sin datos, calendario roto) no frena al resto
+            ctx = league_context(code)
+            export_league(args.out, ctx, today)
+        except Exception:
+            logger.exception("%s: no se exporta", code)
+            continue
         contexts.append(ctx)
     write(args.out / "leagues.json", leagues_index(contexts))
 
