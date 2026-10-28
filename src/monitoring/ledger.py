@@ -37,7 +37,7 @@ from src.config import season_label, season_start_year
 from src.data.fixtures import fetch_fixtures
 from src.league_registry import PRODUCT_LEAGUES
 from src.odds import shin_probabilities
-from src.serving.league_state import model_path, serving_path
+from src.serving.league_paths import model_path, serving_path
 from src.serving.predictor import EloPoissonPredictor
 from src.serving.store import MatchStore
 

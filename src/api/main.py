@@ -28,7 +28,7 @@ from fastapi.responses import RedirectResponse
 from src.api.schemas import Context, EloBlock, ExpectedGoals, Health, PredictionOut, Probabilities, ScoreProb, TeamsOut
 from src.config import season_start_year
 from src.league_registry import PRODUCT_LEAGUES
-from src.serving.league_state import model_path, serving_path
+from src.serving.league_paths import model_path, serving_path
 from src.serving.predictor import EloPoissonPredictor
 from src.serving.store import MatchStore
 
@@ -57,12 +57,20 @@ def _predictor(league: str) -> EloPoissonPredictor:
     return EloPoissonPredictor.load() if league == "ENG" else EloPoissonPredictor.load(model_path(league))
 
 
+def _loaded(league: str) -> str:
+    """Liga válida y con sus datos en la imagen (si faltan, 503: el resto de las ligas sigue respondiendo)."""
+    check_league(league)
+    if league not in available_leagues():
+        raise HTTPException(503, f"La liga {league} no está disponible en este momento")
+    return league
+
+
 def get_store(league: str = LEAGUE_QUERY) -> MatchStore:
-    return _store(check_league(league))
+    return _store(_loaded(league))
 
 
 def get_predictor(league: str = LEAGUE_QUERY) -> EloPoissonPredictor:
-    return _predictor(check_league(league))
+    return _predictor(_loaded(league))
 
 
 def available_leagues() -> list[str]:

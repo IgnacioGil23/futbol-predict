@@ -189,3 +189,27 @@ def test_root_redirects_to_docs(client):
     r = client.get("/", follow_redirects=False)
     assert r.status_code == 307 and r.headers["location"] == "/docs"
     assert client.get("/docs").status_code == 200
+
+
+def test_api_imports_without_the_build_only_packages():
+    """La imagen de la API solo tiene fastapi, numpy y pandas (requirements-api.txt)."""
+    import subprocess
+    import sys
+    code = ("import sys\n"
+            "class Block:\n"
+            "    def find_spec(self, name, path=None, target=None):\n"
+            "        if name.split('.')[0] in {'scipy', 'requests', 'pyarrow', 'sklearn', 'urllib3'}:\n"
+            "            raise ImportError('bloqueado: ' + name)\n"
+            "sys.meta_path.insert(0, Block())\n"
+            "import src.api.main\n")
+    r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr[-800:]
+
+
+def test_league_without_data_is_503_not_500(monkeypatch, tmp_path):
+    import src.api.main as api
+    from fastapi import HTTPException
+    monkeypatch.setattr(api, "serving_path", lambda code: tmp_path / f"{code}.csv.gz")
+    with pytest.raises(HTTPException) as err:
+        api.get_store("ESP")
+    assert err.value.status_code == 503

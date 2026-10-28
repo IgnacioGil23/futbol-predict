@@ -12,40 +12,26 @@ Uso (después de `python -m src.data.leagues`):
 import argparse
 import json
 import logging
-from pathlib import Path
 
 import pandas as pd
 
-from src.config import PROCESSED_DIR, PROJECT_ROOT
 from src.features.build import load_elo_params
 from src.features.elo import EloParams, compute_elo
 from src.features.odds_elo import compute_odds_elo_with_history, load_odds_elo_params
 from src.league_registry import LEAGUES
+from src.serving.league_paths import (  # noqa: F401 - se re-exportan
+    LEAGUE_CONFIG_DIR,
+    LEAGUE_MODELS_DIR,
+    LEAGUES_DATA_DIR,
+    MODEL_FILES,
+    league_config_path,
+    league_matches_path,
+    model_path,
+    serving_path,
+)
 from src.serving.store import build_serving_matches, write_serving_matches
 
 logger = logging.getLogger(__name__)
-
-LEAGUES_DATA_DIR = PROCESSED_DIR / "leagues"
-LEAGUE_MODELS_DIR = PROJECT_ROOT / "models" / "leagues"
-LEAGUE_CONFIG_DIR = PROJECT_ROOT / "configs" / "leagues"
-MODEL_FILES = {"odds_elo": "model.json", "elo": "elo_model.json"}
-
-
-def model_path(code: str, kind: str = "odds_elo") -> Path:
-    return LEAGUE_MODELS_DIR / code / MODEL_FILES[kind]
-
-
-def serving_path(code: str) -> Path:
-    return LEAGUES_DATA_DIR / f"{code}_serving_matches.csv.gz"
-
-
-def league_matches_path(code: str) -> Path:
-    return LEAGUES_DATA_DIR / f"{code}_matches.parquet"
-
-
-def league_config_path(code: str) -> Path:
-    return LEAGUE_CONFIG_DIR / f"{code}.json"
-
 
 def load_league_params(code: str) -> tuple[EloParams, EloParams]:
     """(Elo de cuotas, Elo de resultados) de la liga; Inglaterra usa los de configs/."""
