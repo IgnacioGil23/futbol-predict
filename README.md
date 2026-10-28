@@ -112,9 +112,9 @@ Test seasons 2023-24 to 2025-26 (Premier League figures are in the table above).
   matchday 1, top 4: Spain 71%, Italy 50%, Germany 49%, France 35%; champion: Spain 27%, Italy 39%, Germany 72%,
   France 50% (95% intervals in the reports). Head-to-head tiebreaks (LaLiga, Serie A) are not modelled; the
   Bundesliga and Ligue 1 16th place plays a promotion playoff and is not counted as relegated.
-* **Live monitoring:** the Premier League ledger is unchanged; the other leagues start logging pre-match predictions
-  on 2026-10-27 (`ledger/<LEAGUE>_predictions.csv` on the monitoring branch) and will be evaluated with half a season
-  of data.
+* **Live monitoring:** the Premier League ledger is unchanged; the monitoring workflow also logs pre-match predictions for the
+  other leagues (`ledger/<LEAGUE>_predictions.csv` on the monitoring branch). Their live evaluation is not implemented
+  yet: only the Premier League ledger is evaluated.
 * Club crests and stadium photos are only shown for the Premier League (the other leagues show 3-letter initials).
 
 ## Tech stack

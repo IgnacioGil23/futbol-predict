@@ -113,7 +113,7 @@ export function Monitoring() {
         <div style={{ marginTop: 16 }}><LeagueSwitcher /></div>
         <p className="callout" style={{ marginTop: 16 }}>
           {league.path
-            ? `Todavía no hay registro en vivo de ${league.competition}: las predicciones se empiezan a registrar antes de cada partido desde ahora y la primera evaluación llega con media temporada.`
+            ? `El monitoreo en vivo con evaluación está implementado solo para la Premier. Las predicciones de ${league.competition} se guardan antes de cada partido en un registro propio (rama monitoring del repositorio), pero todavía no se evalúan acá.`
             : 'Todavía no hay un reporte de monitoreo publicado.'}
         </p>
       </div>

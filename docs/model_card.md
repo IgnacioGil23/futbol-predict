@@ -393,8 +393,8 @@ Football-Data.co.uk; calendarios de openfootball (dominio público).
 
   Intervalos de 95% en `reports/season/<LIGA>_evaluacion_2026-10-27.json`. No se modela el desempate por enfrentamiento
   directo (LaLiga, Serie A); en Bundesliga y Ligue 1 el 16.º juega un repechaje de ascenso y no se cuenta como descendido.
-* **Monitoreo:** el registro de la Premier sigue igual; las demás ligas registran predicciones previas desde el 27/10/2026
-  (`ledger/<LIGA>_predictions.csv`, rama `monitoring`) y se evaluarán con media temporada de datos.
+* **Monitoreo:** el registro de la Premier sigue igual; el flujo de monitoreo también guarda las predicciones previas de las
+  demás ligas (`ledger/<LIGA>_predictions.csv`, rama `monitoring`); su evaluación en vivo todavía no está implementada.
 * **Web:** escudos y fotos de estadios solo para la Premier; las demás ligas muestran iniciales de 3 letras.
 
 ## 6. Limitaciones

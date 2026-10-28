@@ -61,9 +61,9 @@ Test 2023-24 a 2025-26 (las cifras de la Premier están arriba).
   Francia 35%; campeón: España 27%, Italia 39%, Alemania 72%, Francia 50% (intervalos de 95% en los reportes). No
   modela el desempate por enfrentamiento directo (LaLiga, Serie A); en Bundesliga y Ligue 1 el 16.º juega un
   repechaje y no se cuenta como descendido.
-* **Monitoreo en vivo:** el registro de la Premier sigue igual; las demás ligas empiezan a registrar predicciones
-  previas el 27/10/2026 (`ledger/<LIGA>_predictions.csv` en la rama `monitoring`) y se evaluarán con media temporada de
-  datos.
+* **Monitoreo en vivo:** el registro de la Premier sigue igual; el flujo de monitoreo también guarda las predicciones
+  previas de las demás ligas (`ledger/<LIGA>_predictions.csv` en la rama `monitoring`). Su evaluación en vivo todavía
+  no está implementada: solo se evalúa el registro de la Premier.
 * Los escudos y las fotos de estadios solo se muestran para la Premier (las demás ligas muestran iniciales de 3 letras).
 
 ## Qué hay adentro
