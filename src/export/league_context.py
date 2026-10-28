@@ -19,6 +19,7 @@ from src.data.schedule import fetch_schedule, schedule_url
 from src.data.team_names import league_display_name, league_short_name, load_names
 from src.data.teams import display_name
 from src.export.badges import badge
+from src.export.league_media import league_crest, league_stadium
 from src.export.stadiums import stadium
 from src.features.build import FEATURES_PATH, load_elo_params
 from src.features.elo import EloParams
@@ -61,11 +62,11 @@ class LeagueContext:
     def badge_of(self, team: str) -> dict:
         if self.is_premier:
             return badge(team)
-        b = badge(team)                       # sin escudo: iniciales
-        return {"badge": None, "short": league_short_name(team, self.code) or b["short"]}
+        url, credit = league_crest(team, self.code)      # escudo libre de Commons o, si no hay, iniciales
+        return {"badge": url, "badge_credit": credit, "short": league_short_name(team, self.code) or badge(team)["short"]}
 
     def stadium_of(self, team: str) -> dict:
-        return stadium(team) if self.is_premier else {"stadium": None}
+        return stadium(team) if self.is_premier else league_stadium(team, self.code)
 
     def schedule(self, season: int) -> pd.DataFrame:
         if self.is_premier:

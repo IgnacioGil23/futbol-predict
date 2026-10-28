@@ -44,6 +44,8 @@ export interface Stadium {
 }
 export interface TeamIndexItem {
   team: string; name: string; slug: string; badge: string | null; short: string; stadium: Stadium | null
+  /** Crédito del escudo cuando su licencia exige citar autor (escudos de Wikimedia Commons de otras ligas). */
+  badge_credit?: Stadium['credit'] | null
   top_seasons: number; last_top_season: string
 }
 export interface TeamSeason {
@@ -54,6 +56,7 @@ export interface TeamSeason {
 export interface EloPoint { date: string; elo: number; division: string; opponent: string; home: boolean; score: string }
 export interface TeamFile {
   team: string; name: string; slug: string; badge: string | null; short: string; stadium: Stadium | null
+  badge_credit?: Stadium['credit'] | null
   seasons: TeamSeason[]; elo: EloPoint[]
 }
 

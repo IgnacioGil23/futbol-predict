@@ -280,11 +280,22 @@ export function TeamDetail() {
             </dl>
           )}
         </div>
-        {t.stadium && (
+        {(t.stadium || t.badge_credit) && (
           <div className="team-hero-credit">
-            <Icon name="camera" size={12} />
-            <a href={t.stadium.credit.source} target="_blank" rel="noreferrer">{t.stadium.credit.author}</a> ·{' '}
-            <a href={t.stadium.credit.license_url} target="_blank" rel="noreferrer">{t.stadium.credit.license}</a> · Wikimedia Commons
+            {t.stadium && (
+              <>
+                <Icon name="camera" size={12} />
+                <a href={t.stadium.credit.source} target="_blank" rel="noreferrer">{t.stadium.credit.author}</a> ·{' '}
+                <a href={t.stadium.credit.license_url} target="_blank" rel="noreferrer">{t.stadium.credit.license}</a> · Wikimedia Commons
+              </>
+            )}
+            {t.badge_credit && (
+              <>
+                {t.stadium ? ' · ' : ''}Escudo:{' '}
+                <a href={t.badge_credit.source} target="_blank" rel="noreferrer">{t.badge_credit.author}</a> ·{' '}
+                <a href={t.badge_credit.license_url} target="_blank" rel="noreferrer">{t.badge_credit.license}</a>
+              </>
+            )}
           </div>
         )}
       </section>

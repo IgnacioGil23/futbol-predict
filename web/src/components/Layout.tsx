@@ -183,7 +183,7 @@ export function Layout() {
                 {(meta.data?.sources ?? []).map((s) => (
                   <li key={s.name}><a href={s.url} target="_blank" rel="noreferrer">{s.name}</a></li>
                 ))}
-                <li><a href="https://commons.wikimedia.org/" target="_blank" rel="noreferrer">Wikimedia Commons</a> <span className="muted">(fotos de estadios)</span></li>
+                <li><a href="https://commons.wikimedia.org/" target="_blank" rel="noreferrer">Wikimedia Commons</a> <span className="muted">(fotos de estadios y escudos de las otras ligas)</span></li>
               </ul>
             </div>
           </div>

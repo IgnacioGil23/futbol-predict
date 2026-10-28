@@ -1,0 +1,1291 @@
+{
+  "leagues": {
+    "ESP": {
+      "Alaves": {
+        "article": "Deportivo Alavés",
+        "crest": null,
+        "stadium": {
+          "article": "Mendizorrotza Stadium",
+          "author": "MarcosMarinM",
+          "file": "Mendizorrotza_diciembre_2021.jpg",
+          "height": 4291,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Mendizorroza",
+          "width": 11669
+        }
+      },
+      "Ath Bilbao": {
+        "article": "Athletic Bilbao",
+        "crest": null,
+        "stadium": {
+          "article": "San Mamés Stadium (2013)",
+          "author": "Marco Almbauer",
+          "file": "Panorama_im_San_Mamés_Stadion.jpg",
+          "height": 4123,
+          "license": "CC0",
+          "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+          "name": "Estadio San Mamés",
+          "width": 6479
+        }
+      },
+      "Ath Madrid": {
+        "article": "Atlético Madrid",
+        "crest": null,
+        "stadium": {
+          "article": "Metropolitano Stadium",
+          "author": "Elwin594",
+          "file": "Atleti_vs_Villarreal_-_September_2025.jpg",
+          "height": 1407,
+          "license": "CC0",
+          "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+          "name": "Estadio Riyadh Air Metropolitano",
+          "width": 2048
+        }
+      },
+      "Barcelona": {
+        "article": "FC Barcelona",
+        "crest": {
+          "author": "HAMDANI 72",
+          "file": "Football Club Barcelona Color Update.png",
+          "height": 2000,
+          "license": "CC0",
+          "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+          "width": 1976
+        },
+        "stadium": {
+          "article": "Camp Nou",
+          "author": "Oh-Barcelona.com from Barcelona, Spain",
+          "file": "Camp_Nou_aerial.jpg",
+          "height": 1659,
+          "license": "CC BY 2.0",
+          "license_url": "https://creativecommons.org/licenses/by/2.0",
+          "name": "Camp Nou",
+          "width": 2207
+        }
+      },
+      "Betis": {
+        "article": "Real Betis",
+        "crest": null,
+        "stadium": null
+      },
+      "Celta": {
+        "article": "RC Celta de Vigo",
+        "crest": {
+          "author": "File:Coa Illustration Shield Heater.svg by User:Madboy74\nFile:Corona real cerrada.svg by User:HansenBCN\nFile:Cross Santiago.svg by User:WarX\nderivative work by Elisardojm",
+          "file": "Escudo RC Celta de Vigo.svg",
+          "height": 1019,
+          "license": "CC BY-SA 3.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+          "width": 750
+        },
+        "stadium": {
+          "article": "Balaídos Stadium",
+          "author": "BandidoBanderas",
+          "file": "Balaidos_hoy.jpg",
+          "height": 969,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Balaídos",
+          "width": 2048
+        }
+      },
+      "Elche": {
+        "article": "Elche CF",
+        "crest": null,
+        "stadium": {
+          "article": "Estadio Martínez Valero",
+          "author": "Magicloren",
+          "file": "Panorámica_del_estadio_Martínez_Valero.jpg",
+          "height": 713,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Estadio Martínez Valero",
+          "width": 1921
+        }
+      },
+      "Espanol": {
+        "article": "RCD Espanyol",
+        "crest": null,
+        "stadium": {
+          "article": "RCDE Stadium",
+          "author": "RCD Espanyol de Barcelona",
+          "file": "Stage_Front_Stadium.jpg",
+          "height": 1440,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "RCDE Stadium",
+          "width": 2160
+        }
+      },
+      "Getafe": {
+        "article": "Getafe CF",
+        "crest": {
+          "author": "Yawen",
+          "file": "Getafe CF Logo.png",
+          "height": 354,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "width": 354
+        },
+        "stadium": {
+          "article": "Estadio Coliseum",
+          "author": "Miguelazo84",
+          "file": "Getafe0-0Lega2018.jpg",
+          "height": 3024,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Estadio Coliseum",
+          "width": 4032
+        }
+      },
+      "La Coruna": {
+        "article": "Deportivo de A Coruña",
+        "crest": null,
+        "stadium": {
+          "article": "Estadio Riazor",
+          "author": "Lisímaco de Egipto",
+          "file": "Estadioriazor2023.jpg",
+          "height": 2304,
+          "license": "CC0",
+          "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+          "name": "Riazor",
+          "width": 3072
+        }
+      },
+      "Levante": {
+        "article": "Levante UD",
+        "crest": null,
+        "stadium": {
+          "article": "Estadi Ciutat de València",
+          "author": "Francesc Fort",
+          "file": "Estadi_Ciutat_de_València_-_nocturna.jpg",
+          "height": 3472,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Estadi Ciutat de València",
+          "width": 4624
+        }
+      },
+      "Malaga": {
+        "article": "Málaga CF",
+        "crest": null,
+        "stadium": {
+          "article": "Estadio La Rosaleda",
+          "author": "Meloptido",
+          "file": "IMG-20220228-WA0055.jpg",
+          "height": 2160,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "La Rosaleda",
+          "width": 3840
+        }
+      },
+      "Osasuna": {
+        "article": "CA Osasuna",
+        "crest": null,
+        "stadium": {
+          "article": "El Sadar Stadium",
+          "author": "Visma17",
+          "file": "Estadio_El_Sadar.jpg",
+          "height": 1067,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Estadio El Sadar",
+          "width": 1600
+        }
+      },
+      "Real Madrid": {
+        "article": "Real Madrid CF",
+        "crest": null,
+        "stadium": {
+          "article": "Bernabéu (stadium)",
+          "author": "Badefa",
+          "file": "Estadio_Santiago_Bernabéu_—_Real_Madrid_Juvenil_A_-_Santiago_Wanderers_Sub-20_(Intercontinental_Sub-20_2026)_—_Récord_de_asistencia_en_un_partido_de_juveniles.jpg",
+          "height": 3000,
+          "license": "CC0",
+          "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+          "name": "Bernabéu",
+          "width": 4000
+        }
+      },
+      "Santander": {
+        "article": "Racing de Santander",
+        "crest": null,
+        "stadium": {
+          "article": "Campos de Sport de El Sardinero",
+          "author": "Edubermu99",
+          "file": "Fotografía_Eduardo_Bermúdez_para_los_Campos_de_Sport_de_El_Sardinero.jpg",
+          "height": 2136,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "El Sardinero",
+          "width": 3216
+        }
+      },
+      "Sevilla": {
+        "article": "Sevilla FC",
+        "crest": null,
+        "stadium": {
+          "article": "Ramón Sánchez-Pizjuán Stadium",
+          "author": "Niels98",
+          "file": "2022-10-25_1_Estadio_Ramón_Sánchez_Pizjuán_(Sevilla_FC).jpg",
+          "height": 3024,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Estadio Ramón Sánchez-Pizjuán",
+          "width": 4032
+        }
+      },
+      "Sociedad": {
+        "article": "Real Sociedad",
+        "crest": null,
+        "stadium": {
+          "article": "Anoeta Stadium",
+          "author": "Bhgh543bgf",
+          "file": "Anoeta_estadioa_31,_Donostia,_Gipuzkoa,_Euskal_Herria.jpg",
+          "height": 3120,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Reale Arena",
+          "width": 4160
+        }
+      },
+      "Valencia": {
+        "article": "Valencia CF",
+        "crest": null,
+        "stadium": {
+          "article": "Mestalla Stadium",
+          "author": "Anidae",
+          "file": "Mestalla_antes_del_partido_Valencia-Barcelona_LaLiga_2023-2024.jpg",
+          "height": 4224,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Mestalla",
+          "width": 5632
+        }
+      },
+      "Vallecano": {
+        "article": "Rayo Vallecano",
+        "crest": null,
+        "stadium": null
+      },
+      "Villarreal": {
+        "article": "Villarreal CF",
+        "crest": null,
+        "stadium": {
+          "article": "Estadio de la Cerámica",
+          "author": "Frank94Rock",
+          "file": "ESTADIO3.jpg",
+          "height": 1260,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Estadio de la Cerámica",
+          "width": 2240
+        }
+      }
+    },
+    "FRA": {
+      "Angers": {
+        "article": "Angers SCO",
+        "crest": {
+          "author": "Angers Sporting Club de l'Ouest",
+          "file": "Angers Sporting Club de l'Ouest logo.svg",
+          "height": 68,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 57
+        },
+        "stadium": {
+          "article": "Stade Raymond Kopa",
+          "author": "M. Mouchoir",
+          "file": "Stade_Jean_Bouin_Angers_2.JPG",
+          "height": 1080,
+          "license": "Public domain",
+          "license_url": "",
+          "name": "Stade Raymond Kopa",
+          "width": 1920
+        }
+      },
+      "Auxerre": {
+        "article": "AJ Auxerre",
+        "crest": null,
+        "stadium": {
+          "article": "Stade de l'Abbé-Deschamps",
+          "author": "YoyoAJA89",
+          "file": "Panorama_du_Stade_de_l'Abbé_Deschamps.png",
+          "height": 963,
+          "license": "CC0",
+          "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+          "name": "Stade de l'Abbé-Deschamps",
+          "width": 4029
+        }
+      },
+      "Brest": {
+        "article": "Stade Brestois 29",
+        "crest": {
+          "author": "Kilyann Le Hen",
+          "file": "Stade Brestois Logo avant 1985.svg",
+          "height": 956,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "width": 837
+        },
+        "stadium": {
+          "article": "Stade Francis-Le Blé",
+          "author": "Romscape",
+          "file": "Vue_panoramique_du_stade_depuis_tribune_Eurodif.jpg",
+          "height": 2246,
+          "license": "CC0",
+          "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+          "name": "Stade Francis-Le Blé",
+          "width": 9633
+        }
+      },
+      "Le Havre": {
+        "article": "Le Havre AC",
+        "crest": null,
+        "stadium": {
+          "article": "Stade Océane",
+          "author": "AxelCFC",
+          "file": "Brésil_Ghana_au_Havre.jpg",
+          "height": 945,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Stade Océane",
+          "width": 1871
+        }
+      },
+      "Le Mans": {
+        "article": "Le Mans FC",
+        "crest": null,
+        "stadium": null
+      },
+      "Lens": {
+        "article": "RC Lens",
+        "crest": null,
+        "stadium": {
+          "article": "Stade Bollaert-Delelis",
+          "author": "Desconocido",
+          "file": "Logo_Stade_Bollaert_delelis.jpg",
+          "height": 816,
+          "license": "CC0",
+          "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+          "name": "Stade Bollaert-Delelis",
+          "width": 816
+        }
+      },
+      "Lille": {
+        "article": "Lille OSC",
+        "crest": null,
+        "stadium": {
+          "article": "Stade Pierre-Mauroy",
+          "author": "Liondartois",
+          "file": "Lille_vs_PSG_2019_-_Stade_Pierre_Mauroy.jpg",
+          "height": 3599,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Stade Pierre-Mauroy",
+          "width": 4800
+        }
+      },
+      "Lorient": {
+        "article": "FC Lorient",
+        "crest": null,
+        "stadium": {
+          "article": "Stade du Moustoir",
+          "author": "NORMOTE",
+          "file": "Stade_du_Moustoir.jpg",
+          "height": 2448,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Stade du Moustoir",
+          "width": 3264
+        }
+      },
+      "Lyon": {
+        "article": "Olympique Lyonnais",
+        "crest": null,
+        "stadium": {
+          "article": "Parc Olympique Lyonnais",
+          "author": "Sebleouf",
+          "file": "Olympique_lyonnais_-_Stade_rennais,_demi-finale_de_Coupe_de_France_2019.jpg",
+          "height": 3016,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Parc Olympique Lyonnais",
+          "width": 4032
+        }
+      },
+      "Marseille": {
+        "article": "Olympique de Marseille",
+        "crest": {
+          "author": "Olympique de Marseille",
+          "file": "Olympique de Marseille 2026 logo.svg",
+          "height": 184,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 184
+        },
+        "stadium": {
+          "article": "Stade Vélodrome",
+          "author": "Sophie P.",
+          "file": "Stade_Vélodrome_en_novembre_2021_(1).jpg",
+          "height": 3024,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Stade Vélodrome",
+          "width": 4032
+        }
+      },
+      "Monaco": {
+        "article": "AS Monaco FC",
+        "crest": null,
+        "stadium": {
+          "article": "Stade Louis II",
+          "author": "V&amp;A Dudush",
+          "file": "Panoramio_-_V&A_Dudush_-_stade_Louis_II.jpg",
+          "height": 719,
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "name": "Stade Louis II",
+          "width": 1080
+        }
+      },
+      "Nice": {
+        "article": "OGC Nice",
+        "crest": {
+          "author": "Unknown authorUnknown author",
+          "file": "OGC Nice (simplified logo).svg",
+          "height": 118,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 100
+        },
+        "stadium": {
+          "article": "Allianz Riviera",
+          "author": "Mirasol",
+          "file": "Allianzcoupdenvoi.jpg",
+          "height": 1936,
+          "license": "CC BY-SA 3.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+          "name": "Allianz Riviera",
+          "width": 2592
+        }
+      },
+      "Paris FC": {
+        "article": "Paris FC",
+        "crest": null,
+        "stadium": {
+          "article": "Stade Jean-Bouin (Paris)",
+          "author": "Arne Müseler",
+          "file": "Paris_Stade_Jean-Bouin_(cropped).jpg",
+          "height": 1894,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "Stade Jean-Bouin",
+          "width": 2696
+        }
+      },
+      "Paris SG": {
+        "article": "Paris Saint-Germain FC",
+        "crest": null,
+        "stadium": null
+      },
+      "Rennes": {
+        "article": "Stade Rennais FC",
+        "crest": {
+          "author": "Stade rennais football club\nKilyann Le Hen (vectorisation)",
+          "file": "Stade Rennais (logo 1960).svg",
+          "height": 1544,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 1472
+        },
+        "stadium": {
+          "article": "Roazhon Park",
+          "author": "EL Loko Foto",
+          "file": "Roazhon_Park_20190814.jpg",
+          "height": 1333,
+          "license": "CC BY 4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0",
+          "name": "Roazhon Park",
+          "width": 2000
+        }
+      },
+      "Strasbourg": {
+        "article": "RC Strasbourg Alsace",
+        "crest": {
+          "author": "KOBI FRANCK",
+          "file": "Racing Club de Strasbourg contre Racing Lens décembre 2016 .jpg",
+          "height": 3280,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "width": 4928
+        },
+        "stadium": {
+          "article": "Stade de la Meinau",
+          "author": "Xaviyeah",
+          "file": "La_Meinau_en_National.jpg",
+          "height": 876,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Stade de la Meinau",
+          "width": 2048
+        }
+      },
+      "Toulouse": {
+        "article": "Toulouse FC",
+        "crest": null,
+        "stadium": {
+          "article": "Stadium de Toulouse",
+          "author": "Laurie Laberinto",
+          "file": "Stadium-Lory.jpg",
+          "height": 770,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Stadium de Toulouse",
+          "width": 2048
+        }
+      },
+      "Troyes": {
+        "article": "ES Troyes AC",
+        "crest": {
+          "author": "Espérance Sportive Troyes Aube Champagne",
+          "file": "ES Troyes AC.svg",
+          "height": 567,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 461
+        },
+        "stadium": null
+      }
+    },
+    "GER": {
+      "Augsburg": {
+        "article": "FC Augsburg",
+        "crest": null,
+        "stadium": {
+          "article": "Augsburg Arena",
+          "author": "Arne Müseler",
+          "file": "Germany_augsburg_stadium_wwk_arena.jpg",
+          "height": 3555,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "WWK Arena",
+          "width": 4747
+        }
+      },
+      "Bayern Munich": {
+        "article": "FC Bayern Munich",
+        "crest": {
+          "author": "FC Bayern Munich",
+          "file": "FC Bayern München logo (2024).svg",
+          "height": 850,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 850
+        },
+        "stadium": {
+          "article": "Allianz Arena",
+          "author": "2015 Michael 2015",
+          "file": "Allianz_Arena_2008-02-09.jpg",
+          "height": 2160,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Allianz Arena",
+          "width": 3840
+        }
+      },
+      "Dortmund": {
+        "article": "Borussia Dortmund",
+        "crest": {
+          "author": "Lispir (Lispir)",
+          "file": "Borussia Dortmund logo.svg",
+          "height": 512,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 512
+        },
+        "stadium": {
+          "article": "Westfalenstadion",
+          "author": "Arne Müseler / www.arne-mueseler.com",
+          "file": "Signal_iduna_park_stadium_dortmund_4.jpg",
+          "height": 2856,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "Signal Iduna Park",
+          "width": 4284
+        }
+      },
+      "Ein Frankfurt": {
+        "article": "Eintracht Frankfurt",
+        "crest": null,
+        "stadium": {
+          "article": "Waldstadion (Frankfurt)",
+          "author": "Patrik Meyer",
+          "file": "Deutsche_bank_park.jpg",
+          "height": 1080,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Deutsche Bank Park",
+          "width": 1920
+        }
+      },
+      "Elversberg": {
+        "article": "SV Elversberg",
+        "crest": {
+          "author": "SV Elversberg",
+          "file": "SV Elversberg Logo 2021.svg",
+          "height": 316,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 316
+        },
+        "stadium": {
+          "article": "Waldstadion an der Kaiserlinde",
+          "author": "MüllerFrankElversberg",
+          "file": "UrsapharmArena.jpg",
+          "height": 2160,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Ursapharm-Arena",
+          "width": 2880
+        }
+      },
+      "FC Koln": {
+        "article": "1. FC Köln",
+        "crest": {
+          "author": "1. FC Köln",
+          "file": "1. FC Koeln Logo 2014–.svg",
+          "height": 337,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "width": 296
+        },
+        "stadium": {
+          "article": "RheinEnergieStadion",
+          "author": "Kölner Sportstätten GmbH",
+          "file": "RheinEnergieSTADION_Logo.svg",
+          "height": 344,
+          "license": "Public domain",
+          "license_url": "",
+          "name": "RheinEnergieStadion",
+          "width": 701
+        }
+      },
+      "Freiburg": {
+        "article": "SC Freiburg",
+        "crest": null,
+        "stadium": {
+          "article": "Europa-Park Stadion",
+          "author": "Andreas Schwarzkopf",
+          "file": "Europa_Park_Stadion_logo.jpg",
+          "height": 853,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Europa-Park Stadion",
+          "width": 1674
+        }
+      },
+      "Hamburg": {
+        "article": "Hamburger SV",
+        "crest": {
+          "author": "Hamburger SV",
+          "file": "Hamburger SV logo.svg",
+          "height": 449,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 607
+        },
+        "stadium": {
+          "article": "Volksparkstadion",
+          "author": "Reinhard Kraasch",
+          "file": "RK_1009_9831_Volksparkstadion.jpg",
+          "height": 1200,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Volksparkstadion",
+          "width": 1800
+        }
+      },
+      "Hoffenheim": {
+        "article": "TSG 1899 Hoffenheim",
+        "crest": {
+          "author": "Template:Lalilu123",
+          "file": "TSG Logo-Standard 4c.png",
+          "height": 1928,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 1614
+        },
+        "stadium": {
+          "article": "Rhein-Neckar-Arena",
+          "author": "PreZero",
+          "file": "PreZero_Arena_wiki.jpg",
+          "height": 2136,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "SNP Arena",
+          "width": 4080
+        }
+      },
+      "Leverkusen": {
+        "article": "Bayer 04 Leverkusen",
+        "crest": {
+          "author": "Unknown authorUnknown author",
+          "file": "Logo TSV Bayer 04 Leverkusen.svg",
+          "height": 252,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 512
+        },
+        "stadium": {
+          "article": "BayArena",
+          "author": "Arne Müseler",
+          "file": "Bayarena_Leverkusen_2020.jpg",
+          "height": 2797,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "BayArena",
+          "width": 4978
+        }
+      },
+      "M'gladbach": {
+        "article": "Borussia Mönchengladbach",
+        "crest": {
+          "author": "Borussia Mönchengladbach",
+          "file": "Borussia Mönchengladbach logo.svg",
+          "height": 817,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 512
+        },
+        "stadium": {
+          "article": "Borussia-Park",
+          "author": "Arne Müseler",
+          "file": "Mönchengladbach_stadion.jpg",
+          "height": 3648,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "Borussia-Park",
+          "width": 5469
+        }
+      },
+      "Mainz": {
+        "article": "1. FSV Mainz 05",
+        "crest": {
+          "author": "1. FSV Mainz 05",
+          "file": "Logo Mainz 05.svg",
+          "height": 477,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 512
+        },
+        "stadium": {
+          "article": "Mewa Arena",
+          "author": "Atirador",
+          "file": "Mewa_Arena1.jpg",
+          "height": 3060,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "MEWA Arena",
+          "width": 4390
+        }
+      },
+      "Paderborn": {
+        "article": "SC Paderborn 07",
+        "crest": {
+          "author": "SC Paderborn 07 e.V.",
+          "file": "SC Paderborn 07 Logo new.svg",
+          "height": 58,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 84
+        },
+        "stadium": {
+          "article": "Home Deluxe Arena",
+          "author": "Zefram",
+          "file": "Paderborn_paragon_arena_2.jpg",
+          "height": 1344,
+          "license": "CC BY 2.0 de",
+          "license_url": "https://creativecommons.org/licenses/by/2.0/de/deed.en",
+          "name": "Home Deluxe Arena",
+          "width": 2688
+        }
+      },
+      "RB Leipzig": {
+        "article": "RB Leipzig",
+        "crest": {
+          "author": "Steffen Prößdorf, edited by User:CennoxX",
+          "file": "2019-07-12 Fußball; Freundschaftsspiel RB Leipzig - FC Zürich 1DX 0881 by Stepro 2.png",
+          "height": 1615,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "width": 3075
+        },
+        "stadium": {
+          "article": "Red Bull Arena (Leipzig)",
+          "author": "Arne Müseler",
+          "file": "Leipzig_stadium.jpg",
+          "height": 3576,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "Red Bull Arena",
+          "width": 4775
+        }
+      },
+      "Schalke 04": {
+        "article": "FC Schalke 04",
+        "crest": {
+          "author": "FC Schalke 04",
+          "file": "FC Schalke 04 Logo.svg",
+          "height": 512,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 512
+        },
+        "stadium": {
+          "article": "Arena AufSchalke",
+          "author": "Arne Müseler from Salzburg, AT",
+          "file": "Veltins_Arena_by_Arne_Mueseler.jpg",
+          "height": 2456,
+          "license": "CC BY-SA 2.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+          "name": "Veltins-Arena",
+          "width": 2982
+        }
+      },
+      "Stuttgart": {
+        "article": "VfB Stuttgart",
+        "crest": {
+          "author": "VfB Stuttgart",
+          "file": "VfB Stuttgart 1893 Logo.svg",
+          "height": 383,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 352
+        },
+        "stadium": {
+          "article": "MHPArena",
+          "author": "Arne Müseler",
+          "file": "Stuttgart_stadium.jpg",
+          "height": 2927,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "MHPArena",
+          "width": 3909
+        }
+      },
+      "Union Berlin": {
+        "article": "1. FC Union Berlin",
+        "crest": null,
+        "stadium": {
+          "article": "Stadion An der Alten Försterei",
+          "author": "Arne Müseler",
+          "file": "Berlin_alte_försterei.jpg",
+          "height": 3692,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "Stadion An der Alten Försterei",
+          "width": 4930
+        }
+      },
+      "Werder Bremen": {
+        "article": "SV Werder Bremen",
+        "crest": {
+          "author": "Unknown authorUnknown author",
+          "file": "SV-Werder-Bremen-Logo.svg",
+          "height": 768,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 512
+        },
+        "stadium": {
+          "article": "Weserstadion",
+          "author": "Arne Müseler",
+          "file": "Germany_bremen_stadium.jpg",
+          "height": 3139,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Weserstadion",
+          "width": 4192
+        }
+      }
+    },
+    "ITA": {
+      "Atalanta": {
+        "article": "Atalanta BC",
+        "crest": {
+          "author": "Atalanta BC",
+          "file": "Atalanta BC.png",
+          "height": 960,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 960
+        },
+        "stadium": {
+          "article": "Stadio di Bergamo",
+          "author": "Vincenzo.togni",
+          "file": "The_outside_of_the_Gewiss_Stadium_in_2020.jpg",
+          "height": 3024,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "New Balance Arena",
+          "width": 4032
+        }
+      },
+      "Bologna": {
+        "article": "Bologna FC 1909",
+        "crest": {
+          "author": "Bologna FC",
+          "file": "Bologna F.C. 1909 logo.svg",
+          "height": 250,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 163
+        },
+        "stadium": {
+          "article": "Stadio Renato Dall'Ara",
+          "author": "Beric Dondarrion",
+          "file": "Stadio_Dall'Ara_01-02-2020.jpg",
+          "height": 1708,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Stadio Renato Dall'Ara",
+          "width": 3038
+        }
+      },
+      "Cagliari": {
+        "article": "Cagliari Calcio",
+        "crest": null,
+        "stadium": {
+          "article": "Unipol Domus",
+          "author": "Sandrino 14",
+          "file": "Unipol_Domus_from_Distinti_2026.jpg",
+          "height": 1840,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Unipol Domus",
+          "width": 3264
+        }
+      },
+      "Como": {
+        "article": "Como 1907",
+        "crest": {
+          "author": "Como 1907 srl",
+          "file": "Calcio Como - logo (Italy, 2019-).svg",
+          "height": 500,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 484
+        },
+        "stadium": {
+          "article": "Stadio Giuseppe Sinigaglia",
+          "author": "Vale93b",
+          "file": "Stadio_Sinigaglia_Como_16-07-2025.jpg",
+          "height": 3838,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Stadio Giuseppe Sinigaglia",
+          "width": 9554
+        }
+      },
+      "Fiorentina": {
+        "article": "ACF Fiorentina",
+        "crest": {
+          "author": "FutureBrand Creative Agency / ACF Fiorentina S.r.l. a socio unico",
+          "file": "ACF Fiorentina - logo (Italy, 2022).svg",
+          "height": 69,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 69
+        },
+        "stadium": {
+          "article": "Stadio Artemio Franchi",
+          "author": "Sailko",
+          "file": "Firenze,_stadio_artemio_franchi,_campo_da_gioco,_10,0.jpg",
+          "height": 3232,
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "name": "Stadio Artemio Franchi",
+          "width": 5990
+        }
+      },
+      "Frosinone": {
+        "article": "Frosinone Calcio",
+        "crest": null,
+        "stadium": {
+          "article": "Stadio Benito Stirpe",
+          "author": "Roberto Celani",
+          "file": "Benito_Stirpe_brescia_panoramica_ternana_sud_ospiti_main_notturna.jpg",
+          "height": 568,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Stadio Benito Stirpe",
+          "width": 960
+        }
+      },
+      "Genoa": {
+        "article": "Genoa CFC",
+        "crest": null,
+        "stadium": {
+          "article": "Stadio Luigi Ferraris",
+          "author": "Gabriel Rinaldi",
+          "file": "Stadio_Luigi_Ferraris_di_Genova_con_il_quartiere_Marassi_(cropped).jpg",
+          "height": 1490,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Stadio Luigi Ferraris",
+          "width": 3162
+        }
+      },
+      "Inter": {
+        "article": "Inter Milan",
+        "crest": {
+          "author": "FC Internazionale Milano S.p.A. / Bureau Borsche",
+          "file": "FC Internazionale Milano 2021.svg",
+          "height": 512,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 512
+        },
+        "stadium": {
+          "article": "San Siro",
+          "author": "Prelvini",
+          "file": "Stadio_Meazza_2021_3.jpg",
+          "height": 3152,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "San Siro",
+          "width": 4728
+        }
+      },
+      "Juventus": {
+        "article": "Juventus FC",
+        "crest": {
+          "author": "Interbrand – Global Brand Consultancy / Juventus Football Club SpA",
+          "file": "Juventus FC - logo black (Italy, 2020).svg",
+          "height": 259,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 164
+        },
+        "stadium": {
+          "article": "Juventus Stadium",
+          "author": "Sebleouf",
+          "file": "2021–22_UEFA_Women's_Champions_League_Final_in_Turin,_Italy_1.jpg",
+          "height": 3024,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Juventus Stadium",
+          "width": 4032
+        }
+      },
+      "Lazio": {
+        "article": "SS Lazio",
+        "crest": {
+          "author": "S.S. Lazio",
+          "file": "S.S. Lazio logo.svg",
+          "height": 123,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 100
+        },
+        "stadium": {
+          "article": "Stadio Olimpico",
+          "author": "Messapi, cropped by Blackcat",
+          "file": "Stadio_Olimpico_2024.jpg",
+          "height": 1712,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Stadio Olimpico",
+          "width": 3384
+        }
+      },
+      "Lecce": {
+        "article": "US Lecce",
+        "crest": null,
+        "stadium": {
+          "article": "Stadio Via del mare",
+          "author": "Vincenzo.togni",
+          "file": "The_Via_Del_Mare_stadium_in_Lecce_during_a_Serie_A_match_between_Lecce_and_SPAL_Ferrara_in_February_2020.jpg",
+          "height": 1536,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Stadio Via del mare",
+          "width": 2048
+        }
+      },
+      "Milan": {
+        "article": "AC Milan",
+        "crest": {
+          "author": "A.C. Milan\n\nUploaded by Vargklo at en.wikipedia",
+          "file": "Logo of AC Milan.svg",
+          "height": 566,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 361
+        },
+        "stadium": {
+          "article": "San Siro",
+          "author": "Prelvini",
+          "file": "Stadio_Meazza_2021_3.jpg",
+          "height": 3152,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "San Siro",
+          "width": 4728
+        }
+      },
+      "Monza": {
+        "article": "AC Monza",
+        "crest": {
+          "author": "AC Monza\n\nUploaded by Giorgio Pallavicini",
+          "file": "Logo of AC Monza.png",
+          "height": 1198,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 854
+        },
+        "stadium": {
+          "article": "Stadio Brianteo",
+          "author": "Simonemb",
+          "file": "Stadio_Brianteo_2024_(cropped).jpg",
+          "height": 2480,
+          "license": "CC0",
+          "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+          "name": "Stadio Brianteo",
+          "width": 3720
+        }
+      },
+      "Napoli": {
+        "article": "SSC Napoli",
+        "crest": {
+          "author": "Logo:  SSC Napoli S.p.A.\nUpload:  The White Lion",
+          "file": "SSC Napoli 2024 (deep blue navy).svg",
+          "height": 512,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 512
+        },
+        "stadium": {
+          "article": "Stadio Diego Armando Maradona",
+          "author": "Gaetano Capaldo",
+          "file": "Stadio_Maradona_Serie_A.jpg",
+          "height": 1730,
+          "license": "CC BY 4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0",
+          "name": "Stadio Diego Armando Maradona",
+          "width": 3561
+        }
+      },
+      "Parma": {
+        "article": "Parma Calcio 1913",
+        "crest": {
+          "author": "Parma Calcio 1913",
+          "file": "Logo Parma Calcio 1913 (adozione 2016).svg",
+          "height": 238,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 195
+        },
+        "stadium": {
+          "article": "Stadio Ennio Tardini",
+          "author": "Brodolò1",
+          "file": "Stadio_Ennio_Tardini_2026.jpg",
+          "height": 4284,
+          "license": "CC0",
+          "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+          "name": "Stadio Ennio Tardini",
+          "width": 5712
+        }
+      },
+      "Roma": {
+        "article": "AS Roma",
+        "crest": {
+          "author": "Associazione Sportiva Roma S.p.A.",
+          "file": "AS ROMA Text Logo 2020 - 2021 .svg",
+          "height": 95,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 443
+        },
+        "stadium": {
+          "article": "Stadio Olimpico",
+          "author": "Messapi, cropped by Blackcat",
+          "file": "Stadio_Olimpico_2024.jpg",
+          "height": 1712,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Stadio Olimpico",
+          "width": 3384
+        }
+      },
+      "Sassuolo": {
+        "article": "US Sassuolo Calcio",
+        "crest": null,
+        "stadium": {
+          "article": "Mapei Stadium – Città del Tricolore",
+          "author": "Vincenzo.togni",
+          "file": "Das_Mapei_Stadium_von_Reggio_nell`Emilia_(2026).jpg",
+          "height": 3024,
+          "license": "CC BY 4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0",
+          "name": "Mapei Stadium – Città del Tricolore",
+          "width": 4032
+        }
+      },
+      "Torino": {
+        "article": "Torino FC",
+        "crest": null,
+        "stadium": {
+          "article": "Stadio Olimpico Grande Torino",
+          "author": "Original photo by Asgaw, cropped by Blackcat",
+          "file": "Stadio_Olimpico_Torino_2017_cropped.jpg",
+          "height": 1950,
+          "license": "CC BY 4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0",
+          "name": "Stadio Olimpico Grande Torino",
+          "width": 3466
+        }
+      },
+      "Udinese": {
+        "article": "Udinese Calcio",
+        "crest": {
+          "author": "Unknown authorUnknown author",
+          "file": "Udinese Calcio 2010.svg",
+          "height": 1772,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 1772
+        },
+        "stadium": {
+          "article": "Stadio Friuli",
+          "author": "Matteo.favi",
+          "file": "DaciArena.jpg",
+          "height": 1011,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Bluenergy Stadium - Stadio Friuli",
+          "width": 1618
+        }
+      },
+      "Venezia": {
+        "article": "Venezia FC",
+        "crest": null,
+        "stadium": {
+          "article": "Stadio Pier Luigi Penzo",
+          "author": "kallerna",
+          "file": "Stadio_Pierluigi_Penzo.jpg",
+          "height": 4284,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Stadio Pier Luigi Penzo",
+          "width": 5712
+        }
+      }
+    }
+  },
+  "verified_on": "2026-10-27"
+}
