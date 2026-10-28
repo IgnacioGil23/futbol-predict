@@ -55,6 +55,12 @@ def evaluation_summary(reports: list) -> dict | None:
             "cutoffs_label": r.get("cutoffs_label")}
 
 
+def unknown_teams(store: MatchStore, schedule: pd.DataFrame) -> set[str]:
+    """Equipos del calendario sin ningún partido en los datos (nombre sin traducir o club nuevo). Antes de la fecha 1
+    todos los demás tienen historia (la temporada anterior, en primera o en segunda)."""
+    return (set(schedule.home_team) | set(schedule.away_team)) - set(store.by_team)
+
+
 def build_season(ctx, today: pd.Timestamp) -> dict | None:
     """Simulación de la temporada en curso de la liga de `ctx` (src.export.league_context.LeagueContext)."""
     season = season_start_year(today.date())
@@ -63,8 +69,7 @@ def build_season(ctx, today: pd.Timestamp) -> dict | None:
     except requests.RequestException as err:
         logger.warning("%s: sin calendario, no se simula la temporada: %s", ctx.code, err)
         return None
-    known = set(ctx.store.teams(ctx.top, season))
-    unknown = (set(schedule.home_team) | set(schedule.away_team)) - known
+    unknown = unknown_teams(ctx.store, schedule)
     if unknown:
         logger.warning("%s: equipos del calendario sin datos %s; no se simula la temporada", ctx.code, sorted(unknown))
         return None

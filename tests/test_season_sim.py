@@ -122,3 +122,18 @@ def test_scores_use_the_given_relegation_spots():
     positions = np.array([[1, 2, 3, 4]] * N_SIMS)
     two = scores(positions, teams, final, relegated=2)["descenso"]
     assert two["y"] == [0.0, 0.0, 1.0, 1.0] and two["p"] == [0.0, 0.0, 1.0, 1.0]
+
+
+def test_preseason_teams_with_history_are_not_unknown():
+    from test_features import make_league
+    from test_serving_api import store_from
+
+    from src.export.season import unknown_teams
+    league = make_league(seasons=(2005, 2006))
+    league["season"] = league["season"].astype(str)
+    league.loc[league.season_start == 2006, ["home_goals", "away_goals"]] = np.nan     # antes de la fecha 1
+    store = store_from(league)
+    e0 = league[(league.division == "E0") & (league.season_start == 2006)]
+    schedule = e0[["home_team", "away_team"]]
+    assert unknown_teams(store, schedule) == set()
+    assert unknown_teams(store, pd.DataFrame({"home_team": ["Nuevo"], "away_team": ["A"]})) == {"Nuevo"}

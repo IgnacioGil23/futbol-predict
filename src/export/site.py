@@ -206,7 +206,7 @@ def export_upcoming(out: Path, ctx: LeagueContext, today: pd.Timestamp, n_matchd
     already_played = set(zip(results.home_team, results.away_team))
     pending = schedule[~schedule["played"].astype(bool) & (schedule["date"] >= today.normalize())]
     pending = pending[[(h, a) not in already_played for h, a in zip(pending.home_team, pending.away_team)]]
-    known = set(store.teams(top, season))
+    known = set(store.by_team)                 # con historia (antes de la fecha 1 nadie jugó todavía esta temporada)
     order = pending.groupby("matchday")["date"].min().sort_values().index[:n_matchdays]
 
     matchdays = []
