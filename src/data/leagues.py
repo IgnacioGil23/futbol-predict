@@ -12,7 +12,8 @@ Controles (sin cantidades fijas de equipos, que cambian entre ligas y temporadas
 * cobertura de tiros y tiros al arco por división y temporada.
 
 Uso:
-    python -m src.data.leagues
+    python -m src.data.leagues              # datos de las cuatro ligas (incluida la temporada en curso)
+    python -m src.data.leagues --report     # además, reescribe el reporte de calidad versionado
 """
 
 import argparse
@@ -51,10 +52,12 @@ def download_league(code: str, force: bool = False, today: date | None = None) -
 
 
 def assign_match_ids(matches: pd.DataFrame, code: str) -> pd.Series:
-    """Id estable por división y temporada: agregar una temporada no cambia los ids de las anteriores."""
-    i = matches.groupby(["division", "season_start"]).cumcount()
-    return pd.Series([f"{code}-{d}-{s}-{n:04d}" for d, s, n in zip(matches["division"], matches["season_start"], i)],
-                     index=matches.index)
+    """Id por contenido (división, temporada, fecha y equipos): no depende del orden de las filas, así que ni una
+    temporada nueva ni un partido postergado que Football-Data inserta en el medio cambian los ids de los demás."""
+    clean = lambda name: "".join(c for c in str(name) if c.isalnum())  # noqa: E731
+    return pd.Series([f"{code}-{d}-{s}-{day:%Y%m%d}-{clean(h)}-{clean(a)}" for d, s, day, h, a in
+                      zip(matches["division"], matches["season_start"], pd.to_datetime(matches["date"]),
+                          matches["home_team"], matches["away_team"])], index=matches.index)
 
 
 def round_robin_check(season: pd.DataFrame) -> dict:
@@ -96,6 +99,8 @@ def load_league(code: str, today: date | None = None) -> tuple[pd.DataFrame, dic
             frames.append(s)
     matches = pd.concat(frames, ignore_index=True)
     matches["match_id"] = assign_match_ids(matches, code)
+    if matches["match_id"].duplicated().any():
+        raise LeagueQualityError(f"{code}: partidos repetidos {list(matches.match_id[matches.match_id.duplicated()])[:3]}")
     # columnas que build_features espera y que en otras ligas no existen (Elo de ClubElo)
     matches["clubelo_home"] = matches["clubelo_away"] = float("nan")
     matches["clubelo_provisional"] = False
@@ -117,6 +122,8 @@ def first_full_shots_season(report: dict, division: str, threshold: float = 0.99
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--force", action="store_true")
+    parser.add_argument("--report", action="store_true",
+                        help="reescribir el reporte de calidad de la replicación (QUALITY_REPORT_PATH), que está versionado")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     LEAGUES_DIR.mkdir(parents=True, exist_ok=True)
@@ -128,9 +135,10 @@ def main() -> None:
         quality["leagues"][code] = {"name": league["name"], **report}
         logger.info("%s: %d partidos · temporadas incompletas %s · tiros completos desde %s", league["name"],
                     len(matches), report["incomplete_seasons"] or "ninguna", report["first_full_shots_season"])
-    QUALITY_REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    QUALITY_REPORT_PATH.write_text(json.dumps(quality, indent=2, ensure_ascii=False), encoding="utf-8")
-    logger.info("Reporte -> %s", QUALITY_REPORT_PATH)
+    if args.report:                 # la actualización diaria de datos no toca el reporte versionado de la investigación
+        QUALITY_REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+        QUALITY_REPORT_PATH.write_text(json.dumps(quality, indent=2, ensure_ascii=False), encoding="utf-8")
+        logger.info("Reporte -> %s", QUALITY_REPORT_PATH)
 
 
 if __name__ == "__main__":

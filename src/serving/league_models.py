@@ -5,8 +5,9 @@ Mismo modelo que la Premier (src/serving/production.py), entrenado en cada liga 
 * elo_model.json: Poisson sobre la diferencia del Elo de resultados (la simulación de la temporada, que necesita un
   rating que se actualice con resultados simulados).
 Los parámetros de cada rating son los de configs/leagues/<liga>.json, elegidos con la regla de
-docs/preregistro_ligas.md. Cada modelo se entrena con las temporadas completas desde la primera de la evaluación de
-esa liga (FIRST_TRAIN de src/models/odds_elo_eval.py) y se reentrena una vez por temporada, como el de la Premier.
+docs/preregistro_ligas.md. Cada modelo se entrena con las temporadas completas desde la primera de su evaluación
+(`train_start`: el publicado, FIRST_TRAIN de src/models/odds_elo_eval.py; el de la simulación, 2002-03, como su
+validación) y se reentrena una vez por temporada, como el de la Premier.
 
 Uso:
     python -m src.serving.league_models --train     # reentrena los modelos (una vez por temporada) y el estado
@@ -29,6 +30,7 @@ from src.metrics import summarize
 from src.models.experiments import predict_feature_model, prepare
 from src.models.feature_models import PoissonGLMModel
 from src.models.odds_elo_eval import FIRST_TRAIN
+from src.models.season_eval import SIM_TRAIN_START
 from src.odds import shin_probabilities
 from src.serving.league_state import build_league_state, load_league_params, model_path, serving_path
 from src.serving.production import ALPHA, export_params
@@ -84,10 +86,16 @@ def test_metrics(features: pd.DataFrame, kind: str, first_train: int) -> dict:
     }
 
 
+def train_start(code: str, kind: str) -> int:
+    """Primera temporada de entrenamiento: el modelo publicado, la de su evaluación (FIRST_TRAIN); el de la simulación,
+    la misma que su validación (src/models/season_eval.py)."""
+    return SIM_TRAIN_START if kind == "elo" else FIRST_TRAIN[code]
+
+
 def train_league(code: str, features: pd.DataFrame, kind: str, today: date | None = None) -> dict:
     """Artefacto (parámetros + metadatos) del modelo `kind` de la liga."""
     current = season_start_year(today or date.today())
-    first = FIRST_TRAIN[code]
+    first = train_start(code, kind)
     cols = MODELS[kind]["features"]
     train = features[(features.season_start >= first) & (features.season_start < current) & features.played]
     model = PoissonGLMModel(cols, alpha=ALPHA).fit(train)

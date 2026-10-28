@@ -37,6 +37,7 @@ VARIANTS = ("producto", "elo_fijo", "base_iguales")
 CALIBRATION_BINS = [0, 0.05, 0.20, 0.50, 0.80, 0.95, 1.0000001]
 N_BOOT = 10_000
 PREMIER_SEASON_MATCHES = 380
+SIM_TRAIN_START = 2002          # el modelo de la simulación se entrena desde acá (también el publicado de cada liga)
 # Temporadas que no se simulan (incompletas en los datos): Francia 2019-20, suspendida.
 SKIP = {"FRA": {2019}}
 
@@ -95,7 +96,7 @@ def evaluate(features: pd.DataFrame, code: str = "ENG") -> dict:
     for s in SEASONS:
         if s in SKIP.get(code, ()):
             continue
-        train = features[(features.season_start >= 2002) & (features.season_start < s) & features.played]
+        train = features[(features.season_start >= SIM_TRAIN_START) & (features.season_start < s) & features.played]
         model = PoissonGLMModel(ELO, alpha=ALPHA).fit(train)
         predictor = EloPoissonPredictor({"params": export_params(model), "meta": {}})
         season = features[(features.season_start == s) & features.played]

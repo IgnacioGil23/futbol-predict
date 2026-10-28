@@ -33,6 +33,7 @@ from src.export.stats import build_stats, remaining_difficulty
 from src.metrics import OUTCOMES, reliability_table, summarize
 from src.models.experiments import predict_feature_model
 from src.models.feature_models import PoissonGLMModel
+from src.models.season_eval import relegation_spots
 from src.odds import shin_probabilities
 from src.serving.predictor import EloPoissonPredictor
 from src.serving.production import ALPHA, FEATURES
@@ -149,6 +150,8 @@ def export_teams(out: Path, ctx: LeagueContext) -> None:
         lambda g: pd.Series({"goals_per_team_game": (g.home_goals.sum() + g.away_goals.sum()) / (2 * len(g))}))
     finals = {int(s): store.standings(top, int(s), pd.Timestamp("2100-01-01")).set_index("team")
               for s in pl.season_start.unique()}
+    # Tamaño de la liga y puestos de descenso de cada temporada (cambian: Francia pasó de 20 a 18 equipos).
+    sizes = pl.groupby("season_start").home_team.nunique()
     index = []
     for team in store.teams(top):
         seasons = []
@@ -161,6 +164,7 @@ def export_teams(out: Path, ctx: LeagueContext) -> None:
             seasons.append({
                 "season": season_label(int(s)), "played": int(len(g)),
                 "points": int(standings.loc[team, "points"]), "position": int(standings.loc[team, "position"]),
+                "teams": int(sizes.loc[s]), "relegation": relegation_spots(ctx.code, int(s)),
                 "goals_for_per_game": r4(gf.mean()), "goals_against_per_game": r4(ga.mean()),
                 "league_goals_per_team_game": r4(avg),
                 "attack_vs_league_pct": r4(gf.mean() / avg - 1), "defence_vs_league_pct": r4(ga.mean() / avg - 1),

@@ -44,3 +44,31 @@ def test_one_failing_league_does_not_stop_the_others(tmp_path, monkeypatch):
     monkeypatch.setattr("sys.argv", ["site", "--out", str(tmp_path), "--leagues", "ENG", "ESP", "ITA"])
     site.main()
     assert json.loads((tmp_path / "leagues.json").read_text(encoding="utf-8")) == ["ENG", "ITA"]
+
+
+def test_team_history_carries_each_season_size_and_relegation_spots(tmp_path):
+    import json
+
+    from test_features import make_league
+    from test_serving_api import store_from
+
+    from src.export.site import export_teams
+
+    league = make_league(seasons=(2015, 2016))
+    league["season"] = league["season"].astype(str)
+    store = store_from(league.replace({"division": {"E0": "F1", "E1": "F2"}}))
+
+    class Ctx:
+        code, top = "FRA", "F1"
+        predictor = type("P", (), {"rating": "odds_elo"})()
+
+        def __init__(self, store):
+            self.store = store
+
+        def name_of(self, team): return team
+        def badge_of(self, team): return {"badge": None, "short": team[:3].upper()}
+        def stadium_of(self, team): return {"stadium": None}
+
+    export_teams(tmp_path, Ctx(store))
+    seasons = json.loads((tmp_path / "teams" / "a.json").read_text(encoding="utf-8"))["seasons"]
+    assert [(s["season"], s["teams"], s["relegation"]) for s in seasons] == [("2015-16", 4, 3), ("2016-17", 4, 2)]
