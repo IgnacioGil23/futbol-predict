@@ -161,6 +161,7 @@ cd web && npm install && npm run dev
 | Calendario de las próximas jornadas | openfootball ([england](https://github.com/openfootball/england), [espana](https://github.com/openfootball/espana), [italy](https://github.com/openfootball/italy), [deutschland](https://github.com/openfootball/deutschland), [europe/france](https://github.com/openfootball/europe)) (dominio público) |
 | Escudos (web, todas las ligas) | Logo de cada club en Wikidata, alojado en [Wikimedia Commons](https://commons.wikimedia.org/), solo con licencia libre (dominio público, CC0, CC BY/BY-SA con crédito); marcas registradas de cada club, mostradas solo como referencia visual (`src/export/league_media.py`) |
 | Fotos de estadios (web) | Imagen principal del artículo de cada estadio en Wikipedia, en [Wikimedia Commons](https://commons.wikimedia.org/) con licencia CC BY / CC BY-SA; autor y licencia junto a cada foto (`src/export/stadiums.py`, `src/export/league_media.py`) |
+| Colores de los clubes (datos para el diseño del sitio) | Colores del recuadro del plantel de cada club en la Wikipedia en inglés (`bgcolor`/`textcolor`/`bordercolor`) o, si no hay, de su equipación local; son los colores que usan los editores, no una guía de marca oficial (`src/export/team_colors.py`, `configs/team_colors.json`) |
 
 Proyecto educativo. **No es una recomendación de apuestas.**
 

@@ -157,6 +157,7 @@ in its docstring and each pre-registration names the command.
 | ClubElo ratings (comparison only) | [Club-Football-Match-Data](https://github.com/xgabora/Club-Football-Match-Data) |
 | Club crests (website, all leagues) | Each club's Wikidata logo on [Wikimedia Commons](https://commons.wikimedia.org/), free licences only (public domain, CC0, CC BY/BY-SA with credit); trademarks of each club, shown only as a visual reference (`src/export/league_media.py`) |
 | Stadium photos (website) | Lead image of each stadium's Wikipedia article, on [Wikimedia Commons](https://commons.wikimedia.org/) under CC BY / CC BY-SA; author and licence credited next to each photo (`src/export/stadiums.py`, `src/export/league_media.py`) |
+| Club colours (data for site design) | Colours of each club's squad navbox on English Wikipedia (`bgcolor`/`textcolor`/`bordercolor`), or its home kit if there is no navbox; editors' identity colours, not official brand guidelines (`src/export/team_colors.py`, `configs/team_colors.json`) |
 
 Raw data are downloaded at build time and not versioned; only aggregated reports are published.
 Educational project. **Not betting advice.**

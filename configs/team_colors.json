@@ -1,0 +1,864 @@
+{
+  "leagues": {
+    "ENG": {
+      "Arsenal": {
+        "origin": "plantel",
+        "primary": "#EE0107",
+        "review": false,
+        "secondary": "#023474",
+        "source": "https://en.wikipedia.org/wiki/Template%3AArsenal_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Aston Villa": {
+        "origin": "plantel",
+        "primary": "#771F48",
+        "review": false,
+        "secondary": "#FFDF00",
+        "source": "https://en.wikipedia.org/wiki/Template%3AAston_Villa_F.C._squad",
+        "text": "#9BE1FF"
+      },
+      "Bournemouth": {
+        "origin": "plantel",
+        "primary": "#E00000",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AAFC_Bournemouth_squad",
+        "text": "#FFFFFF"
+      },
+      "Brentford": {
+        "origin": "plantel",
+        "primary": "#E00000",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ABrentford_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Brighton": {
+        "origin": "plantel",
+        "primary": "#0054A6",
+        "review": false,
+        "secondary": "#FFFFFF",
+        "source": "https://en.wikipedia.org/wiki/Template%3ABrighton_%26_Hove_Albion_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Burnley": {
+        "origin": "plantel",
+        "primary": "#970045",
+        "review": false,
+        "secondary": "#C0C0C0",
+        "source": "https://en.wikipedia.org/wiki/Template%3ABurnley_F.C._squad",
+        "text": "#ADD8E6"
+      },
+      "Chelsea": {
+        "origin": "plantel",
+        "primary": "#001489",
+        "review": false,
+        "secondary": "#FFFFFF",
+        "source": "https://en.wikipedia.org/wiki/Template%3AChelsea_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Coventry": {
+        "origin": "plantel",
+        "primary": "#AAD0FF",
+        "review": false,
+        "secondary": "#000080",
+        "source": "https://en.wikipedia.org/wiki/Template%3ACoventry_City_F.C._squad",
+        "text": "#000080"
+      },
+      "Crystal Palace": {
+        "origin": "plantel",
+        "primary": "#4267DC",
+        "review": false,
+        "secondary": "#C7313C",
+        "source": "https://en.wikipedia.org/wiki/Template%3ACrystal_Palace_F.C._squad",
+        "text": "#FFFF00"
+      },
+      "Everton": {
+        "origin": "plantel",
+        "primary": "#014593",
+        "review": false,
+        "secondary": "#FFFFFF",
+        "source": "https://en.wikipedia.org/wiki/Template%3AEverton_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Fulham": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AFulham_F.C._squad",
+        "text": "#000000"
+      },
+      "Hull": {
+        "origin": "plantel",
+        "primary": "#FFAF00",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AHull_City_A.F.C._squad",
+        "text": "#000000"
+      },
+      "Ipswich": {
+        "origin": "plantel",
+        "primary": "#0000FF",
+        "review": false,
+        "secondary": "#C0C0C0",
+        "source": "https://en.wikipedia.org/wiki/Template%3AIpswich_Town_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Leeds": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#FFDF00",
+        "source": "https://en.wikipedia.org/wiki/Template%3ALeeds_United_F.C._squad",
+        "text": "#0047AB"
+      },
+      "Leicester": {
+        "origin": "plantel",
+        "primary": "#4169E1",
+        "review": false,
+        "secondary": "#DAA520",
+        "source": "https://en.wikipedia.org/wiki/Template%3ALeicester_City_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Liverpool": {
+        "origin": "plantel",
+        "primary": "#D10A11",
+        "review": false,
+        "secondary": "#FFFFFF",
+        "source": "https://en.wikipedia.org/wiki/Template%3ALiverpool_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Luton": {
+        "origin": "plantel",
+        "primary": "#FF3300",
+        "review": false,
+        "secondary": "#000033",
+        "source": "https://en.wikipedia.org/wiki/Template%3ALuton_Town_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Man City": {
+        "origin": "plantel",
+        "primary": "#6CADDF",
+        "review": false,
+        "secondary": "#001B40",
+        "source": "https://en.wikipedia.org/wiki/Template%3AManchester_City_F.C._squad",
+        "text": "#001B40"
+      },
+      "Man United": {
+        "origin": "plantel",
+        "primary": "#DA020E",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AManchester_United_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Newcastle": {
+        "origin": "plantel",
+        "primary": "#000000",
+        "review": false,
+        "secondary": "#FFFFFF",
+        "source": "https://en.wikipedia.org/wiki/Template%3ANewcastle_United_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Norwich": {
+        "origin": "plantel",
+        "primary": "#FFFF00",
+        "review": false,
+        "secondary": "#008000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ANorwich_City_F.C._squad",
+        "text": "#000000"
+      },
+      "Nott'm Forest": {
+        "origin": "plantel",
+        "primary": "#DD0000",
+        "review": false,
+        "secondary": "#FFFFFF",
+        "source": "https://en.wikipedia.org/wiki/Template%3ANottingham_Forest_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Sheffield United": {
+        "origin": "plantel",
+        "primary": "#DD0000",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ASheffield_United_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Southampton": {
+        "origin": "plantel",
+        "primary": "#E00000",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ASouthampton_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Sunderland": {
+        "origin": "plantel",
+        "primary": "#DD0000",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ASunderland_A.F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Tottenham": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#001C58",
+        "source": "https://en.wikipedia.org/wiki/Template%3ATottenham_Hotspur_F.C._squad",
+        "text": "#001C58"
+      },
+      "Watford": {
+        "origin": "plantel",
+        "primary": "#FFFF00",
+        "review": false,
+        "secondary": "#FF0000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AWatford_F.C._squad",
+        "text": "#000000"
+      },
+      "West Brom": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#000080",
+        "source": "https://en.wikipedia.org/wiki/Template%3AWest_Bromwich_Albion_F.C._squad",
+        "text": "#000080"
+      },
+      "West Ham": {
+        "origin": "plantel",
+        "primary": "#7D2838",
+        "review": false,
+        "secondary": "#29B1E6",
+        "source": "https://en.wikipedia.org/wiki/Template%3AWest_Ham_United_F.C._squad",
+        "text": "#FFFFFF"
+      },
+      "Wolves": {
+        "origin": "plantel",
+        "primary": "#F2A900",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AWolverhampton_Wanderers_F.C._squad",
+        "text": "#231F20"
+      }
+    },
+    "ESP": {
+      "Alaves": {
+        "origin": "plantel",
+        "primary": "#0232A0",
+        "review": false,
+        "secondary": "#0000FF",
+        "source": "https://en.wikipedia.org/wiki/Template%3ADeportivo_Alav%C3%A9s_squad",
+        "text": "#FFFFFF"
+      },
+      "Ath Bilbao": {
+        "origin": "plantel",
+        "primary": "#DD0000",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AAthletic_Bilbao_squad",
+        "text": "#FFFFFF"
+      },
+      "Ath Madrid": {
+        "origin": "plantel",
+        "primary": "#CD3333",
+        "review": false,
+        "secondary": "#2D315F",
+        "source": "https://en.wikipedia.org/wiki/Template%3AAtl%C3%A9tico_Madrid_squad",
+        "text": "#FFFFFF"
+      },
+      "Barcelona": {
+        "origin": "plantel",
+        "primary": "#26559B",
+        "review": false,
+        "secondary": "#C32148",
+        "source": "https://en.wikipedia.org/wiki/Template%3AFC_Barcelona_squad",
+        "text": "#FFD700"
+      },
+      "Betis": {
+        "origin": "plantel",
+        "primary": "#00954C",
+        "review": false,
+        "secondary": "#DE9500",
+        "source": "https://en.wikipedia.org/wiki/Template%3AReal_Betis_squad",
+        "text": "#FFFFFF"
+      },
+      "Celta": {
+        "origin": "plantel",
+        "primary": "#AAD0FF",
+        "review": false,
+        "secondary": "#E3256B",
+        "source": "https://en.wikipedia.org/wiki/Template%3ARC_Celta_de_Vigo_squad",
+        "text": "#000080"
+      },
+      "Elche": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#008000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AElche_CF_squad",
+        "text": "#008000"
+      },
+      "Espanol": {
+        "origin": "plantel",
+        "primary": "#4169E1",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ARCD_Espanyol_squad",
+        "text": "#FFFFFF"
+      },
+      "Getafe": {
+        "origin": "plantel",
+        "primary": "#12559D",
+        "review": false,
+        "secondary": "#CFD0D1",
+        "source": "https://en.wikipedia.org/wiki/Template%3AGetafe_CF_squad",
+        "text": "#F1F5FA"
+      },
+      "La Coruna": {
+        "origin": "plantel",
+        "primary": "#094CA1",
+        "review": false,
+        "secondary": "#CDCD00",
+        "source": "https://en.wikipedia.org/wiki/Template%3ADeportivo_de_A_Coru%C3%B1a_squad",
+        "text": "#FFFFFF"
+      },
+      "Levante": {
+        "origin": "plantel",
+        "primary": "#005CA6",
+        "review": false,
+        "secondary": "#B5013D",
+        "source": "https://en.wikipedia.org/wiki/Template%3ALevante_UD_squad",
+        "text": "#FFFFFF"
+      },
+      "Malaga": {
+        "origin": "plantel",
+        "primary": "#87CEEB",
+        "review": false,
+        "secondary": "#FFFF00",
+        "source": "https://en.wikipedia.org/wiki/Template%3AM%C3%A1laga_CF_squad",
+        "text": "#FFFFFF"
+      },
+      "Osasuna": {
+        "origin": "plantel",
+        "primary": "#DD0000",
+        "review": false,
+        "secondary": "#0A3470",
+        "source": "https://en.wikipedia.org/wiki/Template%3ACA_Osasuna_squad",
+        "text": "#FFFFFF"
+      },
+      "Real Madrid": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#543C94",
+        "source": "https://en.wikipedia.org/wiki/Template%3AReal_Madrid_CF_squad",
+        "text": "#543C94"
+      },
+      "Santander": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ARacing_de_Santander_squad",
+        "text": "#008000"
+      },
+      "Sevilla": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ASevilla_FC_squad",
+        "text": "#CB0F20"
+      },
+      "Sociedad": {
+        "origin": "plantel",
+        "primary": "#0000AA",
+        "review": false,
+        "secondary": "#C0C0C0",
+        "source": "https://en.wikipedia.org/wiki/Template%3AReal_Sociedad_squad",
+        "text": "#FFFFFF"
+      },
+      "Valencia": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#E86100",
+        "source": "https://en.wikipedia.org/wiki/Template%3AValencia_CF_squad",
+        "text": "#000000"
+      },
+      "Vallecano": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#E3351C",
+        "source": "https://en.wikipedia.org/wiki/Template%3ARayo_Vallecano_squad",
+        "text": "#E00000"
+      },
+      "Villarreal": {
+        "origin": "plantel",
+        "primary": "#FFFF00",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AVillarreal_CF_squad",
+        "text": "#084B8A"
+      }
+    },
+    "FRA": {
+      "Angers": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#D4AF37",
+        "source": "https://en.wikipedia.org/wiki/Template%3AAngers_SCO_squad",
+        "text": "#000000"
+      },
+      "Auxerre": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#007DC5",
+        "source": "https://en.wikipedia.org/wiki/Template%3AAJ_Auxerre_squad",
+        "text": "#007DC5"
+      },
+      "Brest": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#E00000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AStade_Brestois_29_squad",
+        "text": "#E00000"
+      },
+      "Le Havre": {
+        "origin": "plantel",
+        "primary": "#122E60",
+        "review": false,
+        "secondary": "#99BFE6",
+        "source": "https://en.wikipedia.org/wiki/Template%3ALe_Havre_AC_squad",
+        "text": "#99BFE6"
+      },
+      "Le Mans": {
+        "origin": "plantel",
+        "primary": "#E00000",
+        "review": false,
+        "secondary": "#C0C0C0",
+        "source": "https://en.wikipedia.org/wiki/Template%3ALe_Mans_FC_squad",
+        "text": "#FFFF00"
+      },
+      "Lens": {
+        "origin": "plantel",
+        "primary": "#E00000",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ARC_Lens_squad",
+        "text": "#FFEE00"
+      },
+      "Lille": {
+        "origin": "plantel",
+        "primary": "#E01E14",
+        "review": false,
+        "secondary": "#24206A",
+        "source": "https://en.wikipedia.org/wiki/Template%3ALille_OSC_squad",
+        "text": "#FFFFFF"
+      },
+      "Lorient": {
+        "origin": "plantel",
+        "primary": "#FFA500",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AFC_Lorient_squad",
+        "text": "#000000"
+      },
+      "Lyon": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#DD0000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AOlympique_Lyonnais_squad",
+        "text": "#26559B"
+      },
+      "Marseille": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#009CDC",
+        "source": "https://en.wikipedia.org/wiki/Template%3AOlympique_de_Marseille_squad",
+        "text": "#009CDC"
+      },
+      "Monaco": {
+        "origin": "plantel",
+        "primary": "#E11A22",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AAS_Monaco_FC_squad",
+        "text": "#FFFFFF"
+      },
+      "Nice": {
+        "origin": "plantel",
+        "primary": "#000000",
+        "review": false,
+        "secondary": "#FF0E1F",
+        "source": "https://en.wikipedia.org/wiki/Template%3AOGC_Nice_squad",
+        "text": "#FF0E1F"
+      },
+      "Paris FC": {
+        "origin": "plantel",
+        "primary": "#1F326F",
+        "review": false,
+        "secondary": "#E20E0E",
+        "source": "https://en.wikipedia.org/wiki/Template%3AParis_FC_squad",
+        "text": "#FFFFFF"
+      },
+      "Paris SG": {
+        "origin": "plantel",
+        "primary": "#003665",
+        "review": false,
+        "secondary": "#D32A31",
+        "source": "https://en.wikipedia.org/wiki/Template%3AParis_Saint-Germain_FC_squad",
+        "text": "#F5F5F5"
+      },
+      "Rennes": {
+        "origin": "plantel",
+        "primary": "#E20E0E",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AStade_Rennais_FC_squad",
+        "text": "#FFFFFF"
+      },
+      "Strasbourg": {
+        "origin": "plantel",
+        "primary": "#007FB6",
+        "review": false,
+        "secondary": "#CC0000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ARC_Strasbourg_Alsace_squad",
+        "text": "#FFFFFF"
+      },
+      "Toulouse": {
+        "origin": "plantel",
+        "primary": "#56426F",
+        "review": false,
+        "secondary": "#A891BA",
+        "source": "https://en.wikipedia.org/wiki/Template%3AToulouse_FC_squad",
+        "text": "#FFFFFF"
+      },
+      "Troyes": {
+        "origin": "plantel",
+        "primary": "#0000FF",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AES_Troyes_AC_squad",
+        "text": "#FFFFFF"
+      }
+    },
+    "GER": {
+      "Augsburg": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#008000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AFC_Augsburg_squad",
+        "text": "#DD0000"
+      },
+      "Bayern Munich": {
+        "origin": "plantel",
+        "primary": "#DD0000",
+        "review": false,
+        "secondary": "#0000FF",
+        "source": "https://en.wikipedia.org/wiki/Template%3AFC_Bayern_Munich_squad",
+        "text": "#FFFFFF"
+      },
+      "Dortmund": {
+        "origin": "plantel",
+        "primary": "#FDE100",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ABorussia_Dortmund_squad",
+        "text": "#000000"
+      },
+      "Ein Frankfurt": {
+        "origin": "plantel",
+        "primary": "#000000",
+        "review": false,
+        "secondary": "#FF0000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AEintracht_Frankfurt_squad",
+        "text": "#FF0000"
+      },
+      "Elversberg": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ASV_Elversberg_squad",
+        "text": "#000000"
+      },
+      "FC Koln": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#E00000",
+        "source": "https://en.wikipedia.org/wiki/Template%3A1._FC_K%C3%B6ln_squad",
+        "text": "#E00000"
+      },
+      "Freiburg": {
+        "origin": "plantel",
+        "primary": "#E00000",
+        "review": false,
+        "secondary": "#FFFFFF",
+        "source": "https://en.wikipedia.org/wiki/Template%3ASC_Freiburg_squad",
+        "text": "#FFFFFF"
+      },
+      "Hamburg": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#0000C0",
+        "source": "https://en.wikipedia.org/wiki/Template%3AHamburger_SV_squad",
+        "text": "#DD0000"
+      },
+      "Hoffenheim": {
+        "origin": "plantel",
+        "primary": "#0055FF",
+        "review": false,
+        "secondary": "#000080",
+        "source": "https://en.wikipedia.org/wiki/Template%3ATSG_1899_Hoffenheim_squad",
+        "text": "#FFFFFF"
+      },
+      "Leverkusen": {
+        "origin": "plantel",
+        "primary": "#E00000",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ABayer_04_Leverkusen_squad",
+        "text": "#FFFFFF"
+      },
+      "M'gladbach": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ABorussia_M%C3%B6nchengladbach_squad",
+        "text": "#006000"
+      },
+      "Mainz": {
+        "origin": "plantel",
+        "primary": "#E00000",
+        "review": false,
+        "secondary": "#C0C0C0",
+        "source": "https://en.wikipedia.org/wiki/Template%3A1._FSV_Mainz_05_squad",
+        "text": "#FFFFFF"
+      },
+      "Paderborn": {
+        "origin": "plantel",
+        "primary": "#015EAE",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ASC_Paderborn_07_squad",
+        "text": "#FFFFFF"
+      },
+      "RB Leipzig": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#DD0000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ARB_Leipzig_squad",
+        "text": "#DD0000"
+      },
+      "Schalke 04": {
+        "origin": "plantel",
+        "primary": "#0000DD",
+        "review": false,
+        "secondary": "#C0C0C0",
+        "source": "https://en.wikipedia.org/wiki/Template%3AFC_Schalke_04_squad",
+        "text": "#FFFFFF"
+      },
+      "Stuttgart": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#E00000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AVfB_Stuttgart_squad",
+        "text": "#E00000"
+      },
+      "Union Berlin": {
+        "origin": "plantel",
+        "primary": "#EB1924",
+        "review": false,
+        "secondary": "#FFFFFF",
+        "source": "https://en.wikipedia.org/wiki/Template%3A1._FC_Union_Berlin_squad",
+        "text": "#FFFFFF"
+      },
+      "Werder Bremen": {
+        "origin": "plantel",
+        "primary": "#348153",
+        "review": false,
+        "secondary": "#FFA500",
+        "source": "https://en.wikipedia.org/wiki/Template%3ASV_Werder_Bremen_squad",
+        "text": "#FFFFFF"
+      }
+    },
+    "ITA": {
+      "Atalanta": {
+        "origin": "plantel",
+        "primary": "#006FC0",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AAtalanta_BC_squad",
+        "text": "#000000"
+      },
+      "Bologna": {
+        "origin": "plantel",
+        "primary": "#000080",
+        "review": false,
+        "secondary": "#FF0000",
+        "source": "https://en.wikipedia.org/wiki/Template%3ABologna_FC_1909_squad",
+        "text": "#FFFFFF"
+      },
+      "Cagliari": {
+        "origin": "plantel",
+        "primary": "#00205B",
+        "review": false,
+        "secondary": "#FF2020",
+        "source": "https://en.wikipedia.org/wiki/Template%3ACagliari_Calcio_squad",
+        "text": "#FFFFFF"
+      },
+      "Como": {
+        "origin": "plantel",
+        "primary": "#1D48A1",
+        "review": false,
+        "secondary": "#FBFBF9",
+        "source": "https://en.wikipedia.org/wiki/Template%3AComo_1907_squad",
+        "text": "#FFFFFF"
+      },
+      "Fiorentina": {
+        "origin": "plantel",
+        "primary": "#400393",
+        "review": false,
+        "secondary": "#CF0000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AACF_Fiorentina_squad",
+        "text": "#FFFFFF"
+      },
+      "Frosinone": {
+        "origin": "plantel",
+        "primary": "#FFF200",
+        "review": false,
+        "secondary": "#0000FF",
+        "source": "https://en.wikipedia.org/wiki/Template%3AFrosinone_Calcio_squad",
+        "text": "#0000FF"
+      },
+      "Genoa": {
+        "origin": "plantel",
+        "primary": "#000080",
+        "review": false,
+        "secondary": "#DF2020",
+        "source": "https://en.wikipedia.org/wiki/Template%3AGenoa_CFC_squad",
+        "text": "#FFFFFF"
+      },
+      "Inter": {
+        "origin": "plantel",
+        "primary": "#011EA0",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AInter_Milan_squad",
+        "text": "#FFFFFF"
+      },
+      "Juventus": {
+        "origin": "plantel",
+        "primary": "#000000",
+        "review": false,
+        "secondary": "#FFD700",
+        "source": "https://en.wikipedia.org/wiki/Template%3AJuventus_FC_squad",
+        "text": "#FFFFFF"
+      },
+      "Lazio": {
+        "origin": "plantel",
+        "primary": "#86D9F8",
+        "review": false,
+        "secondary": "#003976",
+        "source": "https://en.wikipedia.org/wiki/Template%3ASS_Lazio_squad",
+        "text": "#000000"
+      },
+      "Lecce": {
+        "origin": "plantel",
+        "primary": "#FFFF00",
+        "review": false,
+        "secondary": "#E50000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AUS_Lecce_squad",
+        "text": "#E50000"
+      },
+      "Milan": {
+        "origin": "plantel",
+        "primary": "#C90C0F",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AAC_Milan_squad",
+        "text": "#FFFFFF"
+      },
+      "Monza": {
+        "origin": "plantel",
+        "primary": "#E4032E",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AAC_Monza_squad",
+        "text": "#FFFFFF"
+      },
+      "Napoli": {
+        "origin": "plantel",
+        "primary": "#1E8EC9",
+        "review": false,
+        "secondary": "#053464",
+        "source": "https://en.wikipedia.org/wiki/Template%3ASSC_Napoli_squad",
+        "text": "#FFFFFF"
+      },
+      "Parma": {
+        "origin": "plantel",
+        "primary": "#FFFFFF",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AParma_Calcio_1913_squad",
+        "text": "#000000"
+      },
+      "Roma": {
+        "origin": "plantel",
+        "primary": "#A00000",
+        "review": false,
+        "secondary": "#FBB900",
+        "source": "https://en.wikipedia.org/wiki/Template%3AAS_Roma_squad",
+        "text": "#FBB900"
+      },
+      "Sassuolo": {
+        "origin": "plantel",
+        "primary": "#08842C",
+        "review": false,
+        "secondary": "#000000",
+        "source": "https://en.wikipedia.org/wiki/Template%3AUS_Sassuolo_Calcio_squad",
+        "text": "#000000"
+      },
+      "Torino": {
+        "origin": "plantel",
+        "primary": "#891912",
+        "review": false,
+        "secondary": "#FFD700",
+        "source": "https://en.wikipedia.org/wiki/Template%3ATorino_FC_squad",
+        "text": "#FFFFFF"
+      },
+      "Udinese": {
+        "origin": "plantel",
+        "primary": "#000000",
+        "review": false,
+        "secondary": "#FFD700",
+        "source": "https://en.wikipedia.org/wiki/Template%3AUdinese_Calcio_squad",
+        "text": "#FFFFFF"
+      },
+      "Venezia": {
+        "origin": "plantel",
+        "primary": "#000000",
+        "review": false,
+        "secondary": "#009E60",
+        "source": "https://en.wikipedia.org/wiki/Template%3AVenezia_FC_squad",
+        "text": "#FFAC1C"
+      }
+    }
+  },
+  "source": "Wikipedia en inglés: recuadro del plantel de cada club (bgcolor/textcolor/bordercolor) o, si falta, la equipación local de su ficha",
+  "verified_on": "2026-10-28"
+}

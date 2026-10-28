@@ -173,7 +173,7 @@ def export_teams(out: Path, ctx: LeagueContext) -> None:
                     "opponent": m.opponent, "home": m.is_home, "score": f"{int(m.gf)}-{int(m.ga)}"}
                    for m in store.by_team[team] if m.played]
         ident = {"team": team, "name": ctx.name_of(team), "slug": slug(team), **ctx.badge_of(team),
-                 **ctx.stadium_of(team)}
+                 **ctx.stadium_of(team), **ctx.colors_of(team)}
         write(out / "teams" / f"{slug(team)}.json", {**ident, "seasons": seasons, "elo": history})
         index.append({**ident, "top_seasons": len(seasons), "last_top_season": seasons[-1]["season"]})
     write(out / "teams.json", sorted(index, key=lambda t: t["name"]))

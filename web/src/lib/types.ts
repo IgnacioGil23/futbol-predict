@@ -42,10 +42,14 @@ export interface Stadium {
   name: string; image: string; wikipedia: string
   credit: { author: string; license: string; license_url: string; source: string }
 }
+/** Colores del club (recuadro del plantel o equipación local en Wikipedia, o revisados a mano): para diseños de la
+ *  web. `text`: color legible sobre `primary`. */
+export interface TeamColors { primary: string; secondary: string | null; text: string | null; source: string }
 export interface TeamIndexItem {
   team: string; name: string; slug: string; badge: string | null; short: string; stadium: Stadium | null
   /** Crédito del escudo cuando su licencia exige citar autor (escudos de Wikimedia Commons de otras ligas). */
   badge_credit?: Stadium['credit'] | null
+  colors?: TeamColors | null
   top_seasons: number; last_top_season: string
 }
 export interface TeamSeason {
@@ -59,6 +63,7 @@ export interface EloPoint { date: string; elo: number; division: string; opponen
 export interface TeamFile {
   team: string; name: string; slug: string; badge: string | null; short: string; stadium: Stadium | null
   badge_credit?: Stadium['credit'] | null
+  colors?: TeamColors | null
   seasons: TeamSeason[]; elo: EloPoint[]
 }
 

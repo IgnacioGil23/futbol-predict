@@ -68,6 +68,7 @@ def test_team_history_carries_each_season_size_and_relegation_spots(tmp_path):
         def name_of(self, team): return team
         def badge_of(self, team): return {"badge": None, "short": team[:3].upper()}
         def stadium_of(self, team): return {"stadium": None}
+        def colors_of(self, team): return {"colors": None}
 
     export_teams(tmp_path, Ctx(store))
     seasons = json.loads((tmp_path / "teams" / "a.json").read_text(encoding="utf-8"))["seasons"]

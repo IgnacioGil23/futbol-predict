@@ -21,6 +21,7 @@ from src.data.teams import display_name
 from src.export.badges import badge
 from src.export.league_media import league_crest, league_stadium
 from src.export.stadiums import stadium
+from src.export.team_colors import team_colors
 from src.features.build import FEATURES_PATH, load_elo_params
 from src.features.elo import EloParams
 from src.models.experiments import prepare
@@ -64,6 +65,10 @@ class LeagueContext:
         url, credit = league_crest(team, self.code)
         short = badge(team)["short"] if self.is_premier else league_short_name(team, self.code) or badge(team)["short"]
         return {"badge": url, "badge_credit": credit, "short": short}
+
+    def colors_of(self, team: str) -> dict:
+        """{"colors": {"primary", "secondary", "source"} o None} (src/export/team_colors.py)."""
+        return {"colors": team_colors(team, self.code)}
 
     def stadium_of(self, team: str) -> dict:
         return stadium(team) if self.is_premier else league_stadium(team, self.code)
