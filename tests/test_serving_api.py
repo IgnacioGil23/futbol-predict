@@ -207,8 +207,9 @@ def test_api_imports_without_the_build_only_packages():
 
 
 def test_league_without_data_is_503_not_500(monkeypatch, tmp_path):
-    import src.api.main as api
     from fastapi import HTTPException
+
+    import src.api.main as api
     monkeypatch.setattr(api, "serving_path", lambda code: tmp_path / f"{code}.csv.gz")
     with pytest.raises(HTTPException) as err:
         api.get_store("ESP")
