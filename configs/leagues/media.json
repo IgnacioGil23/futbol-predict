@@ -1,5 +1,416 @@
 {
   "leagues": {
+    "ENG": {
+      "Arsenal": {
+        "article": "Arsenal F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Emirates Stadium",
+          "author": "Arne Müseler",
+          "file": "London_Emirates_Stadium_arsenal.jpg",
+          "height": 3176,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "Emirates Stadium",
+          "width": 4241
+        }
+      },
+      "Aston Villa": {
+        "article": "Aston Villa F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Villa Park",
+          "author": "Arne Müseler",
+          "file": "Birmingham_aston_villa_park_stadium.jpg",
+          "height": 3468,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "Villa Park",
+          "width": 4631
+        }
+      },
+      "Bournemouth": {
+        "article": "AFC Bournemouth",
+        "crest": null,
+        "stadium": {
+          "article": "Dean Court",
+          "author": "Matthew Jackson",
+          "file": "Deancourt_14092013_vblackpool.jpg",
+          "height": 2456,
+          "license": "CC BY-SA 3.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+          "name": "Dean Court",
+          "width": 7915
+        }
+      },
+      "Brentford": {
+        "article": "Brentford F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Brentford Community Stadium",
+          "author": "AndyScott",
+          "file": "Brentford_Community_Stadium_2020.jpg",
+          "height": 2660,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Brentford Community Stadium",
+          "width": 4000
+        }
+      },
+      "Brighton": {
+        "article": "Brighton & Hove Albion F.C.",
+        "crest": null,
+        "stadium": null
+      },
+      "Burnley": {
+        "article": "Burnley F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Turf Moor",
+          "author": "Trappedinburnley",
+          "file": "Turf_Moor_-_Harry_Potts_Way_(east).jpg",
+          "height": 1080,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Turf Moor",
+          "width": 1920
+        }
+      },
+      "Chelsea": {
+        "article": "Chelsea F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Stamford Bridge (stadium)",
+          "author": "Arne Müseler",
+          "file": "London_Stamford_Bridge.jpg",
+          "height": 3232,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "Stamford Bridge",
+          "width": 4316
+        }
+      },
+      "Coventry": {
+        "article": "Coventry City F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Coventry Building Society Arena",
+          "author": "Amakuru",
+          "file": "Coventry_Derby_October_2021_-_2.jpg",
+          "height": 1960,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Coventry Building Society Arena",
+          "width": 4032
+        }
+      },
+      "Crystal Palace": {
+        "article": "Crystal Palace F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Selhurst Park",
+          "author": "Arne Müseler from Salzburg, AT",
+          "file": "2023_09_09_arne_mueseler_17_18_07_00743-Verbessert-RR_(53283239217).jpg",
+          "height": 3800,
+          "license": "CC BY-SA 2.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+          "name": "Selhurst Park",
+          "width": 5075
+        }
+      },
+      "Everton": {
+        "article": "Everton F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Hill Dickinson Stadium",
+          "author": "David Dixon",
+          "file": "Hill_Dickinson_Stadium,_Liverpool_Waterfront_-_geograph.org.uk_-_8170881.jpg",
+          "height": 768,
+          "license": "CC BY-SA 2.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+          "name": "Hill Dickinson Stadium",
+          "width": 1024
+        }
+      },
+      "Fulham": {
+        "article": "Fulham F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Craven Cottage",
+          "author": "Quintin Soloviev",
+          "file": "Craven_Cottage_(Fulham).jpg",
+          "height": 3702,
+          "license": "CC BY 4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0",
+          "name": "Craven Cottage",
+          "width": 5553
+        }
+      },
+      "Hull": {
+        "article": "Hull City A.F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "MKM Stadium",
+          "author": "David Brown",
+          "file": "Match_day_at_the_KC_Stadium_-_geograph.org.uk_-_1497910.jpg",
+          "height": 480,
+          "license": "CC BY-SA 2.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+          "name": "MKM Stadium",
+          "width": 640
+        }
+      },
+      "Ipswich": {
+        "article": "Ipswich Town F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Portman Road",
+          "author": "John Fielding from Norwich, UK",
+          "file": "Portman_Road_aerial_(cropped).jpg",
+          "height": 2234,
+          "license": "CC BY 2.0",
+          "license_url": "https://creativecommons.org/licenses/by/2.0",
+          "name": "Portman Road",
+          "width": 3525
+        }
+      },
+      "Leeds": {
+        "article": "Leeds United F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Elland Road",
+          "author": "chillilogic.com",
+          "file": "Leeds_United_-_31559864360.jpg",
+          "height": 3024,
+          "license": "CC BY 2.0",
+          "license_url": "https://creativecommons.org/licenses/by/2.0",
+          "name": "Elland Road",
+          "width": 4032
+        }
+      },
+      "Leicester": {
+        "article": "Leicester City F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "King Power Stadium",
+          "author": "Arne Müseler",
+          "file": "Leicester_city_king_power_stadium.jpg",
+          "height": 2487,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "King Power Stadium",
+          "width": 3321
+        }
+      },
+      "Liverpool": {
+        "article": "Liverpool F.C.",
+        "crest": {
+          "author": "Liverpool FC",
+          "file": "Logo Liverpool FC (2024).png",
+          "height": 199,
+          "license": "Public domain",
+          "license_url": "",
+          "width": 520
+        },
+        "stadium": {
+          "article": "Anfield",
+          "author": "Arne Müseler",
+          "file": "Liverpool_anfield_road_stadium.jpg",
+          "height": 3441,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "Anfield",
+          "width": 4595
+        }
+      },
+      "Luton": {
+        "article": "Luton Town F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Kenilworth Road",
+          "author": "Barry Ephgrave",
+          "file": "Luton_Town_FC_-_geograph.org.uk_-_1407783.jpg",
+          "height": 480,
+          "license": "CC BY-SA 2.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+          "name": "Kenilworth Road",
+          "width": 640
+        }
+      },
+      "Man City": {
+        "article": "Manchester City F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Etihad Stadium",
+          "author": "Arne Müseler, cropped by Blackcat",
+          "file": "City_of_Manchester_Stadium_2023_cropped.jpg",
+          "height": 3000,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "Etihad Stadium",
+          "width": 4500
+        }
+      },
+      "Man United": {
+        "article": "Manchester United F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Old Trafford",
+          "author": "Arne Müseler from Salzburg, AT",
+          "file": "2023_07_31_arne_mueseler_00060-Verbessert-RR_(53106651455).jpg",
+          "height": 3741,
+          "license": "CC BY-SA 2.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+          "name": "Old Trafford",
+          "width": 4995
+        }
+      },
+      "Newcastle": {
+        "article": "Newcastle United F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "St James' Park",
+          "author": "Arne Müseler",
+          "file": "Newcastle_st-james-park_stadium.jpg",
+          "height": 3225,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "St James' Park",
+          "width": 4306
+        }
+      },
+      "Norwich": {
+        "article": "Norwich City F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Carrow Road",
+          "author": "ZakNelson1995",
+          "file": "2015-05-16_-11_-_Carrow_Road,_Norwich.JPG",
+          "height": 3833,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Carrow Road",
+          "width": 9608
+        }
+      },
+      "Nott'm Forest": {
+        "article": "Nottingham Forest F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "City Ground",
+          "author": "Stadisimo",
+          "file": "CityGroundFromAboveTrentBridgeCricketGround.jpg",
+          "height": 1227,
+          "license": "CC BY 4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0",
+          "name": "City Ground",
+          "width": 2247
+        }
+      },
+      "Sheffield United": {
+        "article": "Sheffield United F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Bramall Lane",
+          "author": "Arne Müseler from Salzburg, AT",
+          "file": "2023_08_02_arne_mueseler_00138-Verbessert-RR_(53106208941).jpg",
+          "height": 3583,
+          "license": "CC BY-SA 2.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+          "name": "Bramall Lane",
+          "width": 4785
+        }
+      },
+      "Southampton": {
+        "article": "Southampton F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "St Mary's Stadium",
+          "author": "User890899",
+          "file": "St_Mary's_Stadium_(cropped).jpg",
+          "height": 1332,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "St Mary's Stadium",
+          "width": 2339
+        }
+      },
+      "Sunderland": {
+        "article": "Sunderland A.F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Stadium of Light",
+          "author": "Arne Müseler",
+          "file": "Sunderland_stadium_of_light.jpg",
+          "height": 3452,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "Stadium of Light",
+          "width": 4610
+        }
+      },
+      "Tottenham": {
+        "article": "Tottenham Hotspur F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Tottenham Hotspur Stadium",
+          "author": "Arne Müseler",
+          "file": "London_Tottenham_Hotspur_Stadium.jpg",
+          "height": 2925,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "Tottenham Hotspur Stadium",
+          "width": 3906
+        }
+      },
+      "Watford": {
+        "article": "Watford F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Vicarage Road",
+          "author": "Jbb503",
+          "file": "Vicarage_Road_2015.jpg",
+          "height": 414,
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "name": "Vicarage Road",
+          "width": 827
+        }
+      },
+      "West Brom": {
+        "article": "West Bromwich Albion F.C.",
+        "crest": null,
+        "stadium": null
+      },
+      "West Ham": {
+        "article": "West Ham United F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "London Stadium",
+          "author": "Arne Müseler",
+          "file": "London_Olympic_Stadium_West_Ham.jpg",
+          "height": 3811,
+          "license": "CC BY-SA 3.0 de",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+          "name": "London Stadium",
+          "width": 5089
+        }
+      },
+      "Wolves": {
+        "article": "Wolverhampton Wanderers F.C.",
+        "crest": null,
+        "stadium": {
+          "article": "Molineux Stadium",
+          "author": "Bex Walton",
+          "file": "MolineuxStadium2022.jpg",
+          "height": 3583,
+          "license": "CC BY 2.0",
+          "license_url": "https://creativecommons.org/licenses/by/2.0",
+          "name": "Molineux Stadium",
+          "width": 4778
+        }
+      }
+    },
     "ESP": {
       "Alaves": {
         "article": "Deportivo Alavés",
@@ -1287,5 +1698,5 @@
       }
     }
   },
-  "verified_on": "2026-10-27"
+  "verified_on": "2026-10-28"
 }

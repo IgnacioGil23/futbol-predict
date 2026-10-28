@@ -396,7 +396,8 @@ Football-Data.co.uk; calendarios de openfootball (dominio público).
 * **Monitoreo:** el registro de la Premier sigue igual; el flujo de monitoreo también guarda las predicciones previas de las
   demás ligas (`ledger/<LIGA>_predictions.csv`, rama `monitoring`); su evaluación en vivo todavía no está implementada.
 * **Web:** escudos y fotos de estadio de las otras ligas desde Wikimedia Commons, solo con licencia libre (foto para 71
-  de 76 clubes actuales, escudo para 32); el resto, iniciales de 3 letras.
+  de 76 clubes actuales, escudo para 32); el resto, iniciales de 3 letras. La Premier también muestra iniciales: ninguno
+  de sus escudos actuales tiene licencia libre en Commons y los términos de premierleague.com no permiten reutilizarlos.
 
 ## 6. Limitaciones
 

@@ -6,7 +6,7 @@ interface Props {
   eager?: boolean        // escudos visibles al cargar (portada): sin lazy loading
 }
 
-/** Escudo oficial del club (si su código está verificado) o sus iniciales. Si la imagen no carga, también iniciales. */
+/** Escudo del club (de Wikimedia Commons, con licencia libre) o sus iniciales. Si la imagen no carga, también iniciales. */
 export function TeamBadge({ badge, short, name, size = 40, decorative = false, eager = false }: Props) {
   const [failed, setFailed] = useState(false)
   if (badge && !failed) {

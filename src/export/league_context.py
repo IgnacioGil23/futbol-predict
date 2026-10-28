@@ -60,10 +60,10 @@ class LeagueContext:
         return display_name(team) if self.is_premier else league_display_name(team, self.code)
 
     def badge_of(self, team: str) -> dict:
-        if self.is_premier:
-            return badge(team)
-        url, credit = league_crest(team, self.code)      # escudo libre de Commons o, si no hay, iniciales
-        return {"badge": url, "badge_credit": credit, "short": league_short_name(team, self.code) or badge(team)["short"]}
+        """Escudo libre de Wikimedia Commons (todas las ligas) o, si no hay, solo las iniciales."""
+        url, credit = league_crest(team, self.code)
+        short = badge(team)["short"] if self.is_premier else league_short_name(team, self.code) or badge(team)["short"]
+        return {"badge": url, "badge_credit": credit, "short": short}
 
     def stadium_of(self, team: str) -> dict:
         return stadium(team) if self.is_premier else league_stadium(team, self.code)

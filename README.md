@@ -115,9 +115,10 @@ Test seasons 2023-24 to 2025-26 (Premier League figures are in the table above).
 * **Live monitoring:** the Premier League ledger is unchanged; the monitoring workflow also logs pre-match predictions for the
   other leagues (`ledger/<LEAGUE>_predictions.csv` on the monitoring branch). Their live evaluation is not implemented
   yet: only the Premier League ledger is evaluated.
-* Crests and stadium photos for the other leagues come from Wikimedia Commons (free licences only, credited on each
-  team page): stadium photos for 71 of the 76 current clubs and crests for 32; the rest show 3-letter initials
-  (most Spanish and French crests are copyrighted and not on Commons).
+* Crests (all five leagues) and stadium photos for the other leagues come from Wikimedia Commons (free licences only, credited on each
+  team page): stadium photos for 71 of the 76 current clubs of the other leagues and crests for 32 of them; the rest show 3-letter initials
+  (most Spanish and French crests are copyrighted and not on Commons). Premier League clubs show initials: none of
+  their current crests is on Commons with a free licence, and premierleague.com's terms do not allow reusing them.
 
 ## Tech stack
 
@@ -154,8 +155,7 @@ in its docstring and each pre-registration names the command.
 | Results, match statistics and odds (England, Spain, Italy, Germany, France) | [Football-Data.co.uk](https://www.football-data.co.uk/) |
 | Fixtures | openfootball ([england](https://github.com/openfootball/england), [espana](https://github.com/openfootball/espana), [italy](https://github.com/openfootball/italy), [deutschland](https://github.com/openfootball/deutschland), [europe/france](https://github.com/openfootball/europe)) (public domain) |
 | ClubElo ratings (comparison only) | [Club-Football-Match-Data](https://github.com/xgabora/Club-Football-Match-Data) |
-| Club crests (website, Premier League) | Served by premierleague.com; trademarks of each club, shown only as a visual reference |
-| Club crests (website, other leagues) | Each club's Wikidata logo on [Wikimedia Commons](https://commons.wikimedia.org/), free licences only (public domain, CC0, CC BY/BY-SA with credit); trademarks of each club, shown only as a visual reference (`src/export/league_media.py`) |
+| Club crests (website, all leagues) | Each club's Wikidata logo on [Wikimedia Commons](https://commons.wikimedia.org/), free licences only (public domain, CC0, CC BY/BY-SA with credit); trademarks of each club, shown only as a visual reference (`src/export/league_media.py`) |
 | Stadium photos (website) | Lead image of each stadium's Wikipedia article, on [Wikimedia Commons](https://commons.wikimedia.org/) under CC BY / CC BY-SA; author and licence credited next to each photo (`src/export/stadiums.py`, `src/export/league_media.py`) |
 
 Raw data are downloaded at build time and not versioned; only aggregated reports are published.

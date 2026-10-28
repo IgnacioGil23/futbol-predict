@@ -1,5 +1,5 @@
-"""Escudos y fotos de estadio de los clubes de LaLiga, Serie A, Bundesliga y Ligue 1 (la Premier: badges.py y
-stadiums.py).
+"""Escudos de los clubes de las cinco ligas y fotos de estadio de LaLiga, Serie A, Bundesliga y Ligue 1 (las fotos
+de la Premier: stadiums.py).
 
 Mismo criterio que la Premier, a partir del artículo de cada club en la Wikipedia en inglés (CLUB_ARTICLES):
 * Estadio: el campo "stadium" (o "ground") de la ficha del club; foto: la imagen principal del artículo del estadio,
@@ -11,7 +11,8 @@ Mismo criterio que la Premier, a partir del artículo de cada club en la Wikiped
   o con sus iniciales. Los archivos se enlazan en miniatura desde los servidores de Wikimedia, sin copiarlos.
 
 La tabla generada (configs/leagues/media.json, con la fecha de verificación) es la que usa la web:
-    python -m src.export.league_media --build     # vuelve a consultar Wikipedia, Wikidata y Commons
+    python -m src.export.league_media --build                  # vuelve a consultar Wikipedia, Wikidata y Commons
+    python -m src.export.league_media --build --leagues ENG    # solo una liga (las demás quedan como estaban)
     python -m src.export.league_media             # verifica que los archivos y sus licencias no cambiaron
 """
 
@@ -20,11 +21,14 @@ import hashlib
 import json
 import re
 import sys
+import time
 from datetime import date
 from functools import lru_cache
 from urllib.parse import quote
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from src.config import PROJECT_ROOT
 
@@ -32,6 +36,7 @@ MEDIA_PATH = PROJECT_ROOT / "configs" / "leagues" / "media.json"
 COMMONS = "https://upload.wikimedia.org/wikipedia/commons"
 PHOTO_WIDTH = 960
 CREST_WIDTH = 120          # Wikimedia solo sirve miniaturas en anchos estándar (140 da error 400)
+PAUSE_SECONDS = 0.5
 UA = {"User-Agent": "futbol-predict/1.0 (https://github.com/IgnacioGil23/futbol-predict)"}
 WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php"
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
@@ -40,6 +45,7 @@ FREE_LICENSE = re.compile(r"^(CC BY(-SA)? [\d.]+( [a-z]{2})?|CC0|Public domain)$
 
 # Logos de Wikidata que no son el escudo actual del club (revisados a mano el 28/10/2026): no se usan.
 CREST_EXCLUDE: dict[str, dict[str, str]] = {
+    "ENG": {"Liverpool": "es solo el logotipo de texto (L.F.C.), no el escudo"},
     "FRA": {"Strasbourg": "es una foto de un partido", "Brest": "es el escudo anterior a 1985",
             "Rennes": "es el escudo de 1960"},
     "GER": {"RB Leipzig": "es una foto de un partido"},
@@ -48,6 +54,19 @@ CREST_EXCLUDE: dict[str, dict[str, str]] = {
 
 # Artículo del club en la Wikipedia en inglés (nombre canónico de Football-Data -> título), revisado a mano.
 CLUB_ARTICLES: dict[str, dict[str, str]] = {
+    # Premier: los 30 clubes de la Premier desde 2019-20 (los que antes tenían escudo); los demás, iniciales.
+    "ENG": {
+        "Arsenal": "Arsenal F.C.", "Aston Villa": "Aston Villa F.C.", "Bournemouth": "AFC Bournemouth",
+        "Brentford": "Brentford F.C.", "Brighton": "Brighton & Hove Albion F.C.", "Burnley": "Burnley F.C.",
+        "Chelsea": "Chelsea F.C.", "Coventry": "Coventry City F.C.", "Crystal Palace": "Crystal Palace F.C.",
+        "Everton": "Everton F.C.", "Fulham": "Fulham F.C.", "Hull": "Hull City A.F.C.", "Ipswich": "Ipswich Town F.C.",
+        "Leeds": "Leeds United F.C.", "Leicester": "Leicester City F.C.", "Liverpool": "Liverpool F.C.",
+        "Luton": "Luton Town F.C.", "Man City": "Manchester City F.C.", "Man United": "Manchester United F.C.",
+        "Newcastle": "Newcastle United F.C.", "Norwich": "Norwich City F.C.", "Nott'm Forest": "Nottingham Forest F.C.",
+        "Sheffield United": "Sheffield United F.C.", "Southampton": "Southampton F.C.", "Sunderland": "Sunderland A.F.C.",
+        "Tottenham": "Tottenham Hotspur F.C.", "Watford": "Watford F.C.", "West Brom": "West Bromwich Albion F.C.",
+        "West Ham": "West Ham United F.C.", "Wolves": "Wolverhampton Wanderers F.C.",
+    },
     "ESP": {
         "Alaves": "Deportivo Alavés",
         "Ath Bilbao": "Athletic Bilbao",
@@ -135,8 +154,19 @@ CLUB_ARTICLES: dict[str, dict[str, str]] = {
 }
 
 
+@lru_cache(maxsize=1)
+def _session() -> requests.Session:
+    """Con reintentos: las APIs de Wikimedia responden 429/503 si se les pide mucho seguido."""
+    retry = Retry(total=6, backoff_factor=2.0, status_forcelist=(429, 500, 502, 503, 504))
+    session = requests.Session()
+    session.mount("https://", HTTPAdapter(max_retries=retry))
+    session.headers.update(UA)
+    return session
+
+
 def _get(url: str, **params) -> dict:
-    r = requests.get(url, headers=UA, timeout=30, params={"format": "json", "formatversion": 2, **params})
+    time.sleep(PAUSE_SECONDS)                       # sin ráfagas: las APIs de Wikimedia limitan a los clientes rápidos
+    r = _session().get(url, timeout=30, params={"format": "json", "formatversion": 2, **params})
     r.raise_for_status()
     return r.json()
 
@@ -179,10 +209,12 @@ def _club_media(article: str) -> dict:
     return out
 
 
-def build() -> dict:
-    table = {"verified_on": date.today().isoformat(), "leagues": {}}
-    for code, clubs in CLUB_ARTICLES.items():
-        table["leagues"][code] = {team: _club_media(article) for team, article in clubs.items()}
+def build(codes: list[str] | None = None) -> dict:
+    """Regenera la tabla de las ligas `codes` (por defecto, todas) y conserva las demás tal como estaban."""
+    table = json.loads(MEDIA_PATH.read_text(encoding="utf-8")) if MEDIA_PATH.exists() else {"leagues": {}}
+    for code in codes or list(CLUB_ARTICLES):
+        table["leagues"][code] = {team: _club_media(article) for team, article in CLUB_ARTICLES[code].items()}
+    table["verified_on"] = date.today().isoformat()
     MEDIA_PATH.write_text(json.dumps(table, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
     _media.cache_clear()
     return table
@@ -238,8 +270,8 @@ def verify() -> list[str]:
                 now = commons_file(f["file"])
                 if now is None or now["license"] != f["license"]:
                     problems.append(f"{code} {team}: cambió la licencia o no existe {f['file']}")
-                elif requests.head(image_url(f["file"], f["width"], thumb), headers=UA, timeout=30,
-                                   allow_redirects=True).status_code != 200:
+                elif _session().head(image_url(f["file"], f["width"], thumb), timeout=30,
+                                     allow_redirects=True).status_code != 200:
                     problems.append(f"{code} {team}: la miniatura de {f['file']} no carga")
     return problems
 
@@ -247,9 +279,10 @@ def verify() -> list[str]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--build", action="store_true", help="regenerar la tabla desde Wikipedia/Wikidata/Commons")
+    parser.add_argument("--leagues", nargs="*", default=None, help="solo estas ligas (por defecto, todas)")
     args = parser.parse_args()
     if args.build:
-        table = build()
+        table = build(args.leagues)
         for code, clubs in table["leagues"].items():
             crests = sum(bool(m["crest"]) and team not in CREST_EXCLUDE.get(code, {}) for team, m in clubs.items())
             print(f"{code}: {sum(bool(m['stadium']) for m in clubs.values())}/{len(clubs)} fotos, "
