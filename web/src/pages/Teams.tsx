@@ -340,8 +340,8 @@ export function TeamDetail() {
                 <tbody>
                   {seasons.map((s) => (
                     <tr key={s.season}>
-                      <td>{s.season}{s.played < 2 * (nTeams - 1) ? <span className="muted"> ({s.played} PJ)</span> : ''}</td>
-                      <td className="num"><span className={`pos-badge ${s.position === 1 ? 'gold' : s.position <= 4 ? 'top' : s.position > nTeams - league.relegation ? 'rel' : ''}`}>{s.position}º</span></td>
+                      <td>{s.season}{s.played < 2 * ((s.teams ?? nTeams) - 1) ? <span className="muted"> ({s.played} PJ)</span> : ''}</td>
+                      <td className="num"><span className={`pos-badge ${s.position === 1 ? 'gold' : s.position <= 4 ? 'top' : s.position > (s.teams ?? nTeams) - (s.relegation ?? league.relegation) ? 'rel' : ''}`}>{s.position}º</span></td>
                       <td className="num">{s.points}</td>
                       <td className="num">{num(s.goals_for_per_game)}</td>
                       <td className="num">{num(s.goals_against_per_game)}</td>

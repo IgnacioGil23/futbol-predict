@@ -63,6 +63,8 @@ function useNavIndicator(pathname: string) {
   return { navRef, box }
 }
 
+const menuId = (label: string) => `nav-menu-${label.toLowerCase().replace(/\s+/g, '-')}`
+
 export function Layout() {
   const { isDark, toggle } = useTheme()
   const meta = useLeagueData<MetaFile>('meta.json')
@@ -77,7 +79,12 @@ export function Layout() {
   useEffect(() => { window.scrollTo(0, 0) }, [pathname])
   useEffect(() => {
     if (!group) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setGroupAt(null) }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setGroupAt(null)
+      // El foco vuelve al botón del grupo (si quedaba en un enlace del menú, que se oculta, se perdería).
+      document.querySelector<HTMLElement>(`[aria-controls="${menuId(group)}"]`)?.focus()
+    }
     const onDown = (e: MouseEvent) => {
       if (!(e.target instanceof Element) || !e.target.closest('.nav-group')) setGroupAt(null)
     }
@@ -125,14 +132,18 @@ export function Layout() {
               const active = groupActive(pathname, g.items)
               const expanded = group === g.label
               return (
-                <div key={g.label} className={`nav-group ${expanded ? 'expanded' : ''}`}>
+                <div key={g.label} className={`nav-group ${expanded ? 'expanded' : ''}`}
+                     onBlur={(e) => {
+                       // Con Tab fuera del grupo, el menú se cierra.
+                       if (expanded && !(e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget))) setGroup(null)
+                     }}>
                   <button type="button" className={`nav-top nav-group-btn${active ? ' active' : ''}`}
-                          aria-expanded={expanded} aria-haspopup="true"
+                          aria-expanded={expanded} aria-controls={menuId(g.label)}
                           onClick={() => setGroup(expanded ? null : g.label)}>
                     {g.label}<span className="nav-caret" aria-hidden="true" />
                   </button>
                   <div className="nav-group-label">{g.label}</div>
-                  <div className="nav-menu">
+                  <div className="nav-menu" id={menuId(g.label)}>
                     {g.items.map((it) => (
                       <NavLink key={it.to} to={it.to} onClick={() => { setOpen(false); setGroup(null) }}
                                className={({ isActive }) => (isActive ? 'active' : undefined)}>{it.label}</NavLink>

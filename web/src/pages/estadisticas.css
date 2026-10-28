@@ -1,14 +1,14 @@
 .stats-toolbar {
-  position: sticky; top: 64px; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+  position: sticky; top: var(--header-h); z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
   padding: 10px 0; margin-bottom: 8px; background: var(--page);
 }
 .stats-jump { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
 .stats-jump::-webkit-scrollbar { display: none; }
-.stats-jump a {
+.stats-jump button {
   flex: none; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); font-size: 0.82rem;
   font-weight: 600; color: var(--ink-2); text-decoration: none; white-space: nowrap;
 }
-.stats-jump a:hover { color: var(--ink); border-color: var(--line-strong); }
+.stats-jump button:hover { color: var(--ink); border-color: var(--line-strong); }
 
 .stats-section { scroll-margin-top: 130px; margin-top: 40px; }
 .stats-section h2 { margin: 0 0 6px; }

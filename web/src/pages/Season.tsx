@@ -254,9 +254,11 @@ export function Season() {
       <h2 style={{ margin: '32px 0 12px' }}>Todas las posiciones posibles</h2>
       <div className="card"><PositionGrid teams={s.teams} index={byTeam} relegation={s.zones?.relegation ?? 3} /></div>
 
-      <p className="small muted" style={{ marginTop: 24 }}>
-        ¿Qué tan confiables son estas probabilidades? <Link to="/metodologia#simulacion">Ver la validación →</Link>
-      </p>
+      {s.evaluation && (
+        <p className="small muted" style={{ marginTop: 24 }}>
+          ¿Qué tan confiables son estas probabilidades? <Link to="/metodologia#simulacion">Ver la validación →</Link>
+        </p>
+      )}
     </div>
   )
 }

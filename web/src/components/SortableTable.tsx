@@ -6,7 +6,8 @@ export interface Column<T> {
   label: string
   value: (r: T) => number | null
   format: (v: number) => string
-  /** Qué es mejor: define el primer orden al hacer clic en la columna. */
+  /** Primer orden al hacer clic en la columna: 'high' = de mayor a menor (lo que se quiere ver primero, que no
+   *  siempre es "lo mejor": en "Pts perdidos" van primero los que más perdieron). */
   better: 'high' | 'low'
   title?: string
 }

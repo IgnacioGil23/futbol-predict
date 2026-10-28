@@ -118,10 +118,11 @@ function EstadisticasLiga() {
           </div>
         ) : null}
         <nav className="stats-jump" aria-label="Secciones">
-          {SECTIONS.filter((x) => x.id !== 'calendario' || s?.difficulty).map((x) => <a key={x.id} href={`#${x.id}`} onClick={(e) => {
-            e.preventDefault()
-            document.getElementById(x.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          }}>{x.label}</a>)}
+          {SECTIONS.filter((x) => x.id !== 'calendario' || s?.difficulty).map((x) => (
+            <button key={x.id} type="button" onClick={() => document.getElementById(x.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+              {x.label}
+            </button>
+          ))}
         </nav>
       </div>
 
@@ -275,7 +276,7 @@ function EstadisticasLiga() {
                 ) : <p className="small muted">Todavía ningún árbitro dirigió 3 partidos.</p>}
                 {s.referees_next ? (
                   <>
-                    <h3 style={{ marginTop: 20 }}>Árbitros de la próxima fecha</h3>
+                    <h3 style={{ marginTop: 20 }}>Árbitros designados para los próximos partidos</h3>
                     <ul className="ref-next">
                       {Object.entries(s.referees_next).map(([pair, ref]) => {
                         const [h, a] = pair.split('|')
@@ -292,12 +293,12 @@ function EstadisticasLiga() {
             <Section id="calendario" title="Lo que viene"
                      intro="Dificultad del calendario que le queda a cada equipo: el Elo medio de los rivales que todavía tiene que enfrentar (el mismo Elo que usa el modelo). Puesto 1 = el calendario más difícil.">
               <div className="card">
-                <SortableTable rows={s.teams.filter((t) => s.difficulty?.[t.team])} rowKey={(t) => t.team} label={teamLabel}
+                <SortableTable rows={Object.keys(s.difficulty).map((team) => ({ team }))} rowKey={(t) => t.team} label={teamLabel}
                   initialSort="rank" caption="Dificultad del calendario"
                   columns={[
-                    col('rank', 'Puesto', (t) => s.difficulty?.[t.team]?.rank ?? null, f0, 'low'),
-                    col('rating', 'Elo medio de los rivales', (t) => s.difficulty?.[t.team]?.avg_opponent_rating ?? null, f0),
-                    col('remaining', 'Partidos que faltan', (t) => s.difficulty?.[t.team]?.remaining ?? null, f0),
+                    { key: 'rank', label: 'Puesto', value: (t) => s.difficulty?.[t.team]?.rank ?? null, format: f0, better: 'low' },
+                    { key: 'rating', label: 'Elo medio de los rivales', value: (t) => s.difficulty?.[t.team]?.avg_opponent_rating ?? null, format: f0, better: 'high' },
+                    { key: 'remaining', label: 'Partidos que faltan', value: (t) => s.difficulty?.[t.team]?.remaining ?? null, format: f0, better: 'high' },
                   ]} />
               </div>
             </Section>

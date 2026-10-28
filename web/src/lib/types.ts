@@ -50,6 +50,8 @@ export interface TeamIndexItem {
 }
 export interface TeamSeason {
   season: string; played: number; points: number; position: number
+  /** Equipos de la liga y puestos de descenso directo de esa temporada. */
+  teams?: number; relegation?: number
   goals_for_per_game: number; goals_against_per_game: number; league_goals_per_team_game: number
   attack_vs_league_pct: number; defence_vs_league_pct: number
 }
