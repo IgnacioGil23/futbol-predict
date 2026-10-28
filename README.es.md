@@ -64,7 +64,9 @@ Test 2023-24 a 2025-26 (las cifras de la Premier están arriba).
 * **Monitoreo en vivo:** el registro de la Premier sigue igual; el flujo de monitoreo también guarda las predicciones
   previas de las demás ligas (`ledger/<LIGA>_predictions.csv` en la rama `monitoring`). Su evaluación en vivo todavía
   no está implementada: solo se evalúa el registro de la Premier.
-* Los escudos y las fotos de estadios solo se muestran para la Premier (las demás ligas muestran iniciales de 3 letras).
+* Escudos y fotos de estadio de las otras ligas: de Wikimedia Commons (solo licencias libres, con créditos en cada
+  ficha). Hay foto para 71 de los 76 clubes actuales y escudo para 32; el resto muestra iniciales de 3 letras (la
+  mayoría de los escudos españoles y franceses tienen derechos de autor y no están en Commons).
 
 ## Qué hay adentro
 
@@ -155,8 +157,9 @@ cd web && npm install && npm run dev
 | Resultados, estadísticas y cuotas | [Football-Data.co.uk](https://www.football-data.co.uk/) ([notes.txt](https://www.football-data.co.uk/notes.txt)) |
 | Elo de comparación (ClubElo) | [Club Football Match Data](https://github.com/xgabora/Club-Football-Match-Data) (A. Gábor), `EloRatings.csv` |
 | Calendario de las próximas jornadas | openfootball ([england](https://github.com/openfootball/england), [espana](https://github.com/openfootball/espana), [italy](https://github.com/openfootball/italy), [deutschland](https://github.com/openfootball/deutschland), [europe/france](https://github.com/openfootball/europe)) (dominio público) |
-| Escudos (web, solo Premier) | Servidos por premierleague.com; marcas registradas de cada club, mostradas solo como referencia visual |
-| Fotos de estadios (web, solo Premier) | Imagen principal del artículo de cada estadio en Wikipedia, en [Wikimedia Commons](https://commons.wikimedia.org/) con licencia CC BY / CC BY-SA; autor y licencia junto a cada foto (`src/export/stadiums.py`) |
+| Escudos (web, Premier) | Servidos por premierleague.com; marcas registradas de cada club, mostradas solo como referencia visual |
+| Escudos (web, otras ligas) | Logo de cada club en Wikidata, alojado en [Wikimedia Commons](https://commons.wikimedia.org/), solo con licencia libre (dominio público, CC0, CC BY/BY-SA con crédito); marcas registradas de cada club, mostradas solo como referencia visual (`src/export/league_media.py`) |
+| Fotos de estadios (web) | Imagen principal del artículo de cada estadio en Wikipedia, en [Wikimedia Commons](https://commons.wikimedia.org/) con licencia CC BY / CC BY-SA; autor y licencia junto a cada foto (`src/export/stadiums.py`, `src/export/league_media.py`) |
 
 Proyecto educativo. **No es una recomendación de apuestas.**
 
