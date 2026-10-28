@@ -52,18 +52,26 @@ jobs:
           mkdir -p reports/retrain
           python -m src.models.retrain --mode "$MODE" --report "reports/retrain/${MODE}_$(date -u +%F).md"
 
+      # Otras ligas (docs/preregistro_ligas.md): el mismo reentrenamiento anual, con sus parámetros de rating
+      # (configs/leagues/<liga>.json). Entra en el mismo PR que el de la Premier.
+      - name: Reentrenar las otras ligas (anual)
+        if: env.MODE == 'anual'
+        run: |
+          python -m src.data.leagues
+          python -m src.serving.league_models --train
+
       - name: Abrir PR con el modelo nuevo (anual)
         if: env.MODE == 'anual'
         run: |
           REPORT="reports/retrain/anual_$(date -u +%F).md"
-          if git diff --quiet models/production/model.json; then
+          if git diff --quiet models/; then
             echo "El modelo reentrenado es idéntico al actual: no hay PR que abrir."; exit 0
           fi
           BRANCH="retrain/$(date -u +%F)"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
-          git add models/production/model.json "$REPORT"
+          git add models/production/model.json models/leagues/ "$REPORT"
           git commit -m "Reentrenamiento anual del modelo ($(date -u +%F))"
           git push origin "$BRANCH"
           gh pr create --base main --head "$BRANCH" --title "Reentrenamiento anual del modelo ($(date -u +%F))" \

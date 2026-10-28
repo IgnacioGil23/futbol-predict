@@ -74,6 +74,9 @@ def update(today: date | None = None) -> dict:
             missing = sorted(raw - set(entry["openfootball"]))
             if missing:
                 logger.warning("%s %d: sin traducir %s", code, season, missing)
+                # Anotación visible en GitHub Actions: sus partidos no se publican hasta que se traduzcan (un ascendido
+                # se traduce solo después de su primer partido; si no, agregarlo a mano en TEAM_NAMES_PATH).
+                print(f"::warning::{code}: equipos del calendario sin traducir {missing}")
     TEAM_NAMES_PATH.parent.mkdir(parents=True, exist_ok=True)
     TEAM_NAMES_PATH.write_text(json.dumps(table, indent=2, ensure_ascii=False, sort_keys=True), encoding="utf-8")
     _table.cache_clear()

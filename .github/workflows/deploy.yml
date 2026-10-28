@@ -45,7 +45,7 @@ jobs:
           python -m src.features.build
           python -m src.serving.build_state
           # Otras ligas: si fallan (un archivo que falta, un error de formato), la Premier sigue.
-          python -m src.data.leagues && python -m src.serving.league_state || echo "::warning::No se pudieron actualizar las otras ligas; la Premier sigue igual."
+          python -m src.data.leagues && python -m src.data.team_names && python -m src.serving.league_state || echo "::warning::No se pudieron actualizar las otras ligas; la Premier sigue igual."
           python -m src.export.site --out web/public/data
           if [ -f /tmp/monitoring.json ]; then cp /tmp/monitoring.json web/public/data/monitoring.json; echo "Reporte de monitoreo incluido."
           else rm -f web/public/data/monitoring.json; echo "Todavía no hay reporte de monitoreo."; fi

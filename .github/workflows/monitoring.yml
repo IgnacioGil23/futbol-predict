@@ -45,7 +45,7 @@ jobs:
           python -m src.data.load
           python -m src.serving.build_state
           # Otras ligas: si fallan (un archivo que falta, un error de formato), la Premier sigue.
-          python -m src.data.leagues && python -m src.serving.league_state || echo "::warning::No se pudieron actualizar las otras ligas; la Premier sigue igual."
+          python -m src.data.leagues && python -m src.data.team_names && python -m src.serving.league_state || echo "::warning::No se pudieron actualizar las otras ligas; la Premier sigue igual."
 
       # Otras ligas (docs/preregistro_ligas.md): cada una con su registro, con el mismo mecanismo protegido que los
       # modelos en evaluación, para que una falla en una liga no frene el monitoreo de la Premier.
