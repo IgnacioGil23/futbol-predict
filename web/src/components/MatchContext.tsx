@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { formatDate } from '../lib/data'
+import { HATCH } from '../lib/kits'
 import { useLeague } from '../lib/league'
 import type { FormMatch, H2H, Rest } from '../lib/types'
 
@@ -20,7 +21,7 @@ export function FormStrip({ form, name }: { form: FormMatch[]; name: string }) {
       </div>
       <ul style={{ listStyle: 'none', padding: 0, margin: 0 }} className="small">
         {form.slice(0, 5).map((m) => (
-          <li key={m.date} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '3px 0', borderBottom: '1px solid var(--line)' }}>
+          <li key={m.date} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '3px 0', borderBottom: '1px solid var(--rule)' }}>
             <span className="muted tabular">{formatDate(m.date, { day: 'numeric', month: 'short' })}</span>
             <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {m.home ? 'vs' : 'en'} {m.opponent}{m.division === league.second_division ? ' · 2.ª div.' : ''}
@@ -51,7 +52,7 @@ export function H2HBlock({ h2h, homeTeam, homeName, awayName }: { h2h: H2H; home
   const total = h2h.matches
   const rows = [
     { label: homeName, n: h2h.home_team_wins, color: 'var(--home)' },
-    { label: 'Empates', n: h2h.draws, color: 'var(--draw)' },
+    { label: 'Empates', n: h2h.draws, color: HATCH },
     { label: awayName, n: h2h.away_team_wins, color: 'var(--away)' },
   ]
   return (
@@ -60,15 +61,15 @@ export function H2HBlock({ h2h, homeTeam, homeName, awayName }: { h2h: H2H; home
       {rows.map((r) => (
         <div key={r.label} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 2fr 28px', gap: 8, alignItems: 'center', marginBottom: 4 }}>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.label}</span>
-          <span style={{ background: 'var(--surface-2)', borderRadius: 4, height: 8 }}>
-            <span style={{ display: 'block', width: `${(r.n / total) * 100}%`, height: 8, borderRadius: 4, background: r.color }} />
+          <span className="track" style={{ height: 8 }}>
+            <span className="grow-x" style={{ width: `${(r.n / total) * 100}%`, background: r.color, boxShadow: r.color === HATCH ? 'inset 0 0 0 1px var(--hatch)' : undefined }} />
           </span>
           <span className="tabular" style={{ textAlign: 'right' }}>{r.n}</span>
         </div>
       ))}
       <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 0' }}>
         {h2h.last.slice(0, 5).map((m) => (
-          <li key={m.date} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '3px 0', borderBottom: '1px solid var(--line)' }}>
+          <li key={m.date} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '3px 0', borderBottom: '1px solid var(--rule)' }}>
             <span className="muted tabular">{formatDate(m.date, { month: 'short', year: 'numeric' })}</span>
             <span style={{ flex: 1, textAlign: 'right' }}>
               {m.home_team === homeTeam ? <strong>{m.home_team}</strong> : m.home_team} {m.score} {m.away_team === homeTeam ? <strong>{m.away_team}</strong> : m.away_team}

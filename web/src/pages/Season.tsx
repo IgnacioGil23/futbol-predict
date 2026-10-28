@@ -1,8 +1,11 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { Odo, PageBand, Reveal, Title } from '../components/Motion'
+import { pctInt } from '../lib/motion'
+import { TeamBadge } from '../components/TeamBadge'
 import { TeamName } from '../components/TeamName'
 import { formatDate, num, pct, pct1, REPO } from '../lib/data'
-import { LeagueSwitcher } from '../components/LeagueSwitcher'
+import { kitOf } from '../lib/kits'
 import { useLeague, useLeagueData } from '../lib/league'
 import { useTeamIndex } from '../lib/teams'
 import type { SeasonEvaluation, SeasonFile, SeasonTeam, TeamIndexItem } from '../lib/types'
@@ -18,19 +21,40 @@ function prob(p: number) {
 }
 
 function ProbCell({ p, tone }: { p: number; tone: 'up' | 'down' }) {
+  // Tinta por probabilidad: más intensa cuanto más probable (el número siempre está escrito).
   return (
-    <td className="num prob-cell">
-      <span className="prob-bar" data-tone={tone} style={{ width: `${Math.round(p * 100)}%` }} />
+    <td className="num prob-cell" data-tone={tone} style={{ '--p': Math.min(1, p) } as CSSProperties}>
       <span className="prob-text tabular">{prob(p)}</span>
     </td>
   )
+}
+
+const NUMBER_WORD: Record<number, string> = { 1: 'Baja uno', 2: 'Bajan dos', 3: 'Bajan tres', 4: 'Bajan cuatro' }
+
+/** Tramos de la tabla proyectada: la zona de top 6, el resto y, desde el primero con 10% de descender, el descenso. */
+function groupsOf(teams: SeasonTeam[], relegation: number) {
+  const n = teams.length
+  const top = Math.min(6, n)
+  let low = teams.findIndex((t, i) => i >= top && (t.p_relegation >= 0.1 || i >= n - relegation))
+  if (low < 0) low = n
+  const fight = teams.slice(0, top)
+  const middle = teams.slice(top, low)
+  const bottom = teams.slice(low)
+  const contenders = teams.filter((t) => t.p_champion >= 0.01).length
+  const maxRel = Math.max(0, ...middle.map((t) => t.p_relegation))
+  const worst = [...bottom].sort((a, b) => b.p_relegation - a.p_relegation)[0]
+  return [
+    { title: 'La pelea', text: `${contenders} ${contenders === 1 ? 'equipo sale' : 'equipos salen'} campeón en al menos el 1% de las simulaciones.`, rows: fight, start: 0 },
+    { title: 'La mitad', text: middle.length ? `Ninguno desciende en más del ${prob(maxRel)} de las simulaciones.` : '', rows: middle, start: top },
+    { title: 'El descenso', text: worst ? `${NUMBER_WORD[relegation] ?? `Bajan ${relegation}`}. ${worst.name} desciende en el ${prob(worst.p_relegation)} de las simulaciones.` : '', rows: bottom, start: low },
+  ].filter((g) => g.rows.length)
 }
 
 function PositionGrid({ teams, index, relegation }: { teams: SeasonTeam[]; index: Map<string, TeamIndexItem>; relegation: number }) {
   const n = teams.length
   return (
     <div className="table-wrap">
-      <div className="pos-grid" style={{ gridTemplateColumns: `minmax(120px, 1.4fr) repeat(${n}, minmax(22px, 1fr))` }}
+      <div className="pos-grid" style={{ gridTemplateColumns: `minmax(180px, 2fr) repeat(${n}, minmax(22px, 1fr))` }}
            role="table" aria-label="Probabilidad de cada posición final">
         <div className="pos-head" role="columnheader">Equipo</div>
         {Array.from({ length: n }, (_, i) => (
@@ -41,7 +65,7 @@ function PositionGrid({ teams, index, relegation }: { teams: SeasonTeam[]; index
             <div className="pos-team" role="rowheader"><TeamName team={index.get(t.team)} name={t.name} size={18} to={`/equipos/${t.slug}`} /></div>
             {t.positions.map((p, i) => (
               <div key={i} className="pos-cell" role="cell" title={`${t.name}: ${prob(p)} de terminar ${i + 1}º`}
-                   style={{ '--p': Math.min(1, p / 0.5) } as React.CSSProperties}>
+                   style={{ '--p': Math.min(1, p / 0.5) } as React.CSSProperties} data-strong={p / 0.5 > 0.55 || undefined}>
                 {p >= 0.1 ? <span className="tabular">{Math.round(p * 100)}</span> : null}
               </div>
             ))}
@@ -187,78 +211,144 @@ export function Season() {
   const { data: s, error, loading } = useLeagueData<SeasonFile>('season.json')
   const { byTeam } = useTeamIndex()
   const { league } = useLeague()
-  if (loading) return <div className="container section"><div className="skeleton" style={{ minHeight: 400 }} /></div>
+  const title = <Title lines={['¿Cómo puede', 'terminar la', 'temporada?']} />
+  if (loading) {
+    return (
+      <>
+        <PageBand layout="7"><div className="hero-main">{title}</div><div className="hero-aside"><div className="skeleton" style={{ minHeight: 280 }} /></div></PageBand>
+        <div className="container page sec"><div className="skeleton" style={{ minHeight: 400 }} /></div>
+      </>
+    )
+  }
   if (error || !s) {
-    return <div className="container section"><p className="callout">Todavía no hay una simulación publicada.</p></div>
+    return (
+      <>
+        <PageBand layout="7"><div className="hero-main">{title}</div></PageBand>
+        <div className="container page sec"><p className="callout">Todavía no hay una simulación publicada.</p></div>
+      </>
+    )
+  }
+  const relegation = s.zones?.relegation ?? 3
+  const race = [...s.teams].sort((a, b) => b.p_champion - a.p_champion).slice(0, 4)
+  const danger = [...s.teams].sort((a, b) => b.p_relegation - a.p_relegation).slice(0, 4)
+  const groups = groupsOf(s.teams, relegation)
+  const colorOf = (t: SeasonTeam) => kitOf(t.name, byTeam.get(t.team)?.colors, 'var(--acc)').primary
+  const badge = (team: string, name: string, size: number) => {
+    const t = byTeam.get(team)
+    return t ? <TeamBadge badge={t.badge} short={t.short} name={name} size={size} colors={t.colors ?? null} decorative /> : null
   }
   return (
-    <div className="container section">
-      <div className="section-head">
-        <span className="eyebrow">Temporada {s.season} · actualizada el {formatDate(s.as_of)}</span>
-        <h1>¿Cómo puede terminar la temporada?</h1>
-        <p className="lede" style={{ maxWidth: 820 }}>
-          Jugamos los {s.remaining_matches} partidos que faltan {num(s.n_sims, 0)} veces con el modelo. En cada
-          simulación, el Elo de los equipos se actualiza con los resultados simulados, así una racha cambia las chances de
-          lo que viene, como en la realidad. Desempates: puntos, diferencia de gol y goles a favor.
-        </p>
-        <LeagueSwitcher />
-      </div>
-      <div className="card">
-        <div className="table-wrap">
-          <table className="table season-table">
-            <thead>
-              <tr>
-                <th>Equipo</th><th className="num">Pts (PJ)</th><th className="num">Pts esperados</th>
-                <th className="num">Campeón</th><th className="num">Top 4</th><th className="num">Top 6</th><th className="num">Descenso</th>
-              </tr>
-            </thead>
-            <tbody>
-              {s.teams.map((t) => (
-                <tr key={t.slug}>
-                  <td><TeamName team={byTeam.get(t.team)} name={t.name} to={`/equipos/${t.slug}`} /></td>
-                  <td className="num tabular">{t.points} <span className="muted">({t.played})</span></td>
-                  <td className="num tabular">{num(t.expected_points, 1)}</td>
-                  <ProbCell p={t.p_champion} tone="up" />
-                  <ProbCell p={t.p_top4} tone="up" />
-                  <ProbCell p={t.p_top6} tone="up" />
-                  <ProbCell p={t.p_relegation} tone="down" />
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <>
+      <PageBand layout="7">
+        <div className="hero-main">
+          {title}
+          <p className="rise lede" style={{ '--d': '260ms', maxWidth: 820 } as CSSProperties}>
+            Jugamos los <span className="num"><Odo value={s.remaining_matches} now /></span> partidos que faltan {num(s.n_sims, 0)} veces con el modelo. En cada
+            simulación, el Elo de los equipos se actualiza con los resultados simulados, así una racha cambia las chances de
+            lo que viene, como en la realidad. Desempates: puntos, diferencia de gol y goles a favor.
+          </p>
+          <span className="rise data-label" style={{ '--d': '320ms' } as CSSProperties}>Temporada {s.season} · actualizada el {formatDate(s.as_of)}</span>
         </div>
-        <p className="small muted" style={{ marginTop: 8 }}>
-          <strong>Cómo leerla:</strong> "Pts (PJ)" son los puntos reales hasta hoy y los partidos jugados; "Pts esperados",
-          el promedio de puntos al final de la temporada en todas las simulaciones. Las últimas cuatro columnas dicen en
-          qué porcentaje de las {num(s.n_sims, 0)} simulaciones el equipo salió campeón, terminó entre los 4 o los 6
-          primeros o descendió. Por ejemplo, {s.teams[0].name} salió campeón en el {prob(s.teams[0].p_champion)} de las
-          simulaciones. "—" significa que no pasó en ninguna.
-        </p>
-        <p className="small muted" style={{ marginTop: 8 }}>
-          "Top 4" y "Top 6" son posiciones en la tabla: los cupos europeos exactos dependen también de las copas. No se
-          modelan descuentos de puntos.
-        </p>
-        {s.zones?.playoff ? (
-          <p className="small muted" style={{ marginTop: 8 }}>
-            El {s.zones.playoff}.º juega la promoción contra un equipo de {league.second}: no se cuenta como descenso.
+        <div className="hero-aside">
+          <div className="card season-race rise" style={{ '--d': '240ms' } as CSSProperties}>
+            <p className="race-line">
+              {race[0].name} salió campeón en el {prob(race[0].p_champion)} de las simulaciones
+              {race[1] && race[1].p_champion > 0 ? <>; {race[1].name}, en el {prob(race[1].p_champion)}.</> : '.'}
+            </p>
+            <ol className="race-rows">
+              {race.map((t, i) => (
+                <li key={t.slug}>
+                  {badge(t.team, t.name, 28)}
+                  <span className="race-name">{t.name}</span>
+                  <span className="track"><span className="grow-x" style={{ width: `${Math.max(1, t.p_champion * 100)}%`, background: colorOf(t), '--d': `${300 + i * 70}ms` } as CSSProperties} /></span>
+                  <span className="num race-v">{prob(t.p_champion)}</span>
+                </li>
+              ))}
+            </ol>
+            <p className="race-line">{NUMBER_WORD[relegation] ?? `Bajan ${relegation}`}. {danger[0].name} es el más comprometido.</p>
+            <ol className="race-rows">
+              {danger.map((t) => (
+                <li key={t.slug}>
+                  {badge(t.team, t.name, 28)}
+                  <span className="race-name">{t.name}</span>
+                  <span className="num race-v race-big"><Odo value={pctInt(t.p_relegation)} now />%</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </PageBand>
+
+      <div className="container page">
+        <Reveal className="sec" aria-labelledby="proyectada">
+          <div className="section-title">
+            <h2 id="proyectada">La tabla proyectada</h2>
+            <span className="data-label">Ordenada por puntos esperados · % de las {num(s.n_sims, 0)} simulaciones</span>
+          </div>
+          <div className="table-wrap">
+            <table className="table season-table">
+              <thead>
+                <tr>
+                  <th className="num">#</th><th>Equipo</th><th className="num">Pts (PJ)</th><th className="num">Pts esperados</th>
+                  <th className="num">Campeón</th><th className="num">Top 4</th><th className="num">Top 6</th><th className="num">Descenso</th>
+                </tr>
+              </thead>
+              {groups.map((g) => (
+                <tbody key={g.title}>
+                  <tr className="group-row">
+                    <th colSpan={8} scope="rowgroup"><span className="group-title">{g.title}</span>{g.text && <span className="group-text">{g.text}</span>}</th>
+                  </tr>
+                  {g.rows.map((t, i) => (
+                    <tr key={t.slug} className="rise" style={{ '--row-c': colorOf(t), '--d': `${Math.min((g.start + i) * 35, 600)}ms` } as CSSProperties}>
+                      <td className="num muted">{g.start + i + 1}</td>
+                      <td><TeamName team={byTeam.get(t.team)} name={t.name} to={`/equipos/${t.slug}`} size={28} /></td>
+                      <td className="num tabular">{t.points} <span className="muted">({t.played})</span></td>
+                      <td className="num tabular">{num(t.expected_points, 1)}</td>
+                      <ProbCell p={t.p_champion} tone="up" />
+                      <ProbCell p={t.p_top4} tone="up" />
+                      <ProbCell p={t.p_top6} tone="up" />
+                      <ProbCell p={t.p_relegation} tone="down" />
+                    </tr>
+                  ))}
+                </tbody>
+              ))}
+            </table>
+          </div>
+          <p className="note" style={{ marginTop: 12 }}>
+            <strong>Cómo leerla:</strong> "Pts (PJ)" son los puntos reales hasta hoy y los partidos jugados; "Pts esperados",
+            el promedio de puntos al final de la temporada en todas las simulaciones. Las últimas cuatro columnas dicen en
+            qué porcentaje de las {num(s.n_sims, 0)} simulaciones el equipo salió campeón, terminó entre los 4 o los 6
+            primeros o descendió. Por ejemplo, {s.teams[0].name} salió campeón en el {prob(s.teams[0].p_champion)} de las
+            simulaciones. "—" significa que no pasó en ninguna.
           </p>
-        ) : null}
-        {s.zones?.head_to_head ? (
-          <p className="small muted" style={{ marginTop: 8 }}>
-            En {league.competition} el primer desempate es el enfrentamiento directo; la simulación desempata por
-            diferencia de gol y goles a favor.
+          <p className="note" style={{ marginTop: 8 }}>
+            "Top 4" y "Top 6" son posiciones en la tabla: los cupos europeos exactos dependen también de las copas. No se
+            modelan descuentos de puntos.
           </p>
-        ) : null}
+          {s.zones?.playoff ? (
+            <p className="note" style={{ marginTop: 8 }}>
+              El {s.zones.playoff}.º juega la promoción contra un equipo de {league.second}: no se cuenta como descenso.
+            </p>
+          ) : null}
+          {s.zones?.head_to_head ? (
+            <p className="note" style={{ marginTop: 8 }}>
+              En {league.competition} el primer desempate es el enfrentamiento directo; la simulación desempata por
+              diferencia de gol y goles a favor.
+            </p>
+          ) : null}
+        </Reveal>
+
+        <Reveal className="sec" aria-labelledby="posiciones">
+          <div className="section-title"><h2 id="posiciones">Todas las posiciones posibles</h2></div>
+          <PositionGrid teams={s.teams} index={byTeam} relegation={relegation} />
+        </Reveal>
+
+        {s.evaluation && (
+          <p className="note" style={{ marginTop: 24 }}>
+            ¿Qué tan confiables son estas probabilidades? <Link to="/metodologia#simulacion">Ver la validación →</Link>
+          </p>
+        )}
       </div>
-
-      <h2 style={{ margin: '32px 0 12px' }}>Todas las posiciones posibles</h2>
-      <div className="card"><PositionGrid teams={s.teams} index={byTeam} relegation={s.zones?.relegation ?? 3} /></div>
-
-      {s.evaluation && (
-        <p className="small muted" style={{ marginTop: 24 }}>
-          ¿Qué tan confiables son estas probabilidades? <Link to="/metodologia#simulacion">Ver la validación →</Link>
-        </p>
-      )}
-    </div>
+    </>
   )
 }

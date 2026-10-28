@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Icon } from '../components/Icon'
 import { MatchAnalysis, type MatchView } from '../components/MatchAnalysis'
+import { PageBand } from '../components/Motion'
 import { TeamBadge } from '../components/TeamBadge'
 import { API_URL, fetchPrediction, formatDate, loadData, twoSeasonsBefore } from '../lib/data'
-import { LeagueSwitcher } from '../components/LeagueSwitcher'
 import { leagueFile, useLeague, useLeagueData } from '../lib/league'
 import { forecast } from '../lib/model'
 import type { H2H, MetaFile, ModelFile, StateFile, TeamFile, TeamIndexItem, UpcomingFile } from '../lib/types'
@@ -110,27 +110,27 @@ export function Preview() {
   const awayName = nameOf(away)
 
   return (
-    <div className="container section">
-      <div className="section-head">
-        <span className="eyebrow">Previa de partido</span>
+    <>
+      <PageBand layout="7">
+        <div className="hero-main">
         <h1 className="faceoff">
           {[{ t: home, n: homeName }, null, { t: away, n: awayName }].map((x, i) => x === null
             ? <span key="vs" className="faceoff-vs">vs</span>
             : (
               <span key={i} className="faceoff-team">
                 {badgeOf(x.t) && <TeamBadge {...badgeOf(x.t)!} name={x.n} size={64} decorative eager />}
-                <span>{x.n || '…'}</span>
+                <span className="m-title"><span style={{ '--d': `${i * 90}ms` } as CSSProperties}>{x.n || '…'}</span></span>
               </span>
             ))}
         </h1>
-        <p className="lede">
+        <p className="lede rise" style={{ '--d': '260ms' } as CSSProperties}>
           Elegí dos equipos y una fecha. El modelo convierte la diferencia de Elo en goles esperados y, de ahí, en la
           probabilidad de cada marcador. ¿Querés ver la próxima jornada completa? <Link to="/partidos">Próximos partidos →</Link>
         </p>
-        <LeagueSwitcher />
-      </div>
-
-      <div className="card preview-controls">
+        <span className="rise data-label" style={{ '--d': '320ms' } as CSSProperties}>Previa de partido</span>
+        </div>
+        <div className="hero-aside">
+      <div className="card preview-controls rise" style={{ '--d': '240ms' } as CSSProperties}>
         <div className="field">
           <label htmlFor="home">Local</label>
           <select id="home" value={home} onChange={(e) => update({ home: e.target.value })}>
@@ -153,6 +153,9 @@ export function Preview() {
           {!isToday && <button className="btn" onClick={() => update({ date: today })}>Hoy</button>}
         </div>
       </div>
+        </div>
+      </PageBand>
+    <div className="container page preview-body">
 
       {!isToday && !API_URL && (
         <p className="callout" style={{ marginTop: 16 }}>
@@ -182,5 +185,6 @@ export function Preview() {
         </div>
       )}
     </div>
+    </>
   )
 }

@@ -1,7 +1,7 @@
-import { useState, type ReactNode } from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
+import { PageBand, Reveal, Title } from '../components/Motion'
 import { SortableTable, type Column } from '../components/SortableTable'
 import { TeamName } from '../components/TeamName'
-import { LeagueSwitcher } from '../components/LeagueSwitcher'
 import { num, pct } from '../lib/data'
 import { useLeague, useLeagueData } from '../lib/league'
 import { useTeamIndex } from '../lib/teams'
@@ -32,11 +32,11 @@ const col = (key: string, label: string, value: (t: TeamStats) => number | null,
 
 function Section({ id, title, intro, children }: { id: string; title: string; intro?: ReactNode; children: ReactNode }) {
   return (
-    <section id={id} className="stats-section">
-      <h2>{title}</h2>
-      {intro ? <p className="card-sub stats-intro">{intro}</p> : null}
+    <Reveal id={id} className="stats-section">
+      <div className="section-title"><h2>{title}</h2></div>
+      {intro ? <p className="note stats-intro">{intro}</p> : null}
       {children}
-    </section>
+    </Reveal>
   )
 }
 
@@ -85,7 +85,20 @@ function EstadisticasLiga() {
   const { data: s, error, loading } = useLeagueData<StatsFile>(season ? `stats/${season}.json` : null)
   const { byTeam } = useTeamIndex()
 
-  if (index.error) return <div className="container section"><p className="callout">Todavía no hay estadísticas publicadas.</p></div>
+  const band = (
+    <PageBand layout="8">
+      <div className="hero-main">
+        <Title lines={['Estadísticas']} />
+        <p className="rise lede" style={{ '--d': '260ms' } as CSSProperties}>
+          Los números que se miran antes de un partido: cómo rinde cada equipo de local y de visitante, en cada tiempo,
+          cuando va ganando o perdiendo, y señales de si su campaña se sostiene con su juego o con una racha. Tocá el
+          encabezado de una columna para ordenar.
+        </p>
+        <span className="rise data-label" style={{ '--d': '320ms' } as CSSProperties}>{league.competition}{s ? ` · temporada ${s.season}` : ''}</span>
+      </div>
+    </PageBand>
+  )
+  if (index.error) return <>{band}<div className="container page sec"><p className="callout">Todavía no hay estadísticas publicadas.</p></div></>
 
   const teamCell = (t: { team: string }) => {
     const info: TeamIndexItem | undefined = byTeam.get(t.team)
@@ -95,17 +108,9 @@ function EstadisticasLiga() {
   const avgPlayed = s && s.teams.length ? s.teams.reduce((a, t) => a + t.played, 0) / s.teams.length : 0
 
   return (
-    <div className="container section">
-      <div className="section-head">
-        <span className="eyebrow">{league.competition}{s ? ` · temporada ${s.season}` : ''}</span>
-        <h1>Estadísticas</h1>
-        <p className="lede">
-          Los números que se miran antes de un partido: cómo rinde cada equipo de local y de visitante, en cada tiempo,
-          cuando va ganando o perdiendo, y señales de si su campaña se sostiene con su juego o con una racha. Tocá el
-          encabezado de una columna para ordenar.
-        </p>
-        <LeagueSwitcher />
-      </div>
+    <>
+    {band}
+    <div className="container page">
 
       <div className="stats-toolbar">
         {index.data && index.data.length > 1 ? (
@@ -310,5 +315,6 @@ function EstadisticasLiga() {
         </>
       ) : null}
     </div>
+    </>
   )
 }

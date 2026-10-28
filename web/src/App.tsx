@@ -1,5 +1,7 @@
+import type { CSSProperties } from 'react'
 import { HashRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Icon } from './components/Icon'
+import { PageBand, Title } from './components/Motion'
 import { Layout } from './components/Layout'
 import { LeagueProvider } from './components/LeagueProvider'
 import { Estadisticas } from './pages/Estadisticas'
@@ -14,13 +16,16 @@ import { Upcoming } from './pages/Upcoming'
 
 function NotFound() {
   return (
-    <div className="container section not-found">
-      <div className="not-found-code" aria-hidden="true">404</div>
-      <span className="eyebrow">Bandera levantada</span>
-      <h1>Fuera de juego</h1>
-      <p className="lede">Esta página no existe (o se adelantó a la última línea).</p>
-      <Link className="btn btn-primary" to="/">Volver al inicio <span className="arrow"><Icon name="arrow" size={16} /></span></Link>
-    </div>
+    <PageBand layout="8">
+      <div className="hero-main">
+        <Title lines={['Fuera', 'de juego']} />
+        <p className="lede rise" style={{ '--d': '260ms' } as CSSProperties}>Esta página no existe (o se adelantó a la última línea).</p>
+        <span className="not-found-code data-label rise" style={{ '--d': '300ms' } as CSSProperties}>404 · Bandera levantada</span>
+        <div className="rise" style={{ '--d': '340ms' } as CSSProperties}>
+          <Link className="btn btn-primary" to="/">Volver al inicio <span className="arrow"><Icon name="arrow" size={16} /></span></Link>
+        </div>
+      </div>
+    </PageBand>
   )
 }
 

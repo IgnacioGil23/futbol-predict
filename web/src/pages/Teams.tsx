@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { CountUp } from '../components/CountUp'
 import { EloChart } from '../components/EloChart'
 import { Icon } from '../components/Icon'
 import { FormStrip } from '../components/MatchContext'
+import { Odo, PageBand, Title } from '../components/Motion'
 import { TeamBadge } from '../components/TeamBadge'
 import { TeamPreviewPopover, type TeamSeasonSummary } from '../components/TeamPreview'
 import { formatDate, num, pct, pct1 } from '../lib/data'
-import { LeagueSwitcher } from '../components/LeagueSwitcher'
+import { kitOf } from '../lib/kits'
 import { useLeague, useLeagueData } from '../lib/league'
 import { useTeamIndex } from '../lib/teams'
 import type { SeasonFile, StateFile, StatsFile, StatsIndex, TeamFile, TeamSeason } from '../lib/types'
 import './teams.css'
 
-const delay = (d: number) => ({ '--d': d }) as CSSProperties
+const delay = (i: number) => ({ '--d': `${Math.min(i * 35, 600)}ms` }) as CSSProperties
 
 /** Tarjeta de un club de la temporada en curso: abre la vista previa con hover, foco o el botón de información. */
 function ClubCard({ s, i, onOpen, onLeave, active }: {
@@ -23,18 +23,18 @@ function ClubCard({ s, i, onOpen, onLeave, active }: {
   const ref = useRef<HTMLDivElement>(null)
   const t = s.state.table
   return (
-    <div ref={ref} className={`club reveal ${active ? 'active' : ''}`} style={delay(Math.min(i, 12))}
+    <div ref={ref} className={`club row rise ${active ? 'active' : ''}`} style={{ ...delay(i), '--hc': kitOf(s.team.name, s.team.colors).primary, '--ac': kitOf(s.team.name, s.team.colors).secondary } as CSSProperties}
          onPointerEnter={(e) => { if (e.pointerType === 'mouse') onOpen(s, ref.current!, 'hover') }}
          onPointerLeave={(e) => { if (e.pointerType === 'mouse') onLeave() }}>
-      <Link to={`/equipos/${s.team.slug}`} className="card card-link club-card"
+      <Link to={`/equipos/${s.team.slug}`} className="club-card"
             aria-describedby={active ? `tp-${s.team.slug}` : undefined}
             onFocus={(e) => { if (e.currentTarget.matches(':focus-visible')) onOpen(s, ref.current!, 'focus') }}
             onBlur={onLeave}>
         {s.team.stadium && <span className="club-bg" style={{ backgroundImage: active ? `url("${s.team.stadium.image}")` : undefined }} aria-hidden="true" />}
         <span className="club-pos tabular" aria-label={t?.played ? `${t.position}º` : undefined}>{t?.played ? String(t.position).padStart(2, '0') : '–'}</span>
-        <TeamBadge badge={s.team.badge} short={s.team.short} name={s.team.name} size={46} decorative />
+        <TeamBadge badge={s.team.badge} short={s.team.short} name={s.team.name} size={34} colors={s.team.colors ?? null} decorative className="med-h" />
         <span className="club-main">
-          <strong>{s.team.name}</strong>
+          <strong>{s.team.name} <span className="club-code">{s.team.short}</span></strong>
           <span className="club-meta small muted tabular">
             <span>{t?.played ? `${t.points} pts · ${t.played} PJ` : `Elo ${num(s.state.elo, 0)}`}</span>
             <span className="club-form" aria-hidden="true">
@@ -100,33 +100,35 @@ function TeamsLiga() {
   useEffect(() => () => window.clearTimeout(timer.current), [])
 
   return (
-    <div className="container section">
-      <div className="section-head">
-        <span className="eyebrow">Fichas de equipo{state.data ? ` · temporada ${state.data.season}` : ''}</span>
-        <h1>Equipos</h1>
-        <p className="lede">
-          Pasá el mouse por un club para ver su temporada sobre la foto de su estadio; hacé clic para abrir la ficha
-          completa con la evolución del Elo y el rendimiento frente a la liga, temporada por temporada.
-        </p>
-        <LeagueSwitcher />
-        <div className="field search teams-search">
-          <label htmlFor="q" className="sr-only">Buscar un equipo</label>
-          <Icon name="search" size={17} />
-          <input id="q" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar un equipo…" autoComplete="off" />
+    <>
+      <PageBand layout="7">
+        <div className="hero-main">
+          <Title lines={['Equipos']} />
+          <p className="rise lede" style={{ '--d': '260ms' } as CSSProperties}>
+            Pasá el mouse por un club para ver su temporada sobre la foto de su estadio; hacé clic para abrir la ficha
+            completa con la evolución del Elo y el rendimiento frente a la liga, temporada por temporada.
+          </p>
+          <span className="rise data-label" style={{ '--d': '320ms' } as CSSProperties}>Fichas de equipo{state.data ? ` · temporada ${state.data.season}` : ''}</span>
         </div>
-      </div>
+        <div className="hero-aside">
+          <div className="field search teams-search rise" style={{ '--d': '380ms' } as CSSProperties}>
+            <label htmlFor="q" className="sr-only">Buscar un equipo</label>
+            <Icon name="search" size={17} />
+            <input id="q" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar un equipo…" autoComplete="off" />
+          </div>
+        </div>
+      </PageBand>
+    <div className="container page">
 
       {!state.data && <div className="club-grid">{Array.from({ length: 8 }, (_, i) => <div key={i} className="skeleton" style={{ minHeight: 84 }} />)}</div>}
 
       {shown.length > 0 && (
-        <section className="teams-block">
+        <section className="teams-block sec">
           <div className="section-title">
-            <div>
-              <span className="eyebrow">{league.competition} {state.data?.season}</span>
-              <h2>Los {state.data?.teams.length} de esta temporada</h2>
-            </div>
-            <span className="small muted hover-hint"><Icon name="info" size={15} /> Ordenados por su posición en la tabla</span>
+            <h2>Los {state.data?.teams.length} de esta temporada</h2>
+            <span className="data-label hover-hint">{league.competition} {state.data?.season} · ordenados por su posición en la tabla</span>
           </div>
+          <div className="club-cols" aria-hidden="true"><span>#</span><span>Club</span><span>Puntos · PJ</span></div>
           <div className="club-grid">
             {shown.map((s, i) => (
               <ClubCard key={s.team.slug} s={s} i={i} onOpen={onOpen} onLeave={onLeave} active={open?.s.team.slug === s.team.slug} />
@@ -142,8 +144,8 @@ function TeamsLiga() {
           <summary>Otros clubes en {league.competition} desde 2000-01 ({others.length})</summary>
           <div className="club-grid club-grid-sm">
             {others.map((t) => (
-              <Link key={t.slug} to={`/equipos/${t.slug}`} className="card card-link club-card club-card-sm">
-                <TeamBadge badge={t.badge} short={t.short} name={t.name} size={34} decorative />
+              <Link key={t.slug} to={`/equipos/${t.slug}`} className="club-card club-card-sm">
+                <TeamBadge badge={t.badge} short={t.short} name={t.name} size={30} colors={t.colors ?? null} decorative />
                 <span className="club-main">
                   <strong>{t.name}</strong>
                   <span className="small muted">{t.top_seasons} temporadas · última {t.last_top_season}</span>
@@ -161,6 +163,7 @@ function TeamsLiga() {
                             onClose={close} onPointerEnter={keep} onPointerLeave={onLeave} />
       )}
     </div>
+    </>
   )
 }
 
@@ -238,8 +241,8 @@ export function TeamDetail() {
     return t.elo.filter((p) => p.date >= since)
   }, [t, range])
 
-  if (team.error) return <div className="container section"><p className="callout">No encontramos ese equipo. <Link to="/equipos">Volver a equipos</Link></p></div>
-  if (!t) return <div className="container section"><div className="skeleton" style={{ minHeight: 400 }} /></div>
+  if (team.error) return <div className="container page sec"><p className="callout">No encontramos ese equipo. <Link to="/equipos">Volver a equipos</Link></p></div>
+  if (!t) return <div className="container page sec"><div className="skeleton" style={{ minHeight: 400 }} /></div>
 
   const seasons = [...t.seasons].reverse()
   const latest: TeamSeason | undefined = seasons[0]
@@ -249,58 +252,61 @@ export function TeamDetail() {
 
   return (
     <>
-      <section className={`team-hero ${t.stadium ? 'has-img' : ''}`}>
-        {t.stadium && (
-          <img className={`team-hero-img ${imgLoaded ? 'loaded' : ''}`} src={t.stadium.image} alt="" onLoad={() => setImgLoaded(true)} />
-        )}
-        <div className="team-hero-shade" />
-        <div className="container team-hero-inner">
-          <Link to="/equipos" className="back-link small"><Icon name="back" size={15} /> Equipos</Link>
-          <div className="team-hero-id reveal">
-            <TeamBadge badge={t.badge} short={t.short} name={t.name} size={104} eager />
-            <div>
-              {t.stadium
-                ? <span className="team-hero-stadium"><Icon name="pin" size={14} /> {t.stadium.name}</span>
-                : <span className="eyebrow">{t.seasons.length} temporadas en {league.competition} desde 2000-01</span>}
-              <h1>{t.name}</h1>
-            </div>
+      <PageBand layout="7" className="team-hero">
+        <div className="hero-main">
+          <Link to="/equipos" className="hero-back rise"><Icon name="back" size={15} /> Equipos</Link>
+          <div className="team-hero-id">
+            <span className="rise" style={{ '--d': '120ms' } as CSSProperties}>
+              <TeamBadge badge={t.badge} short={t.short} name={t.name} size={104} colors={t.colors ?? null} eager />
+            </span>
+            <Title lines={[t.name]} />
           </div>
+          {t.stadium
+            ? <span className="rise data-label" style={{ '--d': '260ms' } as CSSProperties}><Icon name="pin" size={13} /> {t.stadium.name}</span>
+            : <span className="rise data-label" style={{ '--d': '260ms' } as CSSProperties}>{t.seasons.length} temporadas en {league.competition} desde 2000-01</span>}
           {current && (
-            <dl className="team-hero-stats reveal" style={delay(2)}>
+            <dl className="team-hero-stats rise" style={{ '--d': '320ms' } as CSSProperties}>
               {table?.played ? (
                 <>
-                  <div><dt>Posición</dt><dd><CountUp value={table.position} format={(x) => `${Math.round(x)}º`} /></dd></div>
-                  <div><dt>Puntos</dt><dd><CountUp value={table.points} format={(x) => num(x, 0)} /><small> en {table.played} PJ</small></dd></div>
+                  <div><dt>Posición</dt><dd><Odo value={`${table.position}º`} now /></dd></div>
+                  <div><dt>Puntos</dt><dd><Odo value={num(table.points, 0)} now /><small> en {table.played} PJ</small></dd></div>
                 </>
               ) : null}
-              <div><dt>Elo</dt><dd><CountUp value={current.elo} format={(x) => num(x, 0)} />{eloRank && <small> {eloRank}º de {state.data!.teams.length}</small>}</dd></div>
-              {sim && <div><dt>Pts esperados</dt><dd><CountUp value={sim.expected_points} format={(x) => num(x, 1)} /></dd></div>}
-              {sim && sim.p_champion >= 0.001 && <div><dt>Campeón</dt><dd><CountUp value={sim.p_champion} format={(x) => (sim.p_champion < 0.1 ? pct1(x) : pct(x))} /></dd></div>}
-              {sim && sim.p_champion < 0.001 && sim.p_relegation >= 0.001 && <div><dt>Descenso</dt><dd><CountUp value={sim.p_relegation} format={(x) => (sim.p_relegation < 0.1 ? pct1(x) : pct(x))} /></dd></div>}
+              <div><dt>Elo</dt><dd><Odo value={num(current.elo, 0)} now />{eloRank && <small> {eloRank}º de {state.data!.teams.length}</small>}</dd></div>
+              {sim && <div><dt>Pts esperados</dt><dd><Odo value={num(sim.expected_points, 1)} now /></dd></div>}
+              {sim && sim.p_champion >= 0.001 && <div><dt>Campeón</dt><dd><Odo value={sim.p_champion < 0.1 ? pct1(sim.p_champion) : pct(sim.p_champion)} now /></dd></div>}
+              {sim && sim.p_champion < 0.001 && sim.p_relegation >= 0.001 && <div><dt>Descenso</dt><dd><Odo value={sim.p_relegation < 0.1 ? pct1(sim.p_relegation) : pct(sim.p_relegation)} now /></dd></div>}
             </dl>
           )}
         </div>
-        {(t.stadium || t.badge_credit) && (
-          <div className="team-hero-credit">
-            {t.stadium && (
-              <>
-                <Icon name="camera" size={12} />
-                <a href={t.stadium.credit.source} target="_blank" rel="noreferrer">{t.stadium.credit.author}</a> ·{' '}
-                <a href={t.stadium.credit.license_url} target="_blank" rel="noreferrer">{t.stadium.credit.license}</a> · Wikimedia Commons
-              </>
-            )}
-            {t.badge_credit && (
-              <>
-                {t.stadium ? ' · ' : ''}Escudo:{' '}
-                <a href={t.badge_credit.source} target="_blank" rel="noreferrer">{t.badge_credit.author}</a> ·{' '}
-                <a href={t.badge_credit.license_url} target="_blank" rel="noreferrer">{t.badge_credit.license}</a>
-              </>
-            )}
-          </div>
-        )}
-      </section>
+        <div className="hero-aside">
+          {t.stadium && (
+            <figure className={`team-photo from-r ${imgLoaded ? 'loaded' : ''}`} style={{ '--d': '240ms' } as CSSProperties}>
+              <img src={t.stadium.image} alt="" onLoad={() => setImgLoaded(true)} />
+            </figure>
+          )}
+          {(t.stadium || t.badge_credit) && (
+            <div className="team-hero-credit data-label">
+              {t.stadium && (
+                <>
+                  <Icon name="camera" size={12} />{' '}
+                  <a href={t.stadium.credit.source} target="_blank" rel="noreferrer">{t.stadium.credit.author}</a> ·{' '}
+                  <a href={t.stadium.credit.license_url} target="_blank" rel="noreferrer">{t.stadium.credit.license}</a> · Wikimedia Commons
+                </>
+              )}
+              {t.badge_credit && (
+                <>
+                  {t.stadium ? ' · ' : ''}Escudo:{' '}
+                  <a href={t.badge_credit.source} target="_blank" rel="noreferrer">{t.badge_credit.author}</a> ·{' '}
+                  <a href={t.badge_credit.license_url} target="_blank" rel="noreferrer">{t.badge_credit.license}</a>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </PageBand>
 
-      <div className="container section team-body">
+      <div className="container page team-body">
         {latest && (
           <div className="card" style={{ marginBottom: 18 }}>
             <h3>{latestIsCurrent ? `Esta temporada (${latest.season}), hasta ahora` : `Su última temporada en ${league.competition} (${latest.season})`}</h3>
@@ -327,7 +333,7 @@ export function TeamDetail() {
               <button aria-pressed={range === 'all'} onClick={() => setRange('all')}>Desde 2000</button>
             </div>
           </div>
-          <EloChart series={[{ name: t.name, color: 'var(--home)', points: series }]} height={300} />
+          <EloChart series={[{ name: t.name, color: `color-mix(in srgb, ${kitOf(t.name, t.colors, '#888888').primary} 72%, var(--ink))`, points: series }]} height={300} />
           {range === 'all' && <p className="small muted">2000-01 a 2003-04: arranque del Elo (no hay cuotas antes de 2002-03 y todos los equipos de cada división empiezan igual); no se usa para evaluar.</p>}
         </div>
 

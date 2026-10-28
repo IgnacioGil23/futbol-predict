@@ -5,7 +5,7 @@
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Probabilidad de cada marcador en la Premier League, LaLiga, la Serie A, la Bundesliga y la Ligue 1: un modelo de Poisson sobre Elo, evaluado contra el mercado de apuestas." />
-    <meta name="theme-color" content="#05080a" />
+    <meta name="theme-color" content="#110A16" />
     <meta property="og:title" content="Marcador Probable · Fútbol europeo" />
     <meta property="og:description" content="Probabilidad de cada marcador en la Premier League, LaLiga, la Serie A, la Bundesliga y la Ligue 1: un modelo de Poisson sobre Elo, evaluado contra el mercado de apuestas." />
     <meta property="og:type" content="website" />
@@ -15,6 +15,18 @@
     <script>
       // Tema guardado antes del primer pintado (oscuro por defecto), para que no parpadee.
       try { if (localStorage.getItem('theme') === 'light') document.documentElement.dataset.theme = 'light' } catch (e) {}
+      // Clases del sistema visual (tema y color de la liga) antes del primer pintado. Solo pintan: la liga la decide la app.
+      (function () {
+        var root = document.documentElement
+        root.classList.add(root.dataset.theme === 'light' ? 't-claro' : 't-oscuro')
+        var classes = { premier: 'lg-premier', laliga: 'lg-laliga', 'serie-a': 'lg-seriea', bundesliga: 'lg-bundesliga', 'ligue-1': 'lg-ligue1' }
+        var m = /[?&]liga=([^&#]+)/.exec(location.hash)
+        var slug = m ? m[1] : null
+        if (!slug && (location.hash === '' || location.hash === '#/' || location.hash.indexOf('#/?') === 0)) {
+          try { slug = localStorage.getItem('liga') } catch (e) {}
+        }
+        root.classList.add(classes[slug] || 'lg-premier')
+      })()
     </script>
   </head>
   <body>

@@ -1,0 +1,13 @@
+/* ======================================================================= Revisión */
+.review-summary { display: flex; flex-direction: column; gap: 12px; }
+.rs-rows { display: grid; grid-template-columns: auto 1fr; gap: 6px 20px; align-items: baseline; font-size: 18px; }
+.rs-v { font-size: 44px; font-weight: 500; letter-spacing: -.03em; line-height: 1; }
+.rs-hit { font-size: 16px; color: var(--ink-2); }
+.review-grid { padding-top: 44px; }
+.review-list .table td { padding-top: 10px; padding-bottom: 10px; }
+.review-list .table tbody tr.selected { background: color-mix(in srgb, var(--acc) 16%, transparent); box-shadow: inset 3px 0 0 var(--acc); }
+.review-list .table button:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }
+.pa-track { width: 56px; height: 8px; display: inline-block; }
+.review-match { margin: 6px 0 8px; font-size: 24px; font-weight: 500; }
+.review-detail .outcome { margin: 12px 0 4px; }
+@media (max-width: 900px) { .rs-v { font-size: 32px; } }

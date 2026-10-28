@@ -1,5 +1,8 @@
 import { pct } from '../lib/data'
+import { kitOf, sideColors } from '../lib/kits'
+import { useTeamIndex } from '../lib/teams'
 import type { Probabilities } from '../lib/types'
+import { SplitBar } from './Motion'
 
 interface Props {
   probs: Probabilities
@@ -10,30 +13,29 @@ interface Props {
   size?: 'md' | 'lg'
 }
 
-/** Barra 1X2 con etiquetas directas y, si existe, la referencia del mercado debajo de cada resultado. */
+/** Barra 1X2 con el número en cada tramo y, si existe, la referencia del mercado debajo de cada resultado. */
 export function OutcomeBar({ probs, homeName, awayName, market, marketLabel = 'Mercado (Bet365, sin margen)', size = 'md' }: Props) {
+  const { list } = useTeamIndex()
+  const colorsOf = (name: string) => list.find((t) => t.name === name)?.colors
+  const { hc, ac } = sideColors(kitOf(homeName, colorsOf(homeName)), kitOf(awayName, colorsOf(awayName), '#777777'))
   const segs = [
-    { key: 'home', label: homeName, p: probs.home, color: 'var(--home)' },
-    { key: 'draw', label: 'Empate', p: probs.draw, color: 'var(--draw)' },
-    { key: 'away', label: awayName, p: probs.away, color: 'var(--away)' },
+    { key: 'home', label: homeName },
+    { key: 'draw', label: 'Empate' },
+    { key: 'away', label: awayName },
   ] as const
-  const top = Math.max(probs.home, probs.draw, probs.away)
   return (
     <div className={`outcome outcome-${size}`}>
-      <div className="outcome-track" style={{ gridTemplateColumns: `${probs.home}fr ${probs.draw}fr ${probs.away}fr` }}
-           role="img" aria-label={`Local ${pct(probs.home)}, empate ${pct(probs.draw)}, visitante ${pct(probs.away)}`}>
-        {segs.map((s) => <span key={s.key} style={{ background: s.color, opacity: s.p === top ? 1 : 0.78 }} />)}
-      </div>
-      <div className="outcome-labels">
+      <SplitBar probs={[probs.home, probs.draw, probs.away]} colors={[hc, ac]} height={size === 'lg' ? 44 : 32} font={size === 'lg' ? 16 : 13}
+                label={`Local ${pct(probs.home)}, empate ${pct(probs.draw)}, visitante ${pct(probs.away)}`} />
+      <div className="outcome-legend">
         {segs.map((s) => (
-          <div key={s.key} className={`outcome-${s.key}`}>
-            <div className="outcome-pct tabular" style={s.p === top ? { color: s.color } : undefined}>{pct(s.p)}</div>
-            <div className="outcome-name"><span className="dot" style={{ background: s.color }} />{s.label}</div>
-            {market && <div className="small muted tabular" title={marketLabel}>mercado {pct(market[s.key])}</div>}
+          <div key={s.key}>
+            <div>{s.label}</div>
+            {market && <div title={marketLabel}>mercado {pct(market[s.key])}</div>}
           </div>
         ))}
       </div>
-      {market && <p className="small muted" style={{ marginTop: 10 }}>{marketLabel}: probabilidades implícitas con el margen quitado (método de Shin).</p>}
+      {market && <p className="outcome-market">{marketLabel}: probabilidades implícitas con el margen quitado (método de Shin).</p>}
     </div>
   )
 }

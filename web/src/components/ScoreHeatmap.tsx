@@ -55,11 +55,11 @@ export function ScoreHeatmap({ grid, homeName, awayName, actual, size = 6, compa
            style={{ maxWidth: '100%', height: 'auto', overflow: 'visible' }}
            viewBox={`0 0 ${svgW} ${svgH}`}>
         {/* encabezados */}
-        <text x={margin.left + gw / 2} y={12} textAnchor="middle" style={{ fontWeight: 650, fill: 'var(--away)' }}>
+        <text x={margin.left + gw / 2} y={12} textAnchor="middle" style={{ fontWeight: 700, fill: 'var(--ink)' }}>
           Goles {awayName}
         </text>
         <text transform={`translate(12 ${margin.top + gw / 2}) rotate(-90)`} textAnchor="middle"
-              style={{ fontWeight: 650, fill: 'var(--home)' }}>
+              style={{ fontWeight: 700, fill: 'var(--ink)' }}>
           Goles {homeName}
         </text>
         {Array.from({ length: size }, (_, i) => (
@@ -79,7 +79,7 @@ export function ScoreHeatmap({ grid, homeName, awayName, actual, size = 6, compa
                onFocus={() => setHover([x, y])} onBlur={() => setHover(null)}
                tabIndex={0} role="button" aria-label={`${homeName} ${x}, ${awayName} ${y}: ${pct1(p)}`}
                style={{ cursor: 'default', outline: 'none' }}>
-              <rect x={1.5} y={1.5} width={cell - 3} height={cell - 3} rx={7} fill={color(p)}
+              <rect x={1.5} y={1.5} width={cell - 3} height={cell - 3} rx={3} fill={color(p)}
                     stroke={isHover ? 'var(--ink)' : isBest ? 'var(--accent)' : x === y ? 'var(--axis)' : 'none'}
                     strokeWidth={isHover || isBest ? 2 : 1} strokeDasharray={x === y && !isHover && !isBest ? '3 3' : undefined}
                     style={{ transition: 'stroke 0.15s' }} />
@@ -90,7 +90,7 @@ export function ScoreHeatmap({ grid, homeName, awayName, actual, size = 6, compa
                 </text>
               )}
               {isActual && <rect x={3} y={3} width={cell - 6} height={cell - 6} rx={4} fill="none"
-                                 stroke="var(--away)" strokeWidth={2.5} />}
+                                 stroke="var(--ink)" strokeWidth={2.5} />}
               {isBest && <circle cx={cell - 8} cy={8} r={3} fill={textOn(p)} />}
             </g>
           )
@@ -99,7 +99,7 @@ export function ScoreHeatmap({ grid, homeName, awayName, actual, size = 6, compa
         {homeMarg.map((p, x) => (
           <g key={`hm${x}`} transform={`translate(${margin.left + gw + 8} ${margin.top + x * cell})`}>
             <rect y={cell * 0.25} height={cell * 0.5} width={Math.max(2, (p / barMax) * (margin.right - 30))}
-                  rx={3} fill="var(--home)" opacity={0.85} />
+                  rx={2} fill="var(--home)" />
             <text x={Math.max(2, (p / barMax) * (margin.right - 30)) + 4} y={cell / 2 + 4} style={{ fontSize: 10 }}>
               {Math.round(p * 100)}%
             </text>
@@ -110,7 +110,7 @@ export function ScoreHeatmap({ grid, homeName, awayName, actual, size = 6, compa
           const h = Math.max(2, (p / barMax) * 40)
           return (
             <g key={`am${y}`} transform={`translate(${margin.left + y * cell} ${margin.top + gw + 6})`}>
-              <rect x={cell * 0.25} width={cell * 0.5} height={h} rx={3} fill="var(--away)" opacity={0.85} />
+              <rect x={cell * 0.25} width={cell * 0.5} height={h} rx={2} fill="var(--away)" />
               <text x={cell / 2} y={h + 11} textAnchor="middle" style={{ fontSize: 10 }}>{Math.round(p * 100)}%</text>
             </g>
           )

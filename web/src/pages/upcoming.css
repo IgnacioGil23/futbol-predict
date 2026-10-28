@@ -1,56 +1,117 @@
-.tabs button { display: inline-flex; align-items: baseline; gap: 8px; padding: 8px 16px; }
-.tab-date { font-size: 0.75rem; opacity: 0.7; font-weight: 500; }
-
-.highlight {
-  display: flex; flex-direction: column; gap: 8px; text-align: left; cursor: pointer;
-  font: inherit; color: inherit;
+/* ======================================================================= Partidos: hero */
+.hero-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.lead-title { font-size: 20px; font-weight: 500; }
+.lead { padding: 0; overflow: hidden; }
+.lead-sides { position: relative; display: grid; grid-template-columns: 1fr 1fr; min-height: 250px; }
+.lead-side { display: flex; flex-direction: column; justify-content: space-between; gap: 18px; padding: 24px 90px 24px 26px; min-width: 0; }
+.lead-away { align-items: flex-end; text-align: right; padding: 24px 26px 24px 90px; }
+.lead-name { font-family: var(--display); font-weight: 800; font-size: 44px; line-height: .9; text-transform: uppercase; overflow-wrap: anywhere; }
+.lead-meta { margin-top: 6px; font-family: var(--mono); font-size: 12px; opacity: .9; }
+.fav-ring {
+  position: absolute; left: 50%; top: 50%; margin: -78px 0 0 -78px; border-radius: 50%;
+  background: var(--g1); box-shadow: 0 18px 40px -16px var(--shadow-c);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
 }
-.highlight strong { font-family: var(--display); font-size: 1.35rem; text-transform: uppercase; line-height: 1.05; font-weight: 700; }
-.highlight-badges { display: flex; gap: 4px; margin-top: 4px; }
-.highlight-badges > *:last-child { margin-left: -10px; }
+.fav-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.fav-arc { transition: stroke-dashoffset 1000ms var(--out) 520ms; }
+.fav-p { position: relative; font-size: 46px; font-weight: 500; line-height: 1; letter-spacing: -.04em; }
+.fav-who { position: relative; max-width: 120px; margin-top: 4px; font-size: 14px; line-height: 1.2; color: var(--ink-2); }
+.lead-body { display: flex; flex-direction: column; gap: 12px; padding: 22px 24px; }
+.lead-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 16px; }
+.lead-cta { margin-left: auto; }
+@media (prefers-reduced-motion: reduce) { .fav-arc { transition: none; } }
 
+/* ======================================================================= Partidos: datos y fixture */
+.sub-title { font-size: 26px; margin-bottom: 16px; }
+.datum { display: flex; flex-direction: column; gap: 12px; text-align: left; font: inherit; color: inherit; border: 0; cursor: pointer; }
+.datum h3 { margin: 0; font-size: 18px; font-weight: 500; color: var(--acc); }
+.datum-match { display: flex; align-items: center; gap: 12px; font-size: 22px; }
+.datum-match strong { font-weight: 600; line-height: 1.2; }
+.datum-big { font-size: 40px; font-weight: 500; letter-spacing: -.02em; line-height: 1; }
+.datum-total { display: flex; align-items: baseline; gap: 10px; font-size: 17px; }
+.xg-bars { display: grid; grid-template-columns: 1fr 52px; gap: 8px 12px; align-items: center; }
+.xg-bars .num { font-size: 15px; }
+
+.fixture-head .data-label { max-width: 620px; font-size: 13px; }
+.fx-cols, .fx-row, .fx-skel-row {
+  display: grid; gap: 20px; align-items: center;
+  grid-template-columns: 60px minmax(0, 1fr) minmax(240px, 1.3fr) minmax(0, 1fr) 100px 112px 32px;
+}
+.fx-cols { padding: 10px 0; font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
+.fx-cols .r { text-align: right; } .fx-cols .c { text-align: center; }
+.day-label::first-letter { text-transform: uppercase; }
 .upcoming-list { list-style: none; margin: 0; padding: 0; }
-.upcoming-list > li { border-bottom: 1px solid var(--line); scroll-margin-top: 72px; }
-.upcoming-list > li:last-child { border-bottom: 0; }
-.upcoming-list > li { transition: background 0.2s; }
-.upcoming-list > li.open { background: linear-gradient(180deg, var(--accent-soft), transparent 240px); box-shadow: inset 3px 0 0 var(--accent); }
+.upcoming-list > li { border-bottom: 1px solid var(--rule); scroll-margin-top: 16px; }
+.fx-row { padding: 22px 0 16px; }
+.fx-time { font-size: 14px; }
+.fx-team { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.fx-home { justify-content: flex-end; text-align: right; }
+.fx-name { font-size: 19px; font-weight: 500; line-height: 1.15; min-width: 0; }
+.fx-team.fav .fx-name { font-weight: 700; }
+.fx-bar { position: relative; display: block; }
+.fx-note { position: absolute; top: -18px; transform: translateX(-50%); font-family: var(--mono); font-size: 11px; color: var(--acc); white-space: nowrap; }
+.fx-market { display: block; margin-top: 6px; font-size: 12px; color: var(--ink-2); text-align: center; }
+.fx-score { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.fx-score .big { font-size: 15px; }
+.fx-score .more { font-size: 12px; color: var(--ink-2); }
+.fx-xg { text-align: right; font-size: 14px; white-space: nowrap; }
+.fx-row .chev { justify-self: center; }
+.fx-panel { padding: 4px 0 26px; }
+.fx-summary { display: grid; grid-template-columns: 60px repeat(3, minmax(0, 1fr)); gap: 20px 32px; }
+.fx-summary::before { content: ''; }
+.fx-sum-top, .fx-sum-xg, .fx-sum-go { display: flex; flex-direction: column; gap: 6px; }
+.fx-sum-go { align-items: flex-start; gap: 10px; }
+.fx-sum-score { font-size: 44px; font-weight: 500; line-height: 1; }
+.fx-summary .xg-bars { grid-template-columns: 1fr 48px; }
+.fx-summary .track { height: 8px; }
+.fx-analysis { margin-top: 28px; padding-top: 8px; border-top: 1px solid var(--rule); scroll-margin-top: 16px; }
+.fx-analysis:focus { outline: none; }
+.fx-notes { margin-top: 28px; max-width: 760px; }
+.fx-skeleton { padding-top: 40px; }
+.fx-skel-row { padding: 20px 0; border-bottom: 1px solid var(--rule); }
+.fx-skel-row .skel { height: 14px; }
+.fx-skel-row .skel-bar { height: 30px; }
+.empty-state { margin-top: 40px; font-size: 19px; }
 
-.upcoming-row {
-  all: unset; box-sizing: border-box; cursor: pointer; width: 100%;
-  display: grid; gap: 8px 18px; align-items: center; padding: 16px 20px;
-  grid-template-columns: 1fr auto;
-  grid-template-areas: "when chev" "teams teams" "bar bar" "meta meta";
-}
-.upcoming-row:hover { background: color-mix(in srgb, var(--surface-2) 70%, transparent); }
-.upcoming-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.u-when { grid-area: when; }
-.u-teams { grid-area: teams; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; min-width: 0; }
-.u-team { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
-.u-team strong { font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.u-vs { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-weight: 700; }
-.u-when::first-letter { text-transform: uppercase; }
-.upcoming-row .mini-bar { grid-area: bar; }
-.u-meta { grid-area: meta; display: flex; gap: 12px; flex-wrap: wrap; }
-.u-market { color: var(--ink-2); }
-.u-chevron {
-  grid-area: chev; justify-self: end; width: 30px; height: 30px; border-radius: 50%;
-  display: grid; place-items: center; border: 1px solid var(--line-strong); font-weight: 700;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
-}
-.upcoming-row:hover .u-chevron { border-color: var(--accent-line); color: var(--accent); }
-.open .u-chevron { background: var(--accent); color: var(--accent-ink); border-color: var(--accent);
-}
-@media (min-width: 900px) {
-  .upcoming-row {
-    grid-template-columns: 120px minmax(0, 1.4fr) minmax(180px, 1fr) minmax(0, 1fr) 30px;
-    grid-template-areas: "when teams bar meta chev";
+/* Celular: nombres a la izquierda y la barra de 140 px a la derecha (composición Movil). */
+@media (max-width: 900px) {
+  .lead-sides { min-height: 150px; }
+  .lead-side { padding: 14px 44px 14px 14px; gap: 10px; }
+  .lead-away { padding: 14px 14px 14px 44px; }
+  .lead-name { font-size: 24px; line-height: .92; }
+  .lead-meta { font-size: 12px; }
+  .lead .lead-med { width: 48px !important; height: 48px !important; }
+  .fav-ring { width: 96px !important; height: 96px !important; margin: -48px 0 0 -48px; }
+  .fav-ring svg { width: 96px; height: 96px; }
+  .fav-p { font-size: 28px; }
+  .fav-who { font-size: 11px; max-width: 80px; }
+  .lead-body { padding: 14px; }
+  .lead-cta { margin-left: 0; }
+  .sub-title { font-size: 22px; }
+  .datum-big { font-size: 28px; }
+  .datum-match { font-size: 17px; }
+  .fx-cols { display: none; }
+  .fx-row {
+    grid-template-columns: minmax(0, 1fr) 140px; gap: 6px 12px; padding: 14px 0 12px;
+    grid-template-areas: "time chev" "home bar" "away score" "xg xg";
   }
-  .u-meta { flex-direction: column; gap: 2px; }
+  .fx-time { grid-area: time; font-size: 12px; color: var(--ink-2); }
+  .fx-row .chev { grid-area: chev; justify-self: end; }
+  .fx-home { grid-area: home; flex-direction: row-reverse; justify-content: flex-end; text-align: left; }
+  .fx-away { grid-area: away; }
+  .fx-team { gap: 8px; }
+  .fx-team .med { width: 26px !important; height: 26px !important; }
+  .fx-name { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fx-bar { grid-area: bar; align-self: end; }
+  .fx-bar .bar3 { height: 24px !important; }
+  .fx-note { top: -16px; }
+  .fx-score { grid-area: score; flex-direction: row; justify-content: flex-end; }
+  .fx-score .more { display: none; }
+  .fx-xg { grid-area: xg; display: none; }
+  .fx-market { text-align: left; }
+  .fx-summary { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .fx-summary::before { display: none; }
+  .fx-sum-score { font-size: 36px; }
+  .fx-skel-row { grid-template-columns: minmax(0, 1fr) 140px; }
+  .fx-skel-row .skel:nth-child(n + 4) { display: none; }
 }
-
-.mini-bar-track { display: grid; gap: 2px; height: 8px; }
-.mini-bar-track span { border-radius: 3px; min-width: 3px; }
-.mini-bar-labels { display: flex; justify-content: space-between; font-size: 0.78rem; margin-top: 3px; font-weight: 600; }
-
-.upcoming-detail { padding: 0 4px 12px; }
-@media (min-width: 900px) { .upcoming-detail { padding: 0 18px 18px; } }

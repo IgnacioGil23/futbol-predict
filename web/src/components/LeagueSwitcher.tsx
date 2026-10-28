@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+import { LEAGUE_FIELD } from '../lib/kits'
 import { useLeague } from '../lib/league'
+import { useCurtain } from '../lib/motion'
 import './league-switcher.css'
 
 /**
@@ -9,6 +11,9 @@ import './league-switcher.css'
 export function LeagueSwitcher({ variant = 'pills' }: { variant?: 'menu' | 'pills' }) {
   const { league, leagues, setLeague } = useLeague()
   const [open, setOpen] = useState(false)
+  const curtain = useCurtain()
+  // Cambiar de liga es un evento: la cortina del color de destino barre la pantalla y el cambio llega a los 360 ms.
+  const pick = (slug: string) => (slug === league.slug ? setLeague(slug) : curtain(LEAGUE_FIELD[slug] ?? '#000000', () => setLeague(slug)))
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -24,9 +29,9 @@ export function LeagueSwitcher({ variant = 'pills' }: { variant?: 'menu' | 'pill
 
   if (variant === 'pills') {
     return (
-      <div className="seg league-pills" role="group" aria-label="Liga">
+      <div className="league-tabs" role="group" aria-label="Liga">
         {leagues.map((l) => (
-          <button key={l.slug} type="button" aria-pressed={l.slug === league.slug} onClick={() => setLeague(l.slug)}>
+          <button key={l.slug} type="button" className="league-tab" aria-pressed={l.slug === league.slug} onClick={() => pick(l.slug)}>
             {l.competition}
           </button>
         ))}
@@ -46,7 +51,7 @@ export function LeagueSwitcher({ variant = 'pills' }: { variant?: 'menu' | 'pill
         {leagues.map((l) => (
           <li key={l.slug}>
             <button type="button" aria-current={l.slug === league.slug ? 'true' : undefined}
-                    onClick={() => { setLeague(l.slug); setOpen(false) }}>
+                    onClick={() => { pick(l.slug); setOpen(false) }}>
               <strong>{l.competition}</strong><span className="muted small">{l.country}</span>
             </button>
           </li>
