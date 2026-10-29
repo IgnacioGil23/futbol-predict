@@ -176,7 +176,7 @@ export function Preview() {
         <div style={{ opacity: loading ? 0.55 : 1, transition: 'opacity .2s' }}>
           <p className="small muted" style={{ margin: '16px 0 0' }}>
             {view.mode === 'hoy'
-              ? `Estado de los equipos al ${formatDate(today)} (último partido en los datos: ${formatDate(meta.data!.last_match_in_data)}).`
+              ? `Estado de los equipos al ${formatDate(today)}${meta.data ? ` (último partido en los datos: ${formatDate(meta.data.last_match_in_data)})` : ""}.`
               : `Como si el partido se jugara el ${formatDate(view.date)}: solo usa partidos anteriores a esa fecha.`}
           </p>
           {view.warnings.map((w) => <p key={w} className="callout" style={{ marginTop: 8 }}>{w}</p>)}

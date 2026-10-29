@@ -25,7 +25,13 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
   const fromUrl = params.get('liga')
   const [chosen, setChosen] = useState<string>(() => fromUrl ?? (pathname === '/' ? stored() : null) ?? PREMIER.slug)
   // Un enlace con ?liga= pasa a ser la liga elegida (también después de navegar a otra página sin el parámetro).
-  if (fromUrl && fromUrl !== chosen) setChosen(fromUrl)
+  // Solo cuando el parámetro cambia: si no, al elegir la Premier (que borra ?liga=) el render previo a que la URL
+  // se actualice devolvía la elección a la liga anterior y el cambio se perdía.
+  const [lastFromUrl, setLastFromUrl] = useState(fromUrl)
+  if (fromUrl !== lastFromUrl) {
+    setLastFromUrl(fromUrl)
+    if (fromUrl && fromUrl !== chosen) setChosen(fromUrl)
+  }
   const slug = fromUrl ?? chosen
   const leagues = useMemo(() => (index.data?.length ? index.data : [PREMIER]), [index.data])
   const known = leagues.find((l) => l.slug === slug)
@@ -45,10 +51,13 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
   }, [waiting, league.slug, fromUrl, setParams])
 
   const setLeague = useCallback((next: string) => {
-    setChosen(next)
     remember(next)
     const search = next === PREMIER.slug ? '' : `?liga=${next}`
     // Una ficha de equipo o una previa son de una liga: al cambiar de liga se vuelve a la lista o a una previa vacía.
+    // Ahí la liga viaja en la URL de destino: si se cambiara antes el estado, el efecto que agrega ?liga= escribiría
+    // sobre la ruta vieja y la navegación se perdía. La Premier no lleva parámetro, así que se elige en el estado.
+    const leaving = pathname.startsWith('/equipos/') || pathname === '/partidos/previa'
+    if (!leaving || next === PREMIER.slug) setChosen(next)
     if (pathname.startsWith('/equipos/')) navigate({ pathname: '/equipos', search })
     else if (pathname === '/partidos/previa') navigate({ pathname, search })
     else setParams((p) => { if (next === PREMIER.slug) p.delete('liga'); else p.set('liga', next); return p }, { replace: true })

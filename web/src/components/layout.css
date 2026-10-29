@@ -3,7 +3,7 @@
 main:focus { outline: none; }
 
 /* ======================================================================= encabezado, dentro del band */
-.site-band { z-index: 1; }
+.site-band { z-index: 35; }   /* sobre el fondo oscuro del menú celular (z 29), que si no tapaba el menú abierto */
 .topbar { position: relative; z-index: 30; border-bottom: 1px solid var(--rule); }
 .topbar-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 36px; padding-top: 18px; }
 @media (max-width: 1039px) { .topbar-inner { flex-wrap: nowrap; gap: 12px; } }
@@ -73,7 +73,8 @@ main:focus { outline: none; }
   .nav .nav-top.active { background: var(--g2); box-shadow: inset 3px 0 0 var(--accb); }
   .nav-indicator, .nav-group-btn { display: none; }
   .nav-group-label { display: block; padding: 14px 12px 4px; font-family: var(--mono); font-size: 12px; color: var(--mi2); }
-  .nav-menu { position: static; min-width: 0; padding: 0; box-shadow: none; background: none; opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition: none; }
+  /* Hereda del panel: cerrado, sus enlaces no se ven ni reciben clics. */
+  .nav-menu { position: static; min-width: 0; padding: 0; box-shadow: none; background: none; opacity: 1; transform: none; pointer-events: inherit; visibility: inherit; transition: none; }
   .nav .nav-menu a { padding-left: 20px; }
   .nav-scrim { display: block; position: fixed; inset: 0; z-index: 29; background: rgba(0, 0, 0, .45); }
   .league-row { justify-content: flex-start; }
