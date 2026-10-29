@@ -1,12 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { flushSync } from 'react-dom'
 import { Link, useSearchParams } from 'react-router-dom'
+import { Odo, PageBand, Reveal, Title } from '../components/Motion'
+import { reducedMotion } from '../lib/motion'
 import { OutcomeBar } from '../components/OutcomeBar'
 import { ScoreHeatmap } from '../components/ScoreHeatmap'
 import { formatDate, num, pct } from '../lib/data'
-import { LeagueSwitcher } from '../components/LeagueSwitcher'
 import { useLeague, useLeagueData } from '../lib/league'
 import { forecast } from '../lib/model'
 import type { ReviewMatch, ReviewSeasonFile, ReviewSeasonSummary } from '../lib/types'
+import './review.css'
 
 const RESULT_LABEL = { H: 'ganó el local', D: 'empate', A: 'ganó el visitante' } as const
 
@@ -18,6 +21,14 @@ function gridFrom(lam: number, mu: number) {
 }
 
 type Sort = 'fecha' | 'sorpresas' | 'aciertos'
+
+/** Reordenar con View Transitions: las filas se desplazan a su nuevo lugar (solo las primeras, las que se ven). */
+function withTransition(update: () => void) {
+  const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown }
+  if (doc.startViewTransition && !reducedMotion()) doc.startViewTransition(() => flushSync(update))
+  else update()
+}
+const vtName = (id: string) => `rv-${id.replace(/[^a-zA-Z0-9_-]/g, '-')}`
 
 /** El filtro por equipo y el orden son del estado de la liga: se reinician al cambiar de liga. */
 export function Review() {
@@ -57,19 +68,32 @@ function ReviewLiga() {
   const select = (m: ReviewMatch) => { const n = new URLSearchParams(params); n.set('season', season); n.set('match', m.id); setParams(n, { replace: true }) }
 
   return (
-    <div className="container section">
-      <div className="section-head">
-        <span className="eyebrow">Revisión histórica</span>
-        <h1>¿Qué había predicho el modelo?</h1>
-        <p className="lede">
-          Cada predicción se hizo como si fuera antes del partido: el modelo se reentrena al comienzo de cada temporada
-          solo con las anteriores, y el Elo usa solo partidos previos. Sin maquillaje: acá están también los errores.
-        </p>
-        <LeagueSwitcher />
-      </div>
-
-      <div className="grid grid-main" style={{ alignItems: 'start' }}>
-        <div className="card">
+    <>
+      <PageBand layout="7">
+        <div className="hero-main">
+          <Title lines={['¿Qué había', 'predicho', 'el modelo?']} />
+          <p className="rise lede" style={{ '--d': '260ms' } as CSSProperties}>
+            Cada predicción se hizo como si fuera antes del partido: el modelo se reentrena al comienzo de cada temporada
+            solo con las anteriores, y el Elo usa solo partidos previos. Sin maquillaje: acá están también los errores.
+          </p>
+          <span className="rise data-label" style={{ '--d': '320ms' } as CSSProperties}>Revisión histórica</span>
+        </div>
+        <div className="hero-aside">
+          {summary && (
+            <div className="card review-summary rise" style={{ '--d': '240ms' } as CSSProperties}>
+              <p className="data-label">{season} · log loss, menor es mejor · {summary.compared_matches} partidos con cuotas</p>
+              <div className="rs-rows">
+                <span>Modelo</span><span className="num rs-v"><Odo value={num(summary.model.log_loss, 3)} now /></span>
+                <span>Mercado</span><span className="num rs-v"><Odo value={num(summary.market.log_loss, 3)} now /></span>
+              </div>
+              <p className="rs-hit">Resultado más probable acertado en <span className="num"><Odo value={pct(summary.model.accuracy)} now /></span> de los partidos.</p>
+            </div>
+          )}
+        </div>
+      </PageBand>
+    <div className="container page">
+      <div className="grid grid-main review-grid" style={{ alignItems: 'start' }}>
+        <Reveal as="div" className="review-list">
           <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginBottom: 12 }}>
             <div className="field">
               <label htmlFor="season">Temporada</label>
@@ -86,7 +110,7 @@ function ReviewLiga() {
             </div>
             <div className="field">
               <label htmlFor="sort">Orden</label>
-              <select id="sort" value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
+              <select id="sort" value={sort} onChange={(e) => { const v = e.target.value as Sort; withTransition(() => setSort(v)) }}>
                 <option value="fecha">Más recientes</option>
                 <option value="sorpresas">Mayores sorpresas</option>
                 <option value="aciertos">Resultados más anticipados</option>
@@ -94,7 +118,7 @@ function ReviewLiga() {
             </div>
           </div>
           {summary && (
-            <p className="small" style={{ marginBottom: 10, color: 'var(--ink-2)' }}>
+            <p className="note" style={{ marginBottom: 10 }}>
               {season}: log loss del modelo <strong>{num(summary.model.log_loss, 3)}</strong> vs mercado <strong>{num(summary.market.log_loss, 3)}</strong>{' '}
               (menor es mejor; {summary.compared_matches} partidos con cuotas) · resultado más probable acertado en {pct(summary.model.accuracy)} de los partidos.
             </p>
@@ -103,15 +127,16 @@ function ReviewLiga() {
             <table className="table">
               <thead><tr><th>Fecha</th><th>Partido</th><th className="num">Resultado</th><th className="num" title="Probabilidad que el modelo le daba al resultado que ocurrió">Prob. del resultado</th></tr></thead>
               <tbody>
-                {matches.map((m) => (
-                  <tr key={m.id} onClick={() => select(m)} style={{ cursor: 'pointer', background: m.id === selectedId ? 'var(--accent-soft)' : undefined }}>
+                {matches.map((m, i) => (
+                  <tr key={m.id} onClick={() => select(m)} className={m.id === selectedId ? 'selected' : undefined}
+                      style={{ cursor: 'pointer', viewTransitionName: i < 40 ? vtName(m.id) : undefined } as CSSProperties}>
                     <td className="muted" style={{ whiteSpace: 'nowrap' }}>{formatDate(m.date, { day: 'numeric', month: 'short' })}</td>
                     <td><button onClick={() => select(m)} style={{ all: 'unset', cursor: 'pointer' }}>{m.home_team} – {m.away_team}</button></td>
                     <td className="num"><strong>{m.score[0]}-{m.score[1]}</strong></td>
                     <td className="num">
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ width: 40, height: 6, background: 'var(--surface-2)', borderRadius: 3, display: 'inline-block' }}>
-                          <span style={{ display: 'block', width: `${m.p_actual * 100}%`, height: 6, borderRadius: 3, background: m.p_actual < 0.25 ? 'var(--away)' : 'var(--home)' }} />
+                        <span className="track pa-track">
+                          <span style={{ width: `${m.p_actual * 100}%`, background: m.p_actual < 0.25 ? 'var(--away)' : 'var(--ink)' }} />
                         </span>
                         {pct(m.p_actual)}
                       </span>
@@ -121,7 +146,7 @@ function ReviewLiga() {
               </tbody>
             </table>
           </div>
-        </div>
+        </Reveal>
 
         <div ref={detailRef} className="card review-detail">
           {!selected ? (
@@ -134,8 +159,8 @@ function ReviewLiga() {
             </>
           ) : (
             <>
-              <span className="eyebrow">{formatDate(selected.date)}</span>
-              <h3 style={{ margin: '6px 0 4px', fontSize: '1.4rem' }}>{selected.home_name} {selected.score[0]}-{selected.score[1]} {selected.away_name}</h3>
+              <span className="data-label">{formatDate(selected.date)}</span>
+              <h3 className="review-match">{selected.home_name} {selected.score[0]}-{selected.score[1]} {selected.away_name}</h3>
               <p className="card-sub">
                 Resultado: {RESULT_LABEL[selected.result]}. El modelo le daba un {pct(selected.p_actual)}.
                 Goles esperados {num(selected.expected_goals[0])} – {num(selected.expected_goals[1])} · Elo {num(selected.elo[0], 0)} vs {num(selected.elo[1], 0)}.
@@ -155,5 +180,6 @@ function ReviewLiga() {
         </div>
       </div>
     </div>
+    </>
   )
 }

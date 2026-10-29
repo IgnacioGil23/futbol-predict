@@ -1,9 +1,9 @@
 import { scaleLinear } from 'd3-scale'
 import { line } from 'd3-shape'
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
+import { Odo, PageBand, Reveal, Title } from '../components/Motion'
 import { formatDate, num, pct, REPO } from '../lib/data'
-import { LeagueSwitcher } from '../components/LeagueSwitcher'
 import { useLeague, useLeagueData } from '../lib/league'
 import type { MonitoringIndicator, MonitoringReport, MonitoringStatus } from '../lib/types'
 import { useWidth } from '../lib/useWidth'
@@ -37,7 +37,7 @@ function RangeBar({ name, ind }: { name: string; ind: MonitoringIndicator }) {
   return (
     <div ref={ref} className="range-bar">
       <svg width={width} height={34} role="img" aria-label={`Valor ${fmt(name, v)}; rango normal ${fmt(name, n0)} a ${fmt(name, n1)}`}>
-        <rect x={6} y={12} width={width - 12} height={8} rx={4} fill="var(--surface-2)" />
+        <rect x={6} y={12} width={width - 12} height={8} rx={2} fill="var(--surface-2)" />
         <rect x={x(a0)} y={12} width={x(a1) - x(a0)} height={8} fill="var(--line)" />
         <rect x={x(n0)} y={12} width={x(n1) - x(n0)} height={8} fill="color-mix(in srgb, var(--good) 35%, transparent)" />
         <line x1={x(ind.backtest_median)} x2={x(ind.backtest_median)} y1={9} y2={23} stroke="var(--muted)" strokeDasharray="2 2" />
@@ -85,8 +85,13 @@ function GapChart({ report }: { report: MonitoringReport }) {
           </g>
         ))}
         {x.ticks(6).map((t) => <text key={t} x={x(t)} y={h - 8} textAnchor="middle">{t}</text>)}
-        <path d={path(pts) ?? ''} fill="none" stroke="var(--home)" strokeWidth={2} />
-        {hp && <circle cx={x(hp.n)} cy={y(hp.gap)} r={4.5} fill="var(--home)" stroke="var(--surface)" strokeWidth={2} />}
+        <path d={path(pts) ?? ''} fill="none" stroke="var(--acc)" strokeWidth={2} />
+        {hp && <circle cx={x(hp.n)} cy={y(hp.gap)} r={4.5} fill="var(--acc)" stroke="var(--surface)" strokeWidth={2} />}
+        {(() => {
+          // Rótulo directo en el último punto.
+          const last = pts[pts.length - 1]
+          return <text x={Math.min(x(last.n), width - m.right) - 4} y={y(last.gap) - 10} textAnchor="end" style={{ fill: 'var(--ink)', fontWeight: 700 }}>{last.gap > 0 ? '+' : ''}{num(last.gap, 3)}</text>
+        })()}
       </svg>
       {hp && (
         <div className="tooltip" style={{ left: x(hp.n), top: y(hp.gap) }}>
@@ -105,46 +110,63 @@ function GapChart({ report }: { report: MonitoringReport }) {
 export function Monitoring() {
   const { league } = useLeague()
   const { data: r, error, loading } = useLeagueData<MonitoringReport>('monitoring.json')
-  if (loading) return <div className="container section"><div className="skeleton" style={{ minHeight: 400 }} /></div>
+  const title = <Title lines={['Monitoreo', 'del modelo']} />
+  if (loading) {
+    return (
+      <>
+        <PageBand layout="7"><div className="hero-main">{title}</div><div className="hero-aside"><div className="skeleton" style={{ minHeight: 220 }} /></div></PageBand>
+        <div className="container page sec"><div className="skeleton" style={{ minHeight: 400 }} /></div>
+      </>
+    )
+  }
   if (error || !r) {
     return (
-      <div className="container section">
-        <h1>Monitoreo del modelo</h1>
-        <div style={{ marginTop: 16 }}><LeagueSwitcher /></div>
-        <p className="callout" style={{ marginTop: 16 }}>
+      <>
+      <PageBand layout="7"><div className="hero-main">{title}</div></PageBand>
+      <div className="container page sec">
+        <p className="callout">
           {league.path
             ? `El monitoreo en vivo con evaluación está implementado solo para la Premier. Las predicciones de ${league.competition} se guardan antes de cada partido en un registro propio (rama monitoring del repositorio), pero todavía no se evalúan acá.`
             : 'Todavía no hay un reporte de monitoreo publicado.'}
         </p>
       </div>
+      </>
     )
   }
   const s = r.season
   const missing = Math.max(0, r.window - r.counts.evaluated)
   return (
-    <div className="container section">
-      <div className="section-head">
-        <span className="eyebrow">Transparencia · actualizado el {formatDate(r.generated_at)}</span>
-        <h1>Monitoreo del modelo</h1>
-        <p className="lede">
+    <>
+      <PageBand layout="7">
+        <div className="hero-main">
+        {title}
+        <p className="rise lede" style={{ '--d': '260ms' } as CSSProperties}>
           Antes de cada partido se guarda la predicción en un <a href={`${REPO}/blob/monitoring/ledger/predictions.csv`} target="_blank" rel="noreferrer">registro público e inmutable</a>{' '}
           (<a href={`${REPO}/commits/monitoring`} target="_blank" rel="noreferrer">historial de cambios</a>). Después del partido se compara
           con el resultado y con el mercado de apuestas. Así se ve si el modelo se degrada con el tiempo.
         </p>
-        <LeagueSwitcher />
-      </div>
+        <span className="rise data-label" style={{ '--d': '320ms' } as CSSProperties}>Transparencia · actualizado el {formatDate(r.generated_at)}</span>
+        </div>
+        <div className="hero-aside">
+          <div className={`card status-card status-${r.status} rise`} style={{ '--d': '240ms' } as CSSProperties}>
+            <span className={`status-word status-${r.status}`}>{r.status_label}</span>
+            <p>{STATUS_TEXT[r.status]}</p>
+            <div className="status-progress">
+              <span className="num status-n"><Odo value={r.counts.evaluated} now /></span>
+              <span className="data-label">evaluadas · ventana de {r.window}</span>
+              <span className="track"><span className="grow-x" style={{ width: `${Math.min(100, (r.counts.evaluated / r.window) * 100)}%`, background: 'var(--acc)', '--d': '420ms' } as CSSProperties} /></span>
+            </div>
+            {missing > 0 && (
+              <p className="note">
+                Faltan {missing} partidos evaluados para completar la primera ventana de {r.window} (media temporada).
+              </p>
+            )}
+          </div>
+        </div>
+      </PageBand>
+    <div className="container page">
 
-      <div className={`card status-card status-${r.status}`}>
-        <span className={`status-pill pill-${r.status}`}>{r.status_label}</span>
-        <p style={{ margin: '10px 0 0' }}>{STATUS_TEXT[r.status]}</p>
-        {missing > 0 && (
-          <p className="small muted" style={{ marginTop: 6 }}>
-            Faltan {missing} partidos evaluados para completar la primera ventana de {r.window} (media temporada).
-          </p>
-        )}
-      </div>
-
-      <div className="grid grid-3" style={{ marginTop: 16 }}>
+      <Reveal className="grid grid-3 sec">
         <div className="card stat">
           <span className="small muted">Predicciones registradas</span>
           <strong className="big-num tabular">{r.counts.logged}</strong>
@@ -160,11 +182,11 @@ export function Monitoring() {
           <strong className="big-num tabular" style={{ fontSize: '1.3rem' }}>{r.model_versions.join(', ')}</strong>
           <span className="small muted">Hash de sus parámetros: cambia si cambia algún número</span>
         </div>
-      </div>
+      </Reveal>
 
       {r.shadows && r.shadows.length > 0 && (
         <div className="card" style={{ marginTop: 16 }}>
-          <span className="eyebrow">{r.shadows.length > 1 ? 'Modelos en evaluación' : 'Modelo en evaluación'}</span>
+          <h3>{r.shadows.length > 1 ? 'Modelos en evaluación' : 'Modelo en evaluación'}</h3>
           <p className="small" style={{ margin: '6px 0 10px' }}>
             {r.shadows.length > 1 ? 'Registran sus' : 'Registra sus'} predicciones en paralelo, antes de cada partido. No
             reemplaza al modelo publicado ni se muestran resultados parciales: se evalúa una sola vez,{' '}
@@ -189,7 +211,7 @@ export function Monitoring() {
         </div>
       )}
 
-      <h2 style={{ margin: '32px 0 12px' }}>Indicadores</h2>
+      <div className="section-title sec-title"><h2>Indicadores</h2></div>
       <p className="small muted" style={{ marginBottom: 12 }}>
         Sobre los últimos {r.window} partidos evaluados. Los rangos no son arbitrarios: salen de un backtest del mismo modelo en{' '}
         {r.thresholds.backtest.seasons} (normal = lo que pasó en el 95% de las ventanas; fuera de la franja gris = alerta).
@@ -210,7 +232,7 @@ export function Monitoring() {
 
       {s && (
         <>
-          <h2 style={{ margin: '32px 0 12px' }}>Temporada {s.season}</h2>
+          <div className="section-title sec-title"><h2>Temporada {s.season}</h2></div>
           <div className="grid grid-3">
             <div className="card stat">
               <span className="small muted">Log loss: modelo vs mercado</span>
@@ -285,5 +307,6 @@ export function Monitoring() {
         </div>
       </div>
     </div>
+    </>
   )
 }

@@ -1,10 +1,12 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { formatDate, REPO } from '../lib/data'
-import { useLeagueData } from '../lib/league'
+import { LEAGUE_CLASS } from '../lib/kits'
+import { useLeague, useLeagueData } from '../lib/league'
 import type { MetaFile } from '../lib/types'
-import { BrandMark, Icon } from './Icon'
+import { Icon } from './Icon'
 import { LeagueSwitcher } from './LeagueSwitcher'
+import { MotionContext, reducedMotion } from '../lib/motion'
 import './layout.css'
 
 type NavItem = { to: string; label: string }
@@ -36,7 +38,7 @@ function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => (document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'))
   useEffect(() => {
     document.documentElement.dataset.theme = theme
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#05080a' : '#f3f4ef')
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#110A16' : '#F3EDF7')
     try { localStorage.setItem('theme', theme) } catch { /* sin storage */ }
   }, [theme])
   return { isDark: theme === 'dark', toggle: () => setTheme(theme === 'dark' ? 'light' : 'dark') }
@@ -65,6 +67,61 @@ function useNavIndicator(pathname: string) {
 
 const menuId = (label: string) => `nav-menu-${label.toLowerCase().replace(/\s+/g, '-')}`
 
+const THEME_CURTAIN = { toLight: '#F3EFF5', toDark: '#0C0A10' }
+
+/**
+ * Clases del sistema visual en <html>: tema (t-oscuro / t-claro) y liga (lg-*), tomados del estado que ya existe.
+ * `motion` habilita las animaciones (no con movimiento reducido) y el paso a `go` reinicia la entrada de la pantalla.
+ */
+function useSystemClasses(isDark: boolean, leagueSlug: string, pathname: string) {
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    root.classList.toggle('t-oscuro', isDark)
+    root.classList.toggle('t-claro', !isDark)
+    const current = LEAGUE_CLASS[leagueSlug] ?? 'lg-premier'
+    for (const c of Object.values(LEAGUE_CLASS)) root.classList.toggle(c, c === current)
+  }, [isDark, leagueSlug])
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    if (reducedMotion()) { root.classList.remove('motion', 'go'); return }
+    root.classList.add('motion')
+    root.classList.remove('go')
+    const r = requestAnimationFrame(() => requestAnimationFrame(() => root.classList.add('go')))
+    return () => cancelAnimationFrame(r)
+  }, [isDark, leagueSlug, pathname])
+}
+
+/** Cortina de cambio de liga o de tema: barre la pantalla (340 ms), aplica el cambio a los 360 ms y se desvanece. */
+function useCurtainState() {
+  const [wipe, setWipe] = useState<{ phase: 'idle' | 'on' | 'off'; color: string }>({ phase: 'idle', color: 'transparent' })
+  const timers = useRef<number[]>([])
+  useEffect(() => () => timers.current.forEach(clearTimeout), [])
+  const curtain = useCallback((color: string, apply: () => void) => {
+    if (reducedMotion()) { apply(); return }
+    timers.current.forEach(clearTimeout)
+    setWipe({ phase: 'on', color })
+    timers.current = [
+      window.setTimeout(() => { apply(); setWipe({ phase: 'off', color }) }, 360),
+      window.setTimeout(() => setWipe({ phase: 'idle', color }), 700),
+    ]
+  }, [])
+  return { wipe, curtain }
+}
+
+/** El reflector del band respira solo mientras el band está en pantalla. */
+function useFloodlight() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [lit, setLit] = useState(true)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || typeof IntersectionObserver === 'undefined') return
+    const io = new IntersectionObserver(([e]) => setLit(e.isIntersecting))
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+  return { ref, lit }
+}
+
 export function Layout() {
   const { isDark, toggle } = useTheme()
   const meta = useLeagueData<MetaFile>('meta.json')
@@ -72,6 +129,13 @@ export function Layout() {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { navRef, box } = useNavIndicator(pathname)
+  const { league } = useLeague()
+  useSystemClasses(isDark, league.slug, pathname)
+  const { wipe, curtain } = useCurtainState()
+  const { ref: bandRef, lit } = useFloodlight()
+  const [slot, setSlot] = useState<HTMLDivElement | null>(null)
+  const motion = useMemo(() => ({ slot, curtain }), [slot, curtain])
+  const switchTheme = () => curtain(isDark ? THEME_CURTAIN.toLight : THEME_CURTAIN.toDark, toggle)
   const [groupAt, setGroupAt] = useState<{ label: string; path: string } | null>(null)
   const group = groupAt?.path === pathname ? groupAt.label : null
   const setGroup = (label: string | null) => setGroupAt(label ? { label, path: pathname } : null)
@@ -109,70 +173,77 @@ export function Layout() {
   }, [open])
 
   return (
-    <>
+    <MotionContext.Provider value={motion}>
       <a href="#main" className="skip">Saltar al contenido</a>
-      <header className={`topbar ${scrolled || open ? 'scrolled' : ''}`}>
-        <div className="container topbar-inner">
-          <NavLink to="/" className="brand" aria-label="Marcador Probable, inicio" onClick={() => setOpen(false)}>
-            <BrandMark size={32} />
-            <span className="brand-text">
+      <svg className="grain" aria-hidden="true">
+        <filter id="grainf"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves={2} stitchTiles="stitch" /><feColorMatrix type="saturate" values="0" /></filter>
+        <rect width="100%" height="100%" filter="url(#grainf)" />
+      </svg>
+      <div className={`wipe ${wipe.phase === 'idle' ? '' : wipe.phase}`} aria-hidden="true" style={{ background: wipe.color }} />
+      <div className="band site-band" ref={bandRef}>
+        <div className={`light ${lit ? '' : 'idle'}`} aria-hidden="true" />
+        <header className={`topbar ${scrolled || open ? 'scrolled' : ''}`}>
+          <div className="container topbar-inner">
+            <NavLink to="/" className="brand" aria-label="Marcador Probable, inicio" onClick={() => setOpen(false)}>
               <span className="brand-name">Marcador Probable</span>
               <span className="brand-sub">Cinco ligas · ML</span>
-            </span>
-          </NavLink>
-          <nav id="nav" ref={navRef} className={`nav ${open ? 'open' : ''}`} aria-label="Principal">
-            {box && <span className="nav-indicator" style={{ transform: `translateX(${box.left}px)`, width: box.width }} aria-hidden="true" />}
-            {NAV.map((g) => {
-              if (!g.items) {
+            </NavLink>
+            <nav id="nav" ref={navRef} className={`nav ${open ? 'open' : ''}`} aria-label="Principal">
+              {box && <span className="nav-indicator" style={{ transform: `translateX(${box.left}px)`, width: box.width }} aria-hidden="true" />}
+              {NAV.map((g) => {
+                if (!g.items) {
+                  return (
+                    <NavLink key={g.label} to={g.to!} onClick={() => setOpen(false)}
+                             className={() => `nav-top${isIn(pathname, g.to!) ? ' active' : ''}`}>{g.label}</NavLink>
+                  )
+                }
+                const active = groupActive(pathname, g.items)
+                const expanded = group === g.label
                 return (
-                  <NavLink key={g.label} to={g.to!} onClick={() => setOpen(false)}
-                           className={() => `nav-top${isIn(pathname, g.to!) ? ' active' : ''}`}>{g.label}</NavLink>
-                )
-              }
-              const active = groupActive(pathname, g.items)
-              const expanded = group === g.label
-              return (
-                <div key={g.label} className={`nav-group ${expanded ? 'expanded' : ''}`}
-                     onBlur={(e) => {
-                       // Con Tab fuera del grupo, el menú se cierra.
-                       if (expanded && !(e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget))) setGroup(null)
-                     }}>
-                  <button type="button" className={`nav-top nav-group-btn${active ? ' active' : ''}`}
-                          aria-expanded={expanded} aria-controls={menuId(g.label)}
-                          onClick={() => setGroup(expanded ? null : g.label)}>
-                    {g.label}<span className="nav-caret" aria-hidden="true" />
-                  </button>
-                  <div className="nav-group-label">{g.label}</div>
-                  <div className="nav-menu" id={menuId(g.label)}>
-                    {g.items.map((it) => (
-                      <NavLink key={it.to} to={it.to} onClick={() => { setOpen(false); setGroup(null) }}
-                               className={({ isActive }) => (isActive ? 'active' : undefined)}>{it.label}</NavLink>
-                    ))}
+                  <div key={g.label} className={`nav-group ${expanded ? 'expanded' : ''}`}
+                       onBlur={(e) => {
+                         // Con Tab fuera del grupo, el menú se cierra.
+                         if (expanded && !(e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget))) setGroup(null)
+                       }}>
+                    <button type="button" className={`nav-top nav-group-btn${active ? ' active' : ''}`}
+                            aria-expanded={expanded} aria-controls={menuId(g.label)}
+                            onClick={() => setGroup(expanded ? null : g.label)}>
+                      {g.label}<span className="nav-caret" aria-hidden="true" />
+                    </button>
+                    <div className="nav-group-label">{g.label}</div>
+                    <div className="nav-menu" id={menuId(g.label)}>
+                      {g.items.map((it) => (
+                        <NavLink key={it.to} to={it.to} onClick={() => { setOpen(false); setGroup(null) }}
+                                 className={({ isActive }) => (isActive ? 'active' : undefined)}>{it.label}</NavLink>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )
-            })}
-          </nav>
-          <div className="topbar-actions">
-            <LeagueSwitcher variant="menu" />
-            <button className="icon-btn" onClick={toggle} aria-label={isDark ? 'Usar modo claro' : 'Usar modo oscuro'} title="Cambiar tema">
-              <Icon name={isDark ? 'sun' : 'moon'} />
-            </button>
-            <button className="icon-btn menu-btn" aria-expanded={open} aria-controls="nav" aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
-                    onClick={() => setOpen(!open)}>
-              <Icon name={open ? 'close' : 'menu'} />
-            </button>
+                )
+              })}
+            </nav>
+            <div className="topbar-actions">
+              <button type="button" className="btn theme-btn" onClick={switchTheme} aria-label={isDark ? 'Cambiar a tema día' : 'Cambiar a tema noche'}>
+                {isDark ? 'Noche' : 'Día'}
+              </button>
+              <button type="button" className="btn menu-btn" aria-expanded={open} aria-controls="nav" aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+                      onClick={() => setOpen(!open)}>
+                <Icon name={open ? 'close' : 'menu'} />
+              </button>
+            </div>
           </div>
-        </div>
-      </header>
+          <div className="container league-row">
+            <LeagueSwitcher />
+          </div>
+        </header>
+        <div ref={setSlot} className="band-slot" />
+      </div>
       {open && <div className="nav-scrim" onClick={() => setOpen(false)} aria-hidden="true" />}
-      <main id="main"><Outlet /></main>
+      <main id="main" tabIndex={-1}><Outlet /></main>
       <footer className="footer">
         <div className="container">
           <div className="footer-grid">
             <div className="footer-brand">
               <Link to="/" className="brand" aria-label="Inicio">
-                <BrandMark size={28} />
                 <span className="brand-name">Marcador Probable</span>
               </Link>
               <p className="small muted">
@@ -204,6 +275,6 @@ export function Layout() {
           </div>
         </div>
       </footer>
-    </>
+    </MotionContext.Provider>
   )
 }

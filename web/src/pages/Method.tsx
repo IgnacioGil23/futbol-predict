@@ -1,12 +1,13 @@
-import { useEffect } from 'react'
+import { useEffect, type CSSProperties } from 'react'
 import { useLocation } from 'react-router-dom'
 import { CalibrationChart } from '../components/CalibrationChart'
+import { Odo, PageBand, Reveal, Title } from '../components/Motion'
 import { formatDate, num, pct, REPO } from '../lib/data'
-import { LeagueSwitcher } from '../components/LeagueSwitcher'
 import { useLeagueData } from '../lib/league'
 import { useTeamIndex } from '../lib/teams'
 import type { CalibrationFile, MetaFile, ReviewSeasonSummary, SeasonFile } from '../lib/types'
 import { Evaluation } from './Season'
+import './method.css'
 
 const REPO_NOTE = 'Código, notebooks y tests en el repositorio del proyecto.'
 
@@ -26,16 +27,27 @@ export function Method() {
   const t = m?.test_metrics
 
   return (
-    <div className="container section" style={{ maxWidth: 980 }}>
-      <div className="section-head">
-        <span className="eyebrow">Ficha del modelo</span>
-        <h1>Cómo funciona</h1>
-        <p className="lede">Qué hace el modelo, con qué datos, cómo se evaluó y, sobre todo, qué no puede hacer.</p>
-        <LeagueSwitcher />
-      </div>
+    <>
+      <PageBand layout="7">
+        <div className="hero-main">
+          <Title lines={['Cómo', 'funciona']} />
+          <p className="rise lede" style={{ '--d': '260ms' } as CSSProperties}>Qué hace el modelo, con qué datos, cómo se evaluó y, sobre todo, qué no puede hacer.</p>
+          <span className="rise data-label" style={{ '--d': '320ms' } as CSSProperties}>Ficha del modelo</span>
+        </div>
+        <div className="hero-aside">
+          {m && (
+            <p className="rise hero-figure" style={{ '--d': '380ms' } as CSSProperties}>
+              <span className="data-label">Entrenado con</span>
+              <span className="num hero-figure-v"><Odo value={num(m.trained_on.matches, 0)} now /></span>
+              <span className="data-label">partidos ({m.trained_on.seasons})</span>
+            </p>
+          )}
+        </div>
+      </PageBand>
+    <div className="container page method">
 
-      <div className="grid" style={{ gap: 16 }}>
-        <div className="card">
+      <div className="method-body">
+        <Reveal className="msec">
           <h3>El modelo en una frase</h3>
           <p style={{ color: 'var(--ink-2)' }}>
             Dos regresiones de Poisson (una para los goles del local y otra para los del visitante, en la línea de
@@ -49,9 +61,9 @@ export function Method() {
             comprobaron liga por liga (<a href={`${REPO}/blob/main/docs/preregistro_ligas.md`} target="_blank" rel="noreferrer">preregistro</a>).
           </p>
           {m && <p className="small muted" style={{ marginTop: 8 }}>Entrenado con {num(m.trained_on.matches, 0)} partidos ({m.trained_on.seasons}). {REPO_NOTE}</p>}
-        </div>
+        </Reveal>
 
-        <div className="card">
+        <Reveal className="msec">
           <h3>El rating: un Elo que aprende del mercado</h3>
           <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-2)' }}>
             <li>Partido a partido sobre la primera <strong>y la segunda división</strong> de cada liga, para que los ascendidos lleguen con historia.</li>
@@ -63,9 +75,9 @@ export function Method() {
             <li>Preregistrado y evaluado en 19.763 partidos de cinco ligas: mejoró el log loss en 0,0084 frente al Elo de
               resultados que usaba antes (<a href={`${REPO}/blob/main/docs/preregistro_cuotas.md`} target="_blank" rel="noreferrer">preregistro</a>).</li>
           </ul>
-        </div>
+        </Reveal>
 
-        <div className="card">
+        <Reveal className="msec">
           <h3>Cómo se evaluó</h3>
           <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-2)' }}>
             <li><strong>Split temporal, nunca aleatorio:</strong> entrenamiento 2002-03 a 2020-21, validación 2021-22 y 2022-23, test 2023-24 a 2025-26.</li>
@@ -73,10 +85,10 @@ export function Method() {
             <li>El test se evaluó <strong>una sola vez</strong>, al final.</li>
             <li>Cada predicción de la sección Revisión es fuera de muestra: el modelo se reentrena al inicio de cada temporada con las anteriores.</li>
           </ul>
-        </div>
+        </Reveal>
 
         {t && (
-          <div className="card">
+          <Reveal className="msec">
             <h3>Resultados en test ({t.seasons})</h3>
             <p className="card-sub">Log loss: cuánto "se sorprende" el pronóstico con lo que pasó (menor es mejor). RPS: penaliza más errarle por mucho que por poco.</p>
             <div className="table-wrap">
@@ -89,8 +101,8 @@ export function Method() {
                 </tbody>
               </table>
             </div>
-            <p className="callout" style={{ marginTop: 12 }}>
-              <strong>El modelo no le gana al mercado.</strong> Queda {num(t.model.log_loss - t.bet365_pre_closing.log_loss, 3)} de
+            <p className="band honest">
+              <strong className="honest-title">El modelo no le gana al mercado.</strong> Queda {num(t.model.log_loss - t.bet365_pre_closing.log_loss, 3)} de
               log loss por detrás de Bet365 (con el Elo de resultados eran 0,022). Es lo esperable: las cuotas de cada
               partido incorporan lesiones, alineaciones y noticias de esa semana que el modelo no ve. Sus probabilidades,
               en cambio, están bien calibradas (abajo).
@@ -99,19 +111,19 @@ export function Method() {
               * Pinnacle solo tiene cuotas para {t.pinnacle_closing.n} de los {t.model.n} partidos de test. Probabilidades de
               mercado con el margen de la casa quitado por el método de Shin.
             </p>
-          </div>
+          </Reveal>
         )}
 
         {calib.data && (
-          <div className="card">
+          <Reveal className="msec">
             <h3>¿Sus probabilidades son confiables?</h3>
             <p className="card-sub">Si el modelo dice 40%, ¿pasa 4 de cada 10 veces? Test {calib.data.seasons}, {calib.data.matches} partidos.</p>
             <CalibrationChart model={calib.data.model} market={calib.data.market} />
-          </div>
+          </Reveal>
         )}
 
         {review.data && (
-          <div className="card">
+          <Reveal className="msec">
             <h3>Temporada por temporada</h3>
             <div className="table-wrap">
               <table className="table">
@@ -131,7 +143,7 @@ export function Method() {
               </table>
             </div>
             <p className="small muted" style={{ marginTop: 8 }}>Log loss (menor es mejor). Mercado: Bet365 pre-cierre. Temporadas en curso con pocos partidos: cifras muy ruidosas.</p>
-          </div>
+          </Reveal>
         )}
 
         {season.data?.evaluation && (
@@ -144,7 +156,7 @@ export function Method() {
             )} />
         )}
 
-        <div className="card">
+        <Reveal className="msec">
           <h3>Limitaciones (sin letra chica)</h3>
           <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-2)' }}>
             <li>No conoce lesiones, suspensiones, alineaciones, fichajes ni cambios de entrenador.</li>
@@ -153,10 +165,10 @@ export function Method() {
             <li>Los datos se actualizan una vez por semana; los partidos de la fecha se publican pocos días antes.</li>
             <li>Es un proyecto educativo de portfolio: <strong>no es una recomendación de apuestas</strong>.</li>
           </ul>
-        </div>
+        </Reveal>
 
         {meta.data && (
-          <div className="card">
+          <Reveal className="msec">
             <h3>Datos</h3>
             <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-2)' }}>
               {meta.data.sources.map((s) => <li key={s.name}><a href={s.url} target="_blank" rel="noreferrer">{s.name}</a>: {s.use}.</li>)}
@@ -164,11 +176,11 @@ export function Method() {
             <p className="small muted" style={{ marginTop: 8 }}>
               Último partido en los datos: {formatDate(meta.data.last_match_in_data)} · generado el {formatDate(meta.data.generated_at)}.
             </p>
-          </div>
+          </Reveal>
         )}
 
         {photos.length > 0 && (
-          <div className="card" id="creditos">
+          <Reveal className="msec" id="creditos">
             <h3>Créditos de las fotos de estadios</h3>
             <p className="card-sub">
               Imagen principal del artículo de cada estadio en Wikipedia, alojada en Wikimedia Commons con licencia
@@ -185,9 +197,10 @@ export function Method() {
                 </li>
               ))}
             </ul>
-          </div>
+          </Reveal>
         )}
       </div>
     </div>
+    </>
   )
 }

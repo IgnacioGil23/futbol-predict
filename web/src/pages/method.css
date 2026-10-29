@@ -1,0 +1,20 @@
+/* ======================================================================= Cómo funciona */
+.hero-figure { display: flex; flex-direction: column; gap: 6px; }
+.hero-figure-v { font-size: clamp(52px, 6vw, 88px); font-weight: 500; line-height: 1; letter-spacing: -.03em; }
+.method-body { max-width: 980px; }
+.msec { padding: 36px 0; border-bottom: 1px solid var(--rule); }
+.msec > h3 { font-size: 32px; font-weight: 500; margin-bottom: 16px; }
+.msec p, .msec li { font-size: 17px; }
+.msec ul { margin: 0; padding-left: 18px !important; display: grid; gap: 8px; color: var(--ink-2); }
+.msec ul li::marker { color: var(--acc); }
+.msec strong { color: var(--ink); }
+.msec .table-wrap { margin-top: 8px; }
+.method .card { background: var(--g1); }
+.honest { margin: 20px calc(-1 * 28px) 0; padding: 28px; border-radius: 6px; font-size: 17px; line-height: 1.6; }
+.honest strong { color: #FFFFFF; }
+.honest-title { display: block; margin-bottom: 10px; font-family: var(--display); font-weight: 900; font-size: clamp(40px, 5vw, 64px); line-height: .9; text-transform: uppercase; }
+.method section h2 { margin-bottom: 12px; }
+@media (max-width: 900px) {
+  .msec > h3 { font-size: 24px; }
+  .honest { margin: 20px 0 0; padding: 20px; }
+}
