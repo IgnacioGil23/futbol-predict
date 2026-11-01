@@ -22,6 +22,22 @@ preregistrados.
 | **¿Qué le puede preguntar un hincha?** | **Cómo termina la temporada.** 10.000 simulaciones de los partidos que faltan (con el Elo actualizado dentro de cada una) dan las probabilidades de campeón, top 4 y descenso. Evaluado con 2015-26 contra un simulador que ignora la fuerza de los equipos: 45% menos de Brier para el top 4 antes de la fecha 1, y bien calibrado. Igual le dio 0% al Leicester en 2015-16. |
 | **¿Dónde está la brecha con el mercado?** | No en los promedios sino en la información de cada partido: la mitad de la brecha sale del 14% de los partidos en los que modelo y mercado discrepan en 10 puntos o más, y en las fechas 1 a 5 se duplica (fichajes que los ratings todavía no absorbieron). |
 
+## El sitio web
+
+Rediseñado en octubre de 2026 sobre un único sistema visual; los datos, el modelo y las rutas no cambiaron.
+
+* **Una familia de color por liga.** La página toma el color de la liga que se mira; al cambiar de liga o de tema hay
+  una cortina corta de transición.
+* **Tema día y noche.** Botón en la barra superior ("Noche" / "Día"); ambos temas comparten los mismos tokens.
+* **Partidos como lista de fixture.** Cada partido es una fila; al abrirla se ve el análisis completo en el lugar:
+  grilla de marcadores, Elo, forma, cara a cara y descanso.
+* **Probabilidades de un vistazo.** Barra local / empate / visitante con relleno animado, números que cuentan hasta el
+  valor final y un medallón del club con escudo de licencia libre, diseño de la camiseta o iniciales.
+* **Movimiento sobrio.** Las animaciones solo cambian `transform` y `opacity`; el contenido se lee sin JavaScript, y con
+  la preferencia de movimiento reducido la página muestra su estado final de inmediato.
+
+![Página de partidos: el partido de la jornada con sus probabilidades y el selector de jornada](docs/img/matches.webp)
+
 ## Arquitectura
 
 ```mermaid

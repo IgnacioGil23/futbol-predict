@@ -79,6 +79,22 @@ flowchart LR
 
 Full tables, confidence intervals and reasoning: [model card](docs/model_card.md).
 
+## The website
+
+Redesigned in October 2026 on a single visual system; the data, the model and the routes did not change.
+
+* **One colour family per league.** The page takes the colour of the league being viewed, and switching league or theme
+  plays a short curtain transition.
+* **Day and night themes.** A toggle in the top bar ("Noche" / "Día"); both themes share the same tokens.
+* **Matches as a fixture list.** Each match is a row; opening it shows the full analysis in place: score grid, Elo,
+  form, head-to-head and rest.
+* **Probabilities at a glance.** A home / draw / away bar with an animated fill, count-up numbers, and a club medallion
+  with a free-licence crest, the club's kit design, or initials.
+* **Restrained motion.** Animations only change `transform` and `opacity`; the content reads without JavaScript, and with
+  the reduced-motion setting the page shows its final state straight away.
+
+![Matches page: the match of the round with its probabilities, and the round selector](docs/img/matches.webp)
+
 ## Five leagues
 
 The live product covers the Premier League (England), LaLiga (Spain), Serie A (Italy), the Bundesliga (Germany) and
