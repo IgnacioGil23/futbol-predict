@@ -8,7 +8,7 @@ tamper-evident ledger, and tests every improvement with pre-registered experimen
 **[Live site](https://ignaciogil23.github.io/futbol-predict/)** (Spanish UI) · **[Model card](docs/model_card.md)** ·
 [Versión en español](README.es.md)
 
-![Home page: featured match with home / draw / away probabilities and the most likely scores](docs/img/home.webp)
+![Home page: featured match with home / draw / away probabilities and the most likely scores](docs/img/home-rediseno.webp)
 
 ## Results in 30 seconds
 
@@ -64,7 +64,7 @@ flowchart LR
 * **Security.** Cloud Run deploys via Workload Identity Federation (no long-lived keys); the runtime service account
   has no permissions; the API image excludes scipy and pyarrow.
 
-![Monitoring page](docs/img/monitoring.webp)
+![Monitoring page](docs/img/monitoring-rediseno.webp)
 
 ## Experiments log
 
@@ -93,7 +93,7 @@ Redesigned in October 2026 on a single visual system; the data, the model and th
 * **Restrained motion.** Animations only change `transform` and `opacity`; the content reads without JavaScript, and with
   the reduced-motion setting the page shows its final state straight away.
 
-![Matches page: the match of the round with its probabilities, and the round selector](docs/img/matches.webp)
+![Matches page: the match of the round with its probabilities, and the round selector](docs/img/matches-rediseno.webp)
 
 ## Five leagues
 
