@@ -9,7 +9,7 @@ preregistrados.
 **[Web en vivo](https://ignaciogil23.github.io/futbol-predict/)** · **[Model card](docs/model_card.md)** ·
 [English version](README.md)
 
-![Portada: partido destacado con las probabilidades de local / empate / visitante y los marcadores más probables](docs/img/home.webp)
+![Portada: partido destacado con las probabilidades de local / empate / visitante y los marcadores más probables](docs/img/home-rediseno.webp)
 
 ## Resultados en 30 segundos
 
@@ -36,7 +36,7 @@ Rediseñado en octubre de 2026 sobre un único sistema visual; los datos, el mod
 * **Movimiento sobrio.** Las animaciones solo cambian `transform` y `opacity`; el contenido se lee sin JavaScript, y con
   la preferencia de movimiento reducido la página muestra su estado final de inmediato.
 
-![Página de partidos: el partido de la jornada con sus probabilidades y el selector de jornada](docs/img/matches.webp)
+![Página de partidos: el partido de la jornada con sus probabilidades y el selector de jornada](docs/img/matches-rediseno.webp)
 
 ## Arquitectura
 
@@ -83,7 +83,7 @@ flowchart LR
 * **Seguridad.** Cloud Run se despliega con Workload Identity Federation (sin claves de larga duración); la cuenta de
   servicio de ejecución no tiene permisos; la imagen de la API no incluye scipy ni pyarrow.
 
-![Página de monitoreo](docs/img/monitoring.webp)
+![Página de monitoreo](docs/img/monitoring-rediseno.webp)
 
 ## Registro de experimentos
 
