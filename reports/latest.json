@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-11-06T13:30:44+00:00",
+  "generated_at": "2026-11-09T14:46:17+00:00",
   "window": 190,
   "counts": {
     "logged": 94,
     "logged_live": 44,
     "logged_reconstructed": 50,
-    "evaluated": 85,
-    "evaluated_live": 35,
-    "pending": 9
+    "evaluated": 94,
+    "evaluated_live": 44,
+    "pending": 0
   },
   "model_versions": [
     "02dfa76b769d",
@@ -55,8 +55,8 @@
   "indicators": {
     "gap_vs_market": {
       "description": "Brecha de log loss contra Bet365 pre-cierre (modelo − mercado)",
-      "value": 0.005806256977015218,
-      "n": 85,
+      "value": 0.004330745744410568,
+      "n": 94,
       "status": "insuficiente",
       "status_label": "Datos insuficientes",
       "normal_range": [
@@ -72,8 +72,8 @@
     },
     "goals_ratio": {
       "description": "Goles reales / goles esperados",
-      "value": 1.013005662319058,
-      "n": 85,
+      "value": 1.0170935131287628,
+      "n": 94,
       "status": "insuficiente",
       "status_label": "Datos insuficientes",
       "normal_range": [
@@ -89,8 +89,8 @@
     },
     "draws_diff_pp": {
       "description": "Empates reales − esperados (puntos porcentuales)",
-      "value": 4.482926600491597,
-      "n": 85,
+      "value": 3.927242932918203,
+      "n": 94,
       "status": "insuficiente",
       "status_label": "Datos insuficientes",
       "normal_range": [
@@ -106,8 +106,8 @@
     },
     "home_residual": {
       "description": "Diferencia de gol real − esperada del local (goles por partido)",
-      "value": -0.04749080000000001,
-      "n": 85,
+      "value": -0.021362436170212745,
+      "n": 94,
       "status": "insuficiente",
       "status_label": "Datos insuficientes",
       "normal_range": [
@@ -124,53 +124,53 @@
   },
   "season": {
     "season": "2026-27",
-    "matches": 85,
-    "with_market": 85,
-    "live": 35,
+    "matches": 94,
+    "with_market": 94,
+    "live": 44,
     "model": {
-      "log_loss": 1.0176695225610124,
-      "rps": 0.20444120455534748,
-      "brier": 0.6101264442474961,
-      "accuracy": 0.5176470588235295
+      "log_loss": 1.0134705885730741,
+      "rps": 0.20472082666120078,
+      "brier": 0.6074574485852344,
+      "accuracy": 0.5212765957446809
     },
     "market": {
-      "log_loss": 1.011863265583997,
-      "rps": 0.2024592739602745,
-      "brier": 0.6061534516452186,
-      "accuracy": 0.4823529411764706
+      "log_loss": 1.0091398428286635,
+      "rps": 0.20308138500060835,
+      "brier": 0.603908326880104,
+      "accuracy": 0.4787234042553192
     },
-    "gap_vs_market": 0.005806256977015218,
+    "gap_vs_market": 0.004330745744410568,
     "gap_ci": [
-      -0.024951278506840927,
-      0.03620419169066981
+      -0.02474717768888856,
+      0.03248433371556397
     ],
     "goals": {
-      "expected": 230.008586,
-      "actual": 233.0
+      "expected": 254.647185,
+      "actual": 259.0
     },
     "draws": {
-      "expected": 20.189512389582145,
-      "actual": 24.0
+      "expected": 22.308391643056893,
+      "actual": 26.0
     }
   },
   "calibration": [
     {
       "outcome": "H",
       "bin": 1,
-      "n": 29,
-      "mean_predicted": 0.3254,
-      "observed": 0.2069,
-      "ci_low": 0.0985,
-      "ci_high": 0.3839
+      "n": 33,
+      "mean_predicted": 0.3169,
+      "observed": 0.2424,
+      "ci_low": 0.1283,
+      "ci_high": 0.4102
     },
     {
       "outcome": "H",
       "bin": 2,
-      "n": 34,
-      "mean_predicted": 0.4946,
-      "observed": 0.4706,
-      "ci_low": 0.3145,
-      "ci_high": 0.6326
+      "n": 38,
+      "mean_predicted": 0.4912,
+      "observed": 0.4737,
+      "ci_low": 0.3248,
+      "ci_high": 0.6274
     },
     {
       "outcome": "H",
@@ -184,47 +184,47 @@
     {
       "outcome": "D",
       "bin": 0,
-      "n": 11,
-      "mean_predicted": 0.1639,
-      "observed": 0.0909,
-      "ci_low": 0.0162,
-      "ci_high": 0.3774
+      "n": 12,
+      "mean_predicted": 0.1583,
+      "observed": 0.0833,
+      "ci_low": 0.0149,
+      "ci_high": 0.3539
     },
     {
       "outcome": "D",
       "bin": 1,
-      "n": 74,
-      "mean_predicted": 0.2485,
-      "observed": 0.3108,
-      "ci_low": 0.2169,
-      "ci_high": 0.4234
+      "n": 82,
+      "mean_predicted": 0.2489,
+      "observed": 0.3049,
+      "ci_low": 0.2158,
+      "ci_high": 0.4114
     },
     {
       "outcome": "A",
       "bin": 0,
-      "n": 20,
-      "mean_predicted": 0.1316,
-      "observed": 0.2,
-      "ci_low": 0.0807,
-      "ci_high": 0.416
+      "n": 21,
+      "mean_predicted": 0.1272,
+      "observed": 0.1905,
+      "ci_low": 0.0767,
+      "ci_high": 0.4
     },
     {
       "outcome": "A",
       "bin": 1,
-      "n": 45,
-      "mean_predicted": 0.2962,
-      "observed": 0.2667,
-      "ci_low": 0.1596,
-      "ci_high": 0.4104
+      "n": 49,
+      "mean_predicted": 0.2951,
+      "observed": 0.2449,
+      "ci_low": 0.146,
+      "ci_high": 0.3809
     },
     {
       "outcome": "A",
       "bin": 2,
-      "n": 18,
-      "mean_predicted": 0.4796,
-      "observed": 0.5556,
-      "ci_low": 0.3372,
-      "ci_high": 0.7544
+      "n": 22,
+      "mean_predicted": 0.4824,
+      "observed": 0.5455,
+      "ci_low": 0.3466,
+      "ci_high": 0.7308
     }
   ],
   "cumulative": [
@@ -737,9 +737,270 @@
       "n": 85,
       "gap": 0.005806256977015218,
       "source": "vivo"
+    },
+    {
+      "date": "2026-11-07",
+      "n": 86,
+      "gap": 0.005259275154069309,
+      "source": "vivo"
+    },
+    {
+      "date": "2026-11-07",
+      "n": 87,
+      "gap": 0.004983567233817441,
+      "source": "vivo"
+    },
+    {
+      "date": "2026-11-07",
+      "n": 88,
+      "gap": 0.002380074951752606,
+      "source": "vivo"
+    },
+    {
+      "date": "2026-11-07",
+      "n": 89,
+      "gap": 0.0009425344603761216,
+      "source": "vivo"
+    },
+    {
+      "date": "2026-11-08",
+      "n": 90,
+      "gap": 0.0015886005767750567,
+      "source": "vivo"
+    },
+    {
+      "date": "2026-11-08",
+      "n": 91,
+      "gap": 0.0035008430514006134,
+      "source": "vivo"
+    },
+    {
+      "date": "2026-11-08",
+      "n": 92,
+      "gap": 0.004854725256391873,
+      "source": "vivo"
+    },
+    {
+      "date": "2026-11-08",
+      "n": 93,
+      "gap": 0.005529246671325392,
+      "source": "vivo"
+    },
+    {
+      "date": "2026-11-08",
+      "n": 94,
+      "gap": 0.004330745744410568,
+      "source": "vivo"
     }
   ],
   "recent": [
+    {
+      "date": "2026-11-08",
+      "home_team": "Sunderland",
+      "away_team": "Chelsea",
+      "score": [
+        1,
+        0
+      ],
+      "result": "H",
+      "p": [
+        0.2655,
+        0.2536,
+        0.4809
+      ],
+      "market": [
+        0.2385,
+        0.2596,
+        0.5019
+      ],
+      "p_actual": 0.2655,
+      "source": "vivo",
+      "model_version": "02dfa76b769d"
+    },
+    {
+      "date": "2026-11-08",
+      "home_team": "Man United",
+      "away_team": "Aston Villa",
+      "score": [
+        4,
+        4
+      ],
+      "result": "D",
+      "p": [
+        0.5335,
+        0.2428,
+        0.2237
+      ],
+      "market": [
+        0.4555,
+        0.2598,
+        0.2847
+      ],
+      "p_actual": 0.2428,
+      "source": "vivo",
+      "model_version": "02dfa76b769d"
+    },
+    {
+      "date": "2026-11-08",
+      "home_team": "Ipswich",
+      "away_team": "Bournemouth",
+      "score": [
+        1,
+        2
+      ],
+      "result": "A",
+      "p": [
+        0.2974,
+        0.2596,
+        0.443
+      ],
+      "market": [
+        0.2465,
+        0.25,
+        0.5035
+      ],
+      "p_actual": 0.443,
+      "source": "vivo",
+      "model_version": "02dfa76b769d"
+    },
+    {
+      "date": "2026-11-08",
+      "home_team": "Crystal Palace",
+      "away_team": "Liverpool",
+      "score": [
+        1,
+        3
+      ],
+      "result": "A",
+      "p": [
+        0.2366,
+        0.2459,
+        0.5175
+      ],
+      "market": [
+        0.1673,
+        0.2158,
+        0.6169
+      ],
+      "p_actual": 0.5175,
+      "source": "vivo",
+      "model_version": "02dfa76b769d"
+    },
+    {
+      "date": "2026-11-08",
+      "home_team": "Brighton",
+      "away_team": "Brentford",
+      "score": [
+        2,
+        0
+      ],
+      "result": "H",
+      "p": [
+        0.475,
+        0.2553,
+        0.2697
+      ],
+      "market": [
+        0.5039,
+        0.2446,
+        0.2516
+      ],
+      "p_actual": 0.475,
+      "source": "vivo",
+      "model_version": "02dfa76b769d"
+    },
+    {
+      "date": "2026-11-07",
+      "home_team": "Nott'm Forest",
+      "away_team": "Man City",
+      "score": [
+        3,
+        1
+      ],
+      "result": "H",
+      "p": [
+        0.2222,
+        0.2411,
+        0.5367
+      ],
+      "market": [
+        0.1959,
+        0.2349,
+        0.5691
+      ],
+      "p_actual": 0.2222,
+      "source": "vivo",
+      "model_version": "02dfa76b769d"
+    },
+    {
+      "date": "2026-11-07",
+      "home_team": "Leeds",
+      "away_team": "Tottenham",
+      "score": [
+        1,
+        0
+      ],
+      "result": "H",
+      "p": [
+        0.4389,
+        0.2606,
+        0.3005
+      ],
+      "market": [
+        0.3508,
+        0.2844,
+        0.3648
+      ],
+      "p_actual": 0.4389,
+      "source": "vivo",
+      "model_version": "02dfa76b769d"
+    },
+    {
+      "date": "2026-11-07",
+      "home_team": "Fulham",
+      "away_team": "Newcastle",
+      "score": [
+        1,
+        1
+      ],
+      "result": "D",
+      "p": [
+        0.401,
+        0.2639,
+        0.3352
+      ],
+      "market": [
+        0.4659,
+        0.259,
+        0.2751
+      ],
+      "p_actual": 0.2639,
+      "source": "vivo",
+      "model_version": "02dfa76b769d"
+    },
+    {
+      "date": "2026-11-07",
+      "home_team": "Arsenal",
+      "away_team": "Hull",
+      "score": [
+        1,
+        0
+      ],
+      "result": "H",
+      "p": [
+        0.8647,
+        0.0962,
+        0.0391
+      ],
+      "market": [
+        0.8298,
+        0.1176,
+        0.0526
+      ],
+      "p_actual": 0.8647,
+      "source": "vivo",
+      "model_version": "02dfa76b769d"
+    },
     {
       "date": "2026-11-02",
       "home_team": "Newcastle",
@@ -1220,213 +1481,6 @@
         0.3151
       ],
       "p_actual": 0.2786,
-      "source": "vivo",
-      "model_version": "02dfa76b769d"
-    },
-    {
-      "date": "2026-10-17",
-      "home_team": "Man City",
-      "away_team": "Ipswich",
-      "score": [
-        3,
-        2
-      ],
-      "result": "H",
-      "p": [
-        0.8072,
-        0.1301,
-        0.0627
-      ],
-      "market": [
-        0.7958,
-        0.1276,
-        0.0767
-      ],
-      "p_actual": 0.8072,
-      "source": "vivo",
-      "model_version": "02dfa76b769d"
-    },
-    {
-      "date": "2026-10-17",
-      "home_team": "Fulham",
-      "away_team": "Hull",
-      "score": [
-        1,
-        0
-      ],
-      "result": "H",
-      "p": [
-        0.6328,
-        0.2116,
-        0.1556
-      ],
-      "market": [
-        0.556,
-        0.2388,
-        0.2051
-      ],
-      "p_actual": 0.6328,
-      "source": "vivo",
-      "model_version": "02dfa76b769d"
-    },
-    {
-      "date": "2026-10-17",
-      "home_team": "Everton",
-      "away_team": "Chelsea",
-      "score": [
-        0,
-        2
-      ],
-      "result": "A",
-      "p": [
-        0.3073,
-        0.2609,
-        0.4318
-      ],
-      "market": [
-        0.2957,
-        0.247,
-        0.4573
-      ],
-      "p_actual": 0.4318,
-      "source": "vivo",
-      "model_version": "02dfa76b769d"
-    },
-    {
-      "date": "2026-10-17",
-      "home_team": "Brentford",
-      "away_team": "Liverpool",
-      "score": [
-        1,
-        2
-      ],
-      "result": "A",
-      "p": [
-        0.3386,
-        0.2638,
-        0.3976
-      ],
-      "market": [
-        0.4175,
-        0.2514,
-        0.331
-      ],
-      "p_actual": 0.3976,
-      "source": "vivo",
-      "model_version": "02dfa76b769d"
-    },
-    {
-      "date": "2026-10-12",
-      "home_team": "Coventry",
-      "away_team": "Newcastle",
-      "score": [
-        4,
-        1
-      ],
-      "result": "H",
-      "p": [
-        0.283,
-        0.2572,
-        0.4599
-      ],
-      "market": [
-        0.2871,
-        0.2547,
-        0.4582
-      ],
-      "p_actual": 0.283,
-      "source": "vivo",
-      "model_version": "02dfa76b769d"
-    },
-    {
-      "date": "2026-10-11",
-      "home_team": "Liverpool",
-      "away_team": "Man City",
-      "score": [
-        0,
-        3
-      ],
-      "result": "A",
-      "p": [
-        0.3623,
-        0.2647,
-        0.3729
-      ],
-      "market": [
-        0.3513,
-        0.26,
-        0.3886
-      ],
-      "p_actual": 0.3729,
-      "source": "vivo",
-      "model_version": "02dfa76b769d"
-    },
-    {
-      "date": "2026-10-11",
-      "home_team": "Hull",
-      "away_team": "Everton",
-      "score": [
-        2,
-        2
-      ],
-      "result": "D",
-      "p": [
-        0.2495,
-        0.2496,
-        0.5009
-      ],
-      "market": [
-        0.2539,
-        0.2774,
-        0.4687
-      ],
-      "p_actual": 0.2496,
-      "source": "vivo",
-      "model_version": "02dfa76b769d"
-    },
-    {
-      "date": "2026-10-11",
-      "home_team": "Crystal Palace",
-      "away_team": "Nott'm Forest",
-      "score": [
-        3,
-        1
-      ],
-      "result": "H",
-      "p": [
-        0.4113,
-        0.2632,
-        0.3255
-      ],
-      "market": [
-        0.3524,
-        0.2953,
-        0.3524
-      ],
-      "p_actual": 0.4113,
-      "source": "vivo",
-      "model_version": "02dfa76b769d"
-    },
-    {
-      "date": "2026-10-10",
-      "home_team": "Sunderland",
-      "away_team": "Brighton",
-      "score": [
-        0,
-        2
-      ],
-      "result": "A",
-      "p": [
-        0.3344,
-        0.2636,
-        0.402
-      ],
-      "market": [
-        0.3054,
-        0.269,
-        0.4257
-      ],
-      "p_actual": 0.402,
       "source": "vivo",
       "model_version": "02dfa76b769d"
     }
