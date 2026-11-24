@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-11-23T16:55:21+00:00",
+  "generated_at": "2026-11-24T16:46:25+00:00",
   "window": 190,
   "counts": {
     "logged": 104,
     "logged_live": 54,
     "logged_reconstructed": 50,
-    "evaluated": 103,
-    "evaluated_live": 53,
-    "pending": 1
+    "evaluated": 104,
+    "evaluated_live": 54,
+    "pending": 0
   },
   "model_versions": [
     "02dfa76b769d",
@@ -55,8 +55,8 @@
   "indicators": {
     "gap_vs_market": {
       "description": "Brecha de log loss contra Bet365 pre-cierre (modelo − mercado)",
-      "value": 0.002611798513936537,
-      "n": 103,
+      "value": 0.0011101060296389233,
+      "n": 104,
       "status": "insuficiente",
       "status_label": "Datos insuficientes",
       "normal_range": [
@@ -72,8 +72,8 @@
     },
     "goals_ratio": {
       "description": "Goles reales / goles esperados",
-      "value": 1.0208048481023764,
-      "n": 103,
+      "value": 1.025393770278692,
+      "n": 104,
       "status": "insuficiente",
       "status_label": "Datos insuficientes",
       "normal_range": [
@@ -89,8 +89,8 @@
     },
     "draws_diff_pp": {
       "description": "Empates reales − esperados (puntos porcentuales)",
-      "value": 4.482483154398449,
-      "n": 103,
+      "value": 4.202634277913848,
+      "n": 104,
       "status": "insuficiente",
       "status_label": "Datos insuficientes",
       "normal_range": [
@@ -106,8 +106,8 @@
     },
     "home_residual": {
       "description": "Diferencia de gol real − esperada del local (goles por partido)",
-      "value": 0.020516271844660188,
-      "n": 103,
+      "value": 0.052774086538461544,
+      "n": 104,
       "status": "insuficiente",
       "status_label": "Datos insuficientes",
       "normal_range": [
@@ -124,32 +124,32 @@
   },
   "season": {
     "season": "2026-27",
-    "matches": 103,
-    "with_market": 103,
-    "live": 53,
+    "matches": 104,
+    "with_market": 104,
+    "live": 54,
     "model": {
-      "log_loss": 1.02841367491585,
-      "rps": 0.20838554479178714,
-      "brier": 0.6187595329812352,
-      "accuracy": 0.5145631067961165
+      "log_loss": 1.0248196250205994,
+      "rps": 0.2077548097884527,
+      "brier": 0.6161387827834734,
+      "accuracy": 0.5192307692307693
     },
     "market": {
-      "log_loss": 1.0258018764019134,
-      "rps": 0.20710415898922985,
-      "brier": 0.6161139112399043,
-      "accuracy": 0.47572815533980584
+      "log_loss": 1.0237095189909604,
+      "rps": 0.20698258982116519,
+      "brier": 0.6146232339266553,
+      "accuracy": 0.4807692307692308
     },
-    "gap_vs_market": 0.002611798513936537,
+    "gap_vs_market": 0.0011101060296389233,
     "gap_ci": [
-      -0.02366391711283447,
-      0.029493270752072212
+      -0.026672760391924403,
+      0.028113110015024704
     ],
     "goals": {
-      "expected": 279.19146399999994,
-      "actual": 285.0
+      "expected": 281.842945,
+      "actual": 289.0
     },
     "draws": {
-      "expected": 24.383042350969593,
+      "expected": 24.6292603509696,
       "actual": 29.0
     }
   },
@@ -166,11 +166,11 @@
     {
       "outcome": "H",
       "bin": 2,
-      "n": 42,
-      "mean_predicted": 0.4951,
-      "observed": 0.4762,
-      "ci_low": 0.3336,
-      "ci_high": 0.6228
+      "n": 43,
+      "mean_predicted": 0.4957,
+      "observed": 0.4884,
+      "ci_low": 0.3462,
+      "ci_high": 0.6325
     },
     {
       "outcome": "H",
@@ -193,11 +193,11 @@
     {
       "outcome": "D",
       "bin": 1,
-      "n": 90,
-      "mean_predicted": 0.248,
-      "observed": 0.3,
-      "ci_low": 0.2151,
-      "ci_high": 0.4013
+      "n": 91,
+      "mean_predicted": 0.2479,
+      "observed": 0.2967,
+      "ci_low": 0.2126,
+      "ci_high": 0.3972
     },
     {
       "outcome": "A",
@@ -211,11 +211,11 @@
     {
       "outcome": "A",
       "bin": 1,
-      "n": 53,
-      "mean_predicted": 0.2927,
-      "observed": 0.2264,
-      "ci_low": 0.1345,
-      "ci_high": 0.3553
+      "n": 54,
+      "mean_predicted": 0.2916,
+      "observed": 0.2222,
+      "ci_low": 0.132,
+      "ci_high": 0.3494
     },
     {
       "outcome": "A",
@@ -845,9 +845,38 @@
       "n": 103,
       "gap": 0.0026117985139365364,
       "source": "vivo"
+    },
+    {
+      "date": "2026-11-23",
+      "n": 104,
+      "gap": 0.0011101060296389229,
+      "source": "vivo"
     }
   ],
   "recent": [
+    {
+      "date": "2026-11-23",
+      "home_team": "Brentford",
+      "away_team": "Everton",
+      "score": [
+        4,
+        0
+      ],
+      "result": "H",
+      "p": [
+        0.5196,
+        0.2462,
+        0.2341
+      ],
+      "market": [
+        0.4457,
+        0.2686,
+        0.2857
+      ],
+      "p_actual": 0.5196,
+      "source": "vivo",
+      "model_version": "02dfa76b769d"
+    },
     {
       "date": "2026-11-22",
       "home_team": "Liverpool",
@@ -1512,29 +1541,6 @@
         0.3986
       ],
       "p_actual": 0.2648,
-      "source": "vivo",
-      "model_version": "02dfa76b769d"
-    },
-    {
-      "date": "2026-10-25",
-      "home_team": "Man United",
-      "away_team": "Bournemouth",
-      "score": [
-        0,
-        3
-      ],
-      "result": "A",
-      "p": [
-        0.547,
-        0.2393,
-        0.2137
-      ],
-      "market": [
-        0.4468,
-        0.2618,
-        0.2914
-      ],
-      "p_actual": 0.2137,
       "source": "vivo",
       "model_version": "02dfa76b769d"
     }
